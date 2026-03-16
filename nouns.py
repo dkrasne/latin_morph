@@ -1,5 +1,7 @@
 import streamlit as st
 import random
+import unicodedata
+from utils import radio_change, reset, check_answer
 
 st.markdown("# Nouns")
 
@@ -11,7 +13,7 @@ col_options, col_declension = st.columns(2)
 
 with col_options:
     st.markdown("Options:")
-    st.checkbox("Enforce macrons?", help="If this box is selected, macron mistakes will be considered incorrect.", key="enforce_macrons")
+    st.checkbox("Enforce macrons?", help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", key="enforce_macrons")
     macrons = st.session_state.enforce_macrons
     if macrons:
         st.markdown("You can copy and paste letters from here:")
@@ -20,12 +22,9 @@ with col_options:
     show_stem = st.checkbox("Show noun stem/base?", help="Select this box to show the noun base. (The base is the stem without any of the trailing vowels that sometimes combine with endings.)")
 
 with col_declension:
-    def radio_change():
-        st.session_state["current_question"] = []
-        st.session_state["answer_to_check"] = ""
-
+    # radio_change() is defined in utils.py
     declension = st.radio("Choose a declension to practice:",{"random":"random"} | declension_dict, on_change=radio_change)
-#    st.write(declension)
+
 
 ## DEFINE AVAILABLE NOUNS AND NOUN ENDINGS ##
 
@@ -246,7 +245,6 @@ def gen_question():
 if st.session_state.current_question:
     noun, case, number = st.session_state.current_question
 
-
     # # Uncomment for testing purposes.
     # st.write(st.session_state.current_question)
     # st.write(f"Give the {noun_options["case"][case]} {noun_options["number"][number]} of *{noun}*.")
@@ -324,68 +322,19 @@ if st.session_state.current_question:
 new_question_col, check_answer_col, score_col = st.columns(3)
 
 with check_answer_col:
-    if st.session_state["answer_to_check"] and st.session_state.question_button is False:
-        st.button("Check answer", key="check_answer_button", width="stretch")
-#        st.write("Your answer is: ", st.session_state.answer_to_check)
-
-        if st.session_state.check_answer_button:
-            # st.write("Your answer is: ", current_answer)
-            if isinstance(st.session_state["correct_answer"], list):
-                st.write("The correct answers are:", " or ".join(st.session_state["correct_answer"]))
-            else:
-                st.write(f"The correct answer is: {st.session_state["correct_answer"]}")
-
-            if not st.session_state.answer_checked:
-                st.session_state.total_questions += 1
-                st.session_state.answer_checked = True
-
-                user_answer_check = st.session_state.answer_to_check
-                correct_answer_check = st.session_state.correct_answer
-                if not st.session_state.enforce_macrons:
-                    for macron, vowel in {"ā": "a",
-                                          "ē": "e",
-                                          "ī": "i",
-                                          "ō": "o",
-                                          "ū": "u"}.items():
-                        if isinstance(correct_answer_check, list):
-                            for i,answer_option in enumerate(correct_answer_check):
-                                if macron in answer_option:
-                                    correct_answer_check[i] = answer_option.replace(macron, vowel)
-                        elif macron in correct_answer_check:
-                            correct_answer_check = correct_answer_check.replace(macron, vowel)
-                        if macron in user_answer_check:
-                            user_answer_check = user_answer_check.replace(macron, vowel)
-
-                correct_flag = False
-
-                if isinstance(correct_answer_check, list):
-                    if user_answer_check in correct_answer_check:
-                        correct_flag = True
-                elif user_answer_check == correct_answer_check:
-                    correct_flag = True
-                
-                if correct_flag is True:
-                    st.session_state.current_score += 1
-                    st.markdown("**Good job!**")
-                else:
-                    st.markdown("**Better luck next time!**")
-
-                st.session_state.answer_to_check = ""
-
+    # check_answer() defined in utils.py
+    check_answer()
 
 with new_question_col:
     def new_question():
         st.session_state.current_question = gen_question()
-        noun, case, number = st.session_state.current_question
+#        noun, case, number = st.session_state.current_question
         st.session_state.answer_checked = False
         st.session_state.answer_to_check = ""
     st.button("New Question", on_click=new_question, key="question_button", width="stretch")
 
 with score_col:
-
-    def reset():
-        st.session_state.current_score = 0
-        st.session_state.total_questions = 0
+    # reset() is defined in utils.py
     st.button("Reset Score", "reset", on_click=reset, width="stretch")
 
     st.markdown(f"Current score: {st.session_state.current_score} out of {st.session_state.total_questions}")
