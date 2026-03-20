@@ -25,15 +25,15 @@ pronoun_type_col, options_col = st.columns([2,1], gap="medium")
 # demonstratives
 
 with pronoun_type_col:
-    demonstratives = st.multiselect("Select the demonstrative pronouns you want to include:", 
+    demonstratives = st.multiselect("Choose which demonstrative pronouns you want to include (they are all selected by default):", 
                                     options=[k for k,v in pronoun_vocab.items() if v.get("demonstrative")],
                                     default=[k for k,v in pronoun_vocab.items() if v.get("demonstrative")])
     # personal pronouns
-    personal_pron = st.multiselect("Select the personal pronouns you want to include:", 
+    personal_pron = st.multiselect("Choose which personal pronouns you want to include:", 
                                     options=[k for k,v in pronoun_vocab.items() if v.get("pers_pron")],
                                     default=[k for k,v in pronoun_vocab.items() if v.get("pers_pron")])
     # relative and interrogative pronouns
-    rel_interr = st.multiselect("Select the relative and interrogative pronouns you want to include:", 
+    rel_interr = st.multiselect("Choose which relative and interrogative pronouns you want to include:", 
                                     options=[k for k,v in pronoun_vocab.items() if v.get("rel_interrog")],
                                     default=[k for k,v in pronoun_vocab.items() if v.get("rel_interrog")])
 
@@ -42,7 +42,7 @@ with pronoun_type_col:
         gen_forms_diff = st.checkbox("Distinguish between partitive and non-partitive genitive?", help="If this box is selected, you will be asked to provide either the partitive or non-partitive genitive for *nōs* and *vōs*. If not selected, both forms will count as correct.")
 
 with options_col:
-    st.markdown("Options:")
+    st.markdown("Options:", help="You can adjust these options at any point.")
     st.checkbox("Enforce macrons?", help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", key="enforce_macrons")
     macrons = st.session_state.enforce_macrons
     if macrons:

@@ -35,7 +35,15 @@ def import_verbs():
                                 "pl": {1: "erāmus",
                                         2: "erātis",
                                         3: "erant"}
-                                }
+                                },
+                            "subj": {
+                                "sg": {1: ["essem","forem"],
+                                    2: ["essēs","forēs"],
+                                    3: ["esset", "foret"]},
+                                "pl": {1: ["essēmus","forēmus"],
+                                        2: ["essētis", "forētis"],
+                                        3: ["essent","forent"]}
+                                }                                
                             }
                         },
                     "fut": {
@@ -57,7 +65,8 @@ def import_verbs():
                                     2: "estōte",
                                     3: "suntō"
                                 }
-                            }
+                            },
+                            "inf": ["futūrum esse", "fore"]
                         }
                     },                
                 }

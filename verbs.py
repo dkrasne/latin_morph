@@ -59,7 +59,7 @@ conjugation_dict = {1: "1st",
 verb_options_col,options_col = st.columns([3,2])
 
 with options_col:
-    st.markdown("Options:")
+    st.markdown("Options:", help="You can adjust these options at any point.")
     st.checkbox("Enforce macrons?", help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", key="enforce_macrons")
     macrons = st.session_state.enforce_macrons
     if macrons:
@@ -70,7 +70,7 @@ with options_col:
 # with conjugation_col:
 with verb_options_col:
     conjugation_selector = st.multiselect(
-        "Select which conjugations to include:",
+        "Choose which conjugations to include (they are all selected by default):",
         conjugation_dict.keys(),
         format_func = lambda x: conjugation_dict.get(x),
         default = conjugation_dict.keys(),
@@ -82,7 +82,7 @@ with verb_options_col:
     tense_dict = {abbrev: name for abbrev, name in zip(master_tense_list,[verb_abbrevs[tns] for tns in master_tense_list])}
 
     tense_selector = st.multiselect(
-        "Select which tenses to include:",
+        "Choose which tenses to include:",
         master_tense_list,
         format_func = lambda x: tense_dict[x],
         default=master_tense_list
@@ -92,7 +92,7 @@ with verb_options_col:
     master_voice_list = ["act", "pass", "dep", "semidep"]
     voice_dict = {abbrev: name for abbrev, name in zip(master_voice_list,[verb_abbrevs[vc] for vc in master_voice_list])}
 
-    voice_selector = st.multiselect("Select which voices and types of verb to include:",
+    voice_selector = st.multiselect("Choose which voices and types of verb to include:",
                                     master_voice_list,
                                     format_func=lambda x: voice_dict[x],
                                     default = master_voice_list,
@@ -102,7 +102,7 @@ with verb_options_col:
     master_mood_list = ["ind", "subj", "inf", "impv"]
     mood_dict = {abbrev: name for abbrev, name in zip(master_mood_list,[verb_abbrevs[md] for md in master_mood_list])}
 
-    mood_selector = st.multiselect("Select which moods to include:",
+    mood_selector = st.multiselect("Choose which moods to include:",
                                 master_mood_list,
                                 format_func=lambda x: mood_dict[x],
                                 default=master_mood_list)
@@ -113,7 +113,7 @@ with verb_options_col:
     master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if complete_verb_vocab[key].get("irreg")]
     if "dō" in master_irregular_verbs_list:
         master_irregular_verbs_list.remove("dō")
-    irreg_selector = st.multiselect("Select which irregular verbs to include:",
+    irreg_selector = st.multiselect("Choose which irregular verbs to include:",
                                     master_irregular_verbs_list,
                                     default=master_irregular_verbs_list,
                                     help="Selected irregular verbs will be available regardless of any other selections.")
@@ -515,10 +515,11 @@ else:
                 if verb_vocab[verb]["irreg"]["forms"][tense].get(voice):
                     verb_form = verb_vocab[verb]["irreg"]["forms"][tense][voice].get(mood)
             # If the previous step succeeded, then either: 
-            # the verb_form is now a string (in which case that's the correct form and we just need to finish filling in principal parts), 
+            # the verb_form is now a list or string (in which case that's the correct form and we just need to finish filling in principal parts), 
             # or it's a dictionary and we have to get the appropriate number and person.
+            
             if verb_form:
-                if not isinstance(verb_form, str):
+                if not (isinstance(verb_form, str) or isinstance(verb_form, list)):
                     if verb_form.get(number):
                         verb_form = verb_form[number][person]
 

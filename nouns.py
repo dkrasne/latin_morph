@@ -20,7 +20,7 @@ declension_dict = {"1st": 1, "2nd":["2_us", "2_er", "2_neut"], "3rd": [3, "3_ist
 col_declension, col_options = st.columns(2)
 
 with col_options:
-    st.markdown("Options:")
+    st.markdown("Options:", help="You can adjust these options at any point.")
     st.checkbox("Enforce macrons?", help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", key="enforce_macrons")
     macrons = st.session_state.enforce_macrons
     if macrons:
