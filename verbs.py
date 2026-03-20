@@ -8,6 +8,7 @@ if page_id != st.session_state.curr_page_id:
     st.session_state.current_question = []
     st.session_state.current_score = 0
     st.session_state.total_questions = 0
+    st.session_state.answer_to_check = ""
 st.session_state.curr_page_id = page_id
 
 
@@ -765,12 +766,12 @@ else:
     new_question_col, check_answer_col, score_col = st.columns(3)
 
 
-    with check_answer_col:
-        check_answer()
-        
     with new_question_col:
         # new_question() defined in utils.py
         st.button("New Question", on_click=new_question, args=(build_verb,), key="question_button", width="stretch")
+        
+    with check_answer_col:
+        check_answer()
         
     with score_col:
         # reset() defined in utils.py
