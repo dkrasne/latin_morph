@@ -14,7 +14,6 @@ st.markdown("""
             and all four verb moods (indicative, subjunctive, imperative, and infinitive).
 
             🚧 Currently, nouns, verbs, and pronouns are functional. 
-            Work is underway on adding additional irregular verbs (still to come: *fīō*). 
-            Next up will be adjectives.
+            Next up will be adjectives and adverbs.
 
             """)

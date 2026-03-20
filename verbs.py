@@ -391,7 +391,9 @@ else:
         #     st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
 
         if mood == "impv":
-            if "pres" in tense_list and "fut" in tense_list and fut_impv:
+            if verb == "fīō":
+                tense = "pres"  # this forces a present tense even if only future imperatives are selected, since fīō has no future imperatives
+            elif "pres" in tense_list and "fut" in tense_list and fut_impv:
                 tense = random.choices(["pres", "fut"], [95, 5])[0]
             elif "fut" in tense_list and fut_impv:
                 tense = "fut"
@@ -452,6 +454,8 @@ else:
         elif verb_vocab[verb]["voice"] == "semidep" and tense in pres_sys:
             # extend this logic later to include 3rd person singular passive
             voice = "act"
+            if verb == "fīō" and mood == "inf":
+                voice = "dep"
         elif not voice:
             voice = "dep"
 
@@ -525,6 +529,8 @@ else:
             pres_stem = verb_vocab[verb].get("pres")
             thematic_vowel = verb_vowels["pres"]["inf"].get(conj)
             pres_act_inf = pres_stem + thematic_vowel + "re"
+            if verb == "fīō":
+                pres_act_inf = "fiere"
             if verb_vocab[verb]["voice"] in ["act","semidep"]:
                 pres_inf = pres_act_inf
             if verb_vocab[verb]["voice"] == "dep":

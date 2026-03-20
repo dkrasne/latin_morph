@@ -410,8 +410,35 @@ def import_verbs():
             "perf": "mālu",
             "pap": None
         },
-
-        # add irregular verbs: fio
+    "fīō": {
+            "voice": "semidep",
+            "conj": 3,
+            "pres": "fī",
+            "ppp": "fact",
+            "irreg": {
+                "forms": {
+                    "pres": {
+                        "ind": {
+                            "sg": {
+                                1: "fīō",
+                                2: "fīs",
+                                3: "fit"
+                            },
+                            "pl": {
+                                1: "fīmus",
+                                2: "fītis",
+                                3: "fīunt"
+                            }
+                        },
+                        "impv": {
+                            "sg": {2: "fī"},
+                            "pl": {2: "fīte"}
+                        },
+                        "inf": "fierī"
+                    }
+                }
+            }
+        },
 
         ## REGULAR VERBS
 
@@ -532,7 +559,8 @@ def import_nouns():
                 "ager": {"decl": "2_er",
                          "stem": "agr"},
                 "equus": {"decl": "2_us",
-                          "stem": "equ"}
+                          "stem": "equ"},
+                # add vis and deus; need to update logic to deal with irregular nouns
             }
     return noun_vocab
 
@@ -737,3 +765,78 @@ def import_pronouns():
 
     }
     return pronoun_vocab
+
+def import_adjectives():
+    adjective_vocab = {
+        "pulcher": {
+            "stem": "pulchr",
+            "decl": (1,2)
+        },
+        "laetus": {
+            "stem": "laet",
+            "decl": (1,2)
+        },
+        "tristis": {
+            "noms": ("tristis", "triste"),
+            "stem": "trist",
+            "decl": 3,
+            "irreg": {
+                "adv": {"pos": "triste"}
+            }
+        },
+        "acer": {
+            "noms": ("acer", "acris", "acre"),
+            "stem": ("acr"),
+            "decl": 3
+        },
+        "ingēns": {
+            "noms": ("ingēns",),
+            "stem": ("ingent"),
+            "decl": 3
+        },
+        "sōlus": {
+            "pronominal": True,
+            "decl": (1,2),
+            "stem": "sōl"
+        },
+        "alius": {
+            "pronominal": True,
+            "decl": (1,2),
+            "stem": "al",
+            "irreg": {
+                "sg": {
+                    "nom": {
+                        "n": "aliud"
+                    },
+                    "gen": ("alterīus",)
+                }
+            }
+        },
+        "duo": {
+            "cardinal": True,
+            "decl": None,
+            "no_sg": True,
+            "irreg": {
+                "pl": {
+                    "nom": ("duo", "duae", "duo"),
+                    "gen": ("duōrum", "duārum", "duōrum"),
+                    "dat": ("duōbus", "duābus", "duōbus"),
+                    "acc": (["duo","duōs"], "duās", "duo"),
+                    "abl": ("duōbus", "duābus", "duōbus")
+                }
+            }
+        },
+        "trēs": {
+            "cardinal": True,
+            "decl": 3,
+            "no_sg": True,
+            "stem": "tr"
+        },
+        "ūnus": {
+            "cardinal": True,
+            "pronominal": True,
+            "decl": (1,2),
+            "stem": "ūn"
+        }
+    }
+    return adjective_vocab
