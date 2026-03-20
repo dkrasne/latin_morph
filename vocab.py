@@ -535,3 +535,205 @@ def import_nouns():
                           "stem": "equ"}
             }
     return noun_vocab
+
+def import_pronouns():
+    pronoun_vocab = {
+        "hic": {
+            "genders": True,
+            "demonstrative": True,
+            "sg": {
+                "nom": ("hic", "haec", "hoc"),
+                "gen": ("huius",),
+                "dat": ("huic",),
+                "acc": ("hunc", "hanc", "hoc"),
+                "abl": ("hōc", "hāc", "hōc")
+            },
+            "pl": {
+                "nom": ("hī", "hae", "haec"),
+                "gen": ("hōrum", "hārum", "hōrum"),
+                "dat": ("hīs",),
+                "acc": ("hōs", "hās", "haec"),
+                "abl": ("hīs",)
+            }
+        },
+        "ille": {
+            "genders": True,
+            "demonstrative": True,
+            "sg": {
+                "nom": ("ille", "illa", "illud"),
+                "gen": ("illīus",),
+                "dat": ("illī",),
+                "acc": ("illum", "illam", "illud"),
+                "abl": ("illō", "illā", "illō")
+            },
+            "pl": {
+                "nom": ("illī", "illae", "illa"),
+                "gen": ("illōrum", "illārum", "illōrum"),
+                "dat": ("illīs",),
+                "acc": ("illōs", "illās", "illa"),
+                "abl": ("illīs",)
+            }
+        },
+        "iste": {
+            "genders": True,
+            "demonstrative": True,
+            "sg": {
+                "nom": ("iste", "ista", "istud"),
+                "gen": ("istīus",),
+                "dat": ("istī",),
+                "acc": ("istum", "istam", "istud"),
+                "abl": ("istō", "istā", "istō")
+            },
+            "pl": {
+                "nom": ("istī", "istae", "ista"),
+                "gen": ("istōrum", "istārum", "istōrum"),
+                "dat": ("istīs",),
+                "acc": ("istōs", "istās", "ista"),
+                "abl": ("istīs",)
+            }
+        },
+        "quī": {
+            "genders": True,
+            "rel_interrog": True,
+            "sg": {
+                "nom": ("quī", "quae", "quod"),
+                "gen": ("cuius",),
+                "dat": ("cui",),
+                "acc": ("quem", "quam", "quod"),
+                "abl": ("quō", "quā", "quō")
+            },
+            "pl": {
+                "nom": ("quī", "quae", "quae"),
+                "gen": ("quōrum", "quārum", "quōrum"),
+                "dat": ("quibus",),
+                "acc": ("quōs", "quās", "quae"),
+                "abl": ("quibus",)
+            }
+        },
+        "is": {
+            "genders": True,
+            "demonstrative": True,
+            "sg": {
+                "nom": ("is", "ea", "id"),
+                "gen": ("eius",),
+                "dat": ("eī",),
+                "acc": ("eum", "eam", "id"),
+                "abl": ("eō", "eā", "eō")
+            },
+            "pl": {
+                "nom": (["iī","eī"], "eae", "ea"),
+                "gen": ("eōrum", "eārum", "eōrum"),
+                "dat": (["iīs","eīs"],),
+                "acc": ("eōs", "eās", "ea"),
+                "abl": (["iīs","eīs"],)
+            }
+        },
+        "īdem": {
+            "genders": True,
+            "demonstrative": True,
+            "sg": {
+                "nom": ("īdem", "eadem", "idem"),
+                "gen": ("eiusdem",),
+                "dat": ("eīdem",),
+                "acc": ("eundem", "eandem", "idem"),
+                "abl": ("eōdem", "eādem", "eōdem")
+            },
+            "pl": {
+                "nom": ("īdem", "eaedem", "eadem"),
+                "gen": ("eōrundem", "eārundem", "eōrundem"),
+                "dat": (["īsdem","eīsdem"],),
+                "acc": ("eōsdem", "eāsdem", "eadem"),
+                "abl": (["īsdem","eīsdem"],)
+            }
+        },
+        "ipse": {
+            "genders": True,
+            "demonstrative": True,
+            "sg": {
+                "nom": ("ipse", "ipsa", "ipsum"),
+                "gen": ("ipsīus",),
+                "dat": ("ipsī",),
+                "acc": ("ipsum", "ipsam", "ipsum"),
+                "abl": ("ipsō", "ipsā", "ipsō")
+            },
+            "pl": {
+                "nom": ("ipsī", "ipsae", "ipsa"),
+                "gen": ("ipsōrum", "ipsārum", "ipsōrum"),
+                "dat": ("ipsīs",),
+                "acc": ("ipsōs", "ipsās", "ipsa"),
+                "abl": ("ipsīs",)
+            }
+        },
+        "quis": {
+            "genders": True,
+            "rel_interrog": True,
+            "sg": {
+                "nom": ("quis", "quid"),
+                "gen": ("cuius",),
+                "dat": ("cui",),
+                "acc": ("quem", "quid"),
+                "abl": ("quō",)
+            },
+            "pl": {
+                "nom": ("quī", "quae", "quae"),
+                "gen": ("quōrum", "quārum", "quōrum"),
+                "dat": ("quibus",),
+                "acc": ("quōs", "quās", "quae"),
+                "abl": ("quibus",)
+            }
+        },
+        "ego": {
+            "pers_pron": True,
+            "forms": {
+                "nom": "ego",
+                "gen": "meī",
+                "dat": "mihi",
+                "acc": "mē",
+                "abl": "mē"
+            },
+        },
+        "tū": {
+            "pers_pron": True,
+            "forms": {
+                "nom": "tū",
+                "gen": "tuī",
+                "dat": "tibi",
+                "acc": "tē",
+                "abl": "tē"
+            },
+        },
+        "sē": {
+            "pers_pron": True,
+            "forms": {
+                "nom": None,
+                "gen": "suī",
+                "dat": "sibi",
+                "acc": ["sē","sēsē"],
+                "abl": ["sē","sēsē"]
+            },
+        },
+        "nōs": {
+            "pers_pron": True,
+            "forms": {
+                "nom": "nōs",
+                "gen": {"partitive": "nostrum", 
+                        "non_part": "nostrī"},
+                "dat": "nōbīs",
+                "acc": "nōs",
+                "abl": "nōbīs"
+            },
+        },
+        "vōs": {
+            "pers_pron": True,
+            "forms": {
+                "nom": "vōs",
+                "gen": {"partitive": "vestrum", 
+                        "non_part": "vestrī"},
+                "dat": "vōbīs",
+                "acc": "vōs",
+                "abl": "vōbīs"
+            },
+        },
+
+    }
+    return pronoun_vocab

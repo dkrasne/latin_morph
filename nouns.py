@@ -6,8 +6,8 @@ from vocab import import_nouns
 page_id = "nouns"
 if page_id != st.session_state.curr_page_id:
     st.session_state.current_question = []
-    # st.session_state.current_score = 0
-    # st.session_state.total_questions = 0
+    st.session_state.current_score = 0
+    st.session_state.total_questions = 0
 st.session_state.curr_page_id = page_id
 
 st.markdown("# Nouns")

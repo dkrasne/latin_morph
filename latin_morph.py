@@ -33,7 +33,16 @@ adj_page = st.Page("adjectives.py", title="Adjectives and Adverbs")
 st.markdown("*Use the navigation menu to choose a part of speech to practice.*")
 
 choose_page = st.navigation({"Latin Morph!": [main_page, about_page], 
-                             "Parts of Speech (available)": [nouns_page, verbs_page],
-                             "More Parts of Speech (not yet available)": [pronouns_page, adj_page]})
+                             "Parts of Speech (available)": [nouns_page, verbs_page, pronouns_page, ],
+                             "More Parts of Speech (not yet available)": [adj_page]})
 choose_page.run()
 
+#st.markdown(":copyright: 2026 Darcy Krasne ([CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/))", text_alignment="right")
+st.html(
+    body='''<div style="position:relative;height:5em;width:100%;">
+        <p style="font-size:smaller;text-align:right;position:absolute;bottom:0;right:-3em;">
+            &copy; 2026 Darcy Krasne (<a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>)
+        </p>
+        </div>''',
+    width="stretch"
+    )

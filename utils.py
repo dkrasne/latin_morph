@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import unicodedata
+import traceback
 
 def radio_change():
     st.session_state.current_question = []
@@ -18,14 +19,15 @@ def reset():
 
 def new_question(gen_question):
     # n.b. `gen_question()` may have a different name depending on page.
-    try:
+#    try:
         st.session_state.current_question = gen_question()
         st.session_state.answer_checked = False
         st.session_state.answer_to_check = ""
-    except:
-        # st.write("Your selected options have resulted in an impossibility: try selecting some additional options.")
-        return
-#    else:
+    # except:
+    #     # st.write("Your selected options have resulted in an impossibility: try selecting some additional options.")
+    #     st.write("Something went wrong.")
+    #     return
+
 
 
 def remove_macrons(text):
