@@ -777,20 +777,88 @@ def import_pronouns():
 
 def import_adjectives():
     adjective_vocab = {
+        # "": {
+        #     "stem": "",
+        #     "decl": (),
+        #     # "noms": ()
+        # },
         "pulcher": {
             "stem": "pulchr",
+            "decl": (1,2)
+        },
+        "miser": {
+            "stem": "miser",
             "decl": (1,2)
         },
         "laetus": {
             "stem": "laet",
             "decl": (1,2)
         },
+        "sanus": {
+            "stem": "san",
+            "decl": (1,2)
+        },
+        "vacuus": {
+            "stem": "vacu",
+            "decl": (1,2)
+        },
+        "bonus": {
+            "stem": "bon",
+            "decl": (1,2),
+            "irreg": {
+                "stems": {
+                    "comp": "mel",
+                    "super": "optim"
+                },
+                "forms": {
+                    "adv": {"pos": "bene"}
+                }
+            }
+        },
+        "magnus": {
+            "stem": "magn",
+            "decl": (1,2),
+            "irreg": {
+                "stems": {
+                    "comp": "ma",
+                    "super": "maxim"
+                },
+                "forms": {
+                    "adv": {
+                        "pos": ["magnoperē","magnopere","magnum"],
+                        "comp": "magis"
+                    }
+                }
+            }
+        },
+        "facilis": {
+            "noms": ("facilis", "facile"),
+            "stem": "facil",
+            "decl": 3,
+            "irreg": {
+                "forms":{
+                    "adv": {"pos": "facile"}
+                }
+            }
+        },
+        "difficilis": {
+            "noms": ("difficilis", "difficile"),
+            "stem": "difficil",
+            "decl": 3,
+            "irreg": {
+                "forms":{
+                    "adv": {"pos": ["difficulter", "difficiliter", "difficilē"]}
+                }
+            }
+        },
         "tristis": {
             "noms": ("tristis", "triste"),
             "stem": "trist",
             "decl": 3,
             "irreg": {
-                "adv": {"pos": "triste"}
+                "forms":{
+                    "adv": {"pos": "triste"}
+                }
             }
         },
         "acer": {
@@ -798,50 +866,86 @@ def import_adjectives():
             "stem": ("acr"),
             "decl": 3
         },
+        "celer": {
+            "noms": ("celer", "celeris", "celere"),
+            "stem": ("celer"),
+            "decl": 3
+        },
         "ingēns": {
             "noms": ("ingēns",),
             "stem": ("ingent"),
             "decl": 3
         },
+        "omnis": {
+            "noms": ("omnis", "omne"),
+            "stem": "omn",
+            "decl": 3,
+            "comp": None,
+            "super": None,
+            "irreg": {
+                "forms": {
+                    "adv": {
+                        "pos": "omnīnō"
+                    }
+                }
+            }
+        },        
         "sōlus": {
             "pronominal": True,
             "decl": (1,2),
-            "stem": "sōl"
+            "stem": "sōl",
+            "irreg": {
+                "forms": {
+                    "adv": {
+                        "pos": "sōlum"
+                    }
+                }
+            }
         },
         "alius": {
             "pronominal": True,
             "decl": (1,2),
             "stem": "al",
             "irreg": {
-                "sg": {
-                    "nom": {
-                        "n": "aliud"
+                "forms": {
+                    "sg": {
+                        "nom": {
+                            "n": "aliud"
+                        },
+                        "gen": ("alterīus",)
                     },
-                    "gen": ("alterīus",)
+                    "adv": {
+                        "pos": "aliter"
+                    }
                 }
             }
         },
         "duo": {
+            #"no_adv": True,
             "cardinal": True,
             "decl": None,
             "no_sg": True,
             "irreg": {
-                "pl": {
-                    "nom": ("duo", "duae", "duo"),
-                    "gen": ("duōrum", "duārum", "duōrum"),
-                    "dat": ("duōbus", "duābus", "duōbus"),
-                    "acc": (["duo","duōs"], "duās", "duo"),
-                    "abl": ("duōbus", "duābus", "duōbus")
+                "forms":{
+                    "pl": {
+                        "nom": ("duo", "duae", "duo"),
+                        "gen": ("duōrum", "duārum", "duōrum"),
+                        "dat": ("duōbus", "duābus", "duōbus"),
+                        "acc": (["duo","duōs"], "duās", "duo"),
+                        "abl": ("duōbus", "duābus", "duōbus")
+                    }
                 }
             }
         },
         "trēs": {
+            #"no_adv": True,
             "cardinal": True,
             "decl": 3,
             "no_sg": True,
             "stem": "tr"
         },
         "ūnus": {
+            #"no_adv": True,
             "cardinal": True,
             "pronominal": True,
             "decl": (1,2),

@@ -1,15 +1,12 @@
 import streamlit as st
 import random
-from utils import radio_change, reset, check_answer, new_question, remove_macrons
+from utils import radio_change, reset, new_question, remove_macrons, submit_and_check_answer, clear_page
 from vocab import import_verbs
 
+st.set_page_config("Latin Morph! Verbs")
+
 page_id = "verbs"
-if page_id != st.session_state.curr_page_id:
-    st.session_state.current_question = []
-    st.session_state.current_score = 0
-    st.session_state.total_questions = 0
-    st.session_state.answer_to_check = ""
-st.session_state.curr_page_id = page_id
+clear_page(page_id)
 
 
 complete_verb_vocab = import_verbs()
@@ -753,35 +750,37 @@ else:
             question += f" The principal parts are: {", ".join(verb_pp)}."
 
         if not st.session_state.question_generation_error_message:
+
             st.markdown("### Current question")
 
             with st.form(key="verb_answer_form", clear_on_submit=True):
                 current_answer = st.text_input(question, key="answer_input")
-
-                submit_button_col, user_answer_col = st.columns(2)
+                
+                submit_button_col, user_answer_col = st.columns([1,2])
                 with submit_button_col:
-                    answer_submitted = st.form_submit_button("Submit answer")
-                    if answer_submitted:
-                        st.session_state.answer_to_check = current_answer.strip().lower()
+                    def disable_button():
+                            st.session_state.button_disable = True
+                    st.form_submit_button(
+                        "Check answer", 
+                        key="form_submission_button",
+                        on_click=submit_and_check_answer,
+                        disabled=st.session_state.button_disable,
+                    )
                 with user_answer_col:
-                    if st.session_state.answer_to_check:
-                        st.write("Your answer is: ", st.session_state.answer_to_check)
+                    st.markdown(st.session_state.answer_display_message)
         
 
     ## GENERATE NEW QUESTIONS AND CHECK ANSWERS ##
 
-    new_question_col, check_answer_col, score_col = st.columns(3)
-
+    new_question_col, results_col, score_col = st.columns(3)
 
     with new_question_col:
-        # new_question() defined in utils.py
         st.button("New Question", on_click=new_question, args=(build_verb,), key="question_button", width="stretch")
-        
-    with check_answer_col:
-        check_answer()
-        
-    with score_col:
-        # reset() defined in utils.py
-        st.button("Reset Score", "reset", on_click=reset, width="stretch")
 
+    with results_col:
+        st.markdown(st.session_state.result_message)    # just write the result message, rather than other things as well.
+
+    with score_col:
+        st.button("Reset Score", "reset", on_click=reset, width="stretch")
         st.markdown(f"Current score: **{st.session_state.current_score}** out of **{st.session_state.total_questions}**")
+

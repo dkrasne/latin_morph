@@ -1,5 +1,7 @@
 import streamlit as st
 
+st.set_page_config("About Latin Morph!")
+
 st.markdown("""
             # About Latin Morph!
                         

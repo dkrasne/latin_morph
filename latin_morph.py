@@ -1,6 +1,10 @@
 import streamlit as st
 
-st.set_page_config("Latin Morph!", menu_items={"About": "A pedagogical tool for Latin students at any level to practice creating correct word forms."})
+st.set_page_config("Latin Morph!", 
+                   menu_items={
+                       "About": "A pedagogical morphology tool for Latin students at any level to practice creating correct word forms."
+                        }
+                    )
 
 if "enforce_macrons" not in st.session_state:
     st.session_state["enforce_macrons"] = False
@@ -22,6 +26,14 @@ if "curr_page_id" not in st.session_state:
     st.session_state["curr_page_id"] = ""
 if "question_generation_error_message" not in st.session_state:
     st.session_state["question_generation_error_message"] = ""
+if "answer_phrase" not in st.session_state:
+    st.session_state["answer_phrase"] = ""
+if "result_message" not in st.session_state:
+    st.session_state["result_message"] = ""
+if "button_disable" not in st.session_state:
+    st.session_state["button_disable"] = False
+if "answer_display_message" not in st.session_state:
+    st.session_state["answer_display_message"] = ""
 
 
 main_page = st.Page("main_page.py", title="Main Page")
