@@ -30,7 +30,7 @@ verbs_page = st.Page("verbs.py", title="Verbs")
 about_page = st.Page("about.py", title="About")
 pronouns_page = st.Page("pronouns.py", title="Pronouns")
 adj_page = st.Page("adjectives.py", title="Adjectives and Adverbs")
-test_page = st.Page("button_test.py", title="Test page")
+# test_page = st.Page("button_test.py", title="Test page")
 
 st.markdown("*Use the navigation menu to choose a part of speech to practice.*")
 
