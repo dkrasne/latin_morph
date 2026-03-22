@@ -1,15 +1,10 @@
 import streamlit as st
 import random
-from utils import reset, check_answer, new_question
+from utils import reset, new_question, submit_and_check_answer, clear_page
 from vocab import import_adjectives
 
 page_id = "adjectives"
-if page_id != st.session_state.curr_page_id:
-    st.session_state.current_question = []
-    st.session_state.current_score = 0
-    st.session_state.total_questions = 0
-    st.session_state.answer_to_check = ""
-st.session_state.curr_page_id = page_id
+clear_page(page_id)
 
 
 complete_verb_vocab = import_adjectives()
