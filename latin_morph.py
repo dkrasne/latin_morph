@@ -80,7 +80,7 @@ st.sidebar.select_slider("Auto-advance to next question?",
                          options=[False] + list(range(5,61)), 
                          format_func=lambda x: "No" if x is False else str(x)+" sec", 
                          key="auto_advance", 
-                         help="If you want to automatically advance to the next question after answering, rather than having to click **New Question**, set this to the number of seconds you want to wait before advancing (between 5 and 60 seconds). (You can still skip a question by clicking **New Question**.)")
+                         help="If you want to automatically advance to the next question after answering, rather than having to click **New Question**, set this to the number of seconds you want to wait before advancing (between 5 and 60 seconds). (You can still use **New Question** to advance or skip a question if you want.)")
 
 choose_page.run()
 
