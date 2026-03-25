@@ -306,7 +306,7 @@ def gen_adj_adv_id():
     gender = None
     if pos != "adv":
         case = random.choice(adj_options["case"])
-        case = "voc"
+        #case = "voc"
         number = random.choice(adj_options["number"])
         gender = random.choice(adj_options["gender"])
     for num in ["sg","pl"]:
