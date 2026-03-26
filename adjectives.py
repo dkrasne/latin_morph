@@ -315,7 +315,7 @@ def gen_adj_adv_id():
     degree = random.choice(degree_list)
     #degree = "comp"
     if degree in ["comp","super"]:
-        reduced_vocab = {k:v for k,v in reduced_vocab.items() if v.get("comp", 0) == 0 and v.get("super", 0) == 0}
+        reduced_vocab = {k:v for k,v in reduced_vocab.items() if v.get("comp", "ok") == "ok" and v.get("super", "ok") == "ok"}
 
     adj = random.choice(list(reduced_vocab.keys()))
     
@@ -519,7 +519,7 @@ if not degree_list:
 else:
     question = ""
     if st.session_state.current_question:
-        correct_form, adj_id, noms = st.session_state.current_question
+        correct_form, adj_id, dict_entry = st.session_state.current_question
         adj, case, number, gender, pos, degree = adj_id
         
         st.session_state.correct_answer = correct_form
@@ -530,7 +530,7 @@ else:
         ## CREATE QUESTION PHRASE ##
         question = f"For *{adj}*, give the **{adj_abbrevs["degree"][degree]}** {'**adverb' if pos == 'adv' else 'form in the **'}{", ".join([item for item in [adj_abbrevs["gender"].get(gender), adj_abbrevs["case"].get(case), adj_abbrevs["number"].get(number)] if item is not None])}**."
         if dictionary_entry is True:
-            question += f" The dictionary entry is: *{"*, *".join(noms)}*."
+            question += f" The dictionary entry is: *{"*, *".join(dict_entry)}*."
         if irreg_alert is True:
             question += f" {st.session_state.irreg_alert_message}"
 
