@@ -927,7 +927,8 @@ def import_adjectives():
                     "sg": {
                         "nom": ("alius", "alia", "aliud"),
                         "gen": ("alterīus",),
-                        "dat": ("alterī",)
+                        "dat": ("alterī",),
+                        "acc": ("alium", "aliam", "aliud"),
                     },
                     "adv": {
                         "pos": "aliter"
