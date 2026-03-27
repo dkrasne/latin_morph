@@ -23,6 +23,7 @@ pronoun_vocab = import_pronouns()
 
 option_expander = st.expander("Settings", expanded=True)
 
+gen_forms_diff = None
 with option_expander:
     pronoun_type_col, options_col = st.columns([2,1], gap="medium")
     with pronoun_type_col:
@@ -154,7 +155,7 @@ if st.session_state.current_question:
             "pos": "pronoun",
             "word": pronoun, 
             "id": {
-                "case": case,
+                "case": case + " (part.)" if part_gen and gen_string else case + " (non-part.)" if gen_string else case,
                 "num": number,
                 "gender": gender
             },

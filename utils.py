@@ -131,6 +131,7 @@ def submit_and_check_answer():
             else:
                 st.session_state.result_message = "**Incorrect. Better luck next time!**"
     
+            st.session_state.question_list[-1]["answer"] = user_answer
             st.session_state.question_list[-1]["correct"] = correct_flag  # write correctness to question_list
 
     if st.session_state.auto_advance:
