@@ -8,7 +8,7 @@ from vocab import import_nouns
 # if st.session_state.question_list:
 questions_asked = st.session_state.question_list
 
-st.set_page_config("Latin Morph! Nouns")
+st.set_page_config("Latin Morph! Nouns", layout="centered")
 
 page_id = "nouns"
 clear_page(page_id)
@@ -304,7 +304,8 @@ if st.session_state.current_question:
             "word": noun, 
             "id": {
                 "case": case,
-                "number": number
+                "num": number,
+                "decle": "1st" if str(noun_decl)[0] == "1" else "2nd" if str(noun_decl)[0] == "2" else "3rd (i-stem)" if "istem" in str(noun_decl) else "3rd" if str(noun_decl)[0] == "3" else "4th" if str(noun_decl)[0] == "4" else "5th"
             },
 #            "correct": False
         }

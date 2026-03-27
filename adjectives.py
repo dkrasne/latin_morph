@@ -6,7 +6,7 @@ from vocab import import_adjectives
 
 questions_asked = st.session_state.question_list
 
-st.set_page_config("Latin Morph! Adjectives and Adverbs")
+st.set_page_config("Latin Morph! Adjectives and Adverbs", layout="centered")
 
 page_id = "adjectives"
 clear_page(page_id)
@@ -297,7 +297,7 @@ def gen_adj_adv_id():
     # choose adjective or adverb
     reduced_vocab = {k:v for k,v in select_vocab.items()}
 
-    pos = random.choices(pos_list, [90, 10])[0] if len(pos_list) == 2 else pos_list[0]
+    pos = random.choices(pos_list, [7, 1])[0] if len(pos_list) == 2 else pos_list[0]
     if pos == "adv": # if adverb, only include words that can have adverbs
         reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (v.get("no_adv") or v.get("cardinal"))}
     
@@ -355,7 +355,7 @@ def create_adj_adv(adj_id=None):
                     correct_form = irreg_forms.get(number, {}).get(case)
                 else:
                     pass
-                    # update this later to pull a "comp" or "super" key from the irregular forms part of the dictionary. Alternatively, these could possibly go under irregular stems with a "no_infix" T/F flag, in which case that part of the code will need updating.
+                    # update this later to pull a "comp" or "super" key from the irregular forms part of the dictionary, for words like "plus". Alternatively, these could possibly go under irregular stems with a "no_infix" T/F flag, in which case that part of the code will need updating.
             if correct_form:
                 st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
 
@@ -493,11 +493,26 @@ def create_adj_adv(adj_id=None):
 
 
     curr_question = {
-            "pos": "adj",
+            "pos": pos,
             "word": adj, 
-            "id": adj_id,
+            "id": {"degree": degree,
+                   "decl": "1st/2nd" if adj_info["decl"] == (1,2) else "3rd (cons.)" if adj in cons_stems else "3rd"},
 #            "correct": False
         }
+    if pos == "adj":
+        curr_question["id"].update(
+            {
+                "case": case,
+                "num": number,
+                "gender": gender,
+            }
+                   )
+
+    if "stem" in st.session_state["irreg_alert_message"]:
+        curr_question["id"].update({"irreg": "stem"})
+    elif "irregular" in st.session_state["irreg_alert_message"]:
+        curr_question["id"].update({"irreg": "form"})
+    
 
     if st.session_state.append_answer is True:
         questions_asked.append(

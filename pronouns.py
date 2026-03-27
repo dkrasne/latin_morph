@@ -7,7 +7,7 @@ from vocab import import_pronouns
 # if st.session_state.question_list :
 questions_asked = st.session_state.question_list
 
-st.set_page_config("Latin Morph! Pronouns")
+st.set_page_config("Latin Morph! Pronouns", layout="centered")
                    
 page_id = "pronouns"
 clear_page(page_id)
@@ -155,7 +155,7 @@ if st.session_state.current_question:
             "word": pronoun, 
             "id": {
                 "case": case,
-                "number": number,
+                "num": number,
                 "gender": gender
             },
 #            "correct": False

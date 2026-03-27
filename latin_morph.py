@@ -3,7 +3,8 @@ import streamlit as st
 st.set_page_config("Latin Morph!", 
                    menu_items={
                        "About": "A pedagogical morphology tool for Latin students at any level to practice creating correct word forms."
-                        }
+                        },
+                    layout="centered"
                     )
 
 # every page
@@ -71,6 +72,7 @@ about_page = st.Page("about.py", title="About")
 pronouns_page = st.Page("pronouns.py", title="Pronouns")
 adj_page = st.Page("adjectives.py", title="Adjectives and Adverbs")
 # test_page = st.Page("button_test.py", title="Test page")
+data_page = st.Page("data.py", title="Session Data")
 
 st.markdown("*Use the navigation menu to choose a part of speech to practice.*")
 
@@ -79,7 +81,8 @@ st.markdown("*Use the navigation menu to choose a part of speech to practice.*")
 
 choose_page = st.navigation({"**Latin Morph!**": [main_page, about_page], 
                              "Parts of Speech": [nouns_page, verbs_page, pronouns_page, adj_page],
-                            #  "Test": [test_page]
+                            #  "Test": [test_page],
+                            "Tools": [data_page]
                              })
 
 st.sidebar.select_slider("Auto-advance to next question?", 

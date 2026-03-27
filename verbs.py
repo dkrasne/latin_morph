@@ -7,7 +7,7 @@ from vocab import import_verbs
 # if st.session_state.question_list:
 questions_asked = st.session_state.question_list
 
-st.set_page_config("Latin Morph! Verbs")
+st.set_page_config("Latin Morph! Verbs", layout="centered")
 
 page_id = "verbs"
 clear_page(page_id)
@@ -736,7 +736,7 @@ else:
         curr_question = {
                 "pos": "verb",
                 "word": verb, 
-                "id": {k:v for k,v in verb_id.items() if k != "verb"} | {"conj": conj}
+                "id": {k:v for k,v in verb_id.items() if k != "verb"} | {"conj": str(conj)}
             }
 
         if st.session_state.append_answer is True:
