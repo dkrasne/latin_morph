@@ -12,8 +12,10 @@ def clear_page(page_id):
         st.session_state.total_questions = 0
         st.session_state.answer_to_check = ""
         st.session_state.correct_answer = None
+        st.session_state.answer_input = None
         st.session_state.result_message = ""
         st.session_state.answer_display_message = ""
+        st.session_state.append_answer = True
     st.session_state.curr_page_id = page_id
     
 
@@ -39,13 +41,14 @@ def new_question(gen_question):
     '''
 
 #    try:
-    st.session_state.current_question = gen_question()
     st.session_state.answer_checked = False
     st.session_state.answer_to_check = ""
     st.session_state.result_message = ""
     st.session_state.answer_display_message = ""
     st.session_state.button_disable = False
     st.session_state.append_answer = True
+
+    st.session_state.current_question = gen_question()
     # except:
     #     # st.write("Your selected options have resulted in an impossibility: try selecting some additional options.")
     #     st.write("Something went wrong.")
@@ -130,9 +133,13 @@ def submit_and_check_answer():
                     st.balloons()
             else:
                 st.session_state.result_message = "**Incorrect. Better luck next time!**"
-    
-            st.session_state.question_list[-1]["answer"] = user_answer
-            st.session_state.question_list[-1]["correct"] = correct_flag  # write correctness to question_list
+
+#            st.write(st.session_state.append_answer)
+            if st.session_state.append_answer is False:
+                st.session_state.question_list[-1]["answer"] = user_answer
+                st.session_state.question_list[-1]["correct"] = correct_flag  # write correctness to question_list
+                    #st.session_state.append_answer = True
+#            st.write(st.session_state.question_list[-1])
 
     if st.session_state.auto_advance:
         st.session_state.auto_advance_trigger = True        

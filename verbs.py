@@ -738,12 +738,14 @@ else:
                 "word": verb, 
                 "id": {k:str(v) if v is not None else v for k,v in verb_id.items() if k != "verb"} | {"conj": str(conj)}
             }
-
+#        st.write(st.session_state.append_answer)
         if st.session_state.append_answer is True:
             questions_asked.append(
                 curr_question
             )
+#            st.write(curr_question)
             st.session_state.append_answer = False
+#            st.write("Now it's", st.session_state.append_answer)
 
         return [verb_form, verb_id, verb_principal_parts]
 

@@ -512,6 +512,8 @@ def create_adj_adv(adj_id=None):
         curr_question["id"].update({"irreg": "stem"})
     elif "irregular" in st.session_state["irreg_alert_message"]:
         curr_question["id"].update({"irreg": "form"})
+    else:
+        curr_question["id"].update({"irreg": None})
     
 
     if st.session_state.append_answer is True:

@@ -13,9 +13,11 @@ st.markdown(
     (Any question that you skipped does not appear.)
     You can sort the tables by any column; 
     by default, your incorrect answers appear first, 
-    and the words are listed in alphabetical order.
+    and the words are listed in alphabetical order. 
+    Further down the page are aggregate results that show how well you have done in each category 
+    (e.g., nouns grouped by declension; verbs grouped by conjugation, tense, voice, and mood; etc.)
 
-    As your answers are not preserved between sessions, you can download any table that you want to save, in order to have a record of your answers: 
+    As your answers are not preserved between sessions, you should download any table that you want to save, in order to have a record of your answers and overall results: 
     to do so, hover over the table and select the first option ("Download as CSV," represented as a downward arrow) from the menu that appears in the upper right.
 
     Eventually, you will also be able to find other useful information about your session and progress on this page.
@@ -23,8 +25,28 @@ st.markdown(
 """
 )
 
+df_dict = {}
 
 if st.session_state.question_list:
+
+    st.divider(width="stretch")
+
+    st.html(
+        """
+        <div style="border: dashed black 1px; display: inline-block; padding: 5px 10px;"><b>Jump to:</b>
+            <ul>
+                <li>
+                    <a href="#individual-answers">Individual Answers</a>
+                </li>
+                <li>
+                    <a href="#aggregate-results">Aggregate Results</a>
+                </li>
+            </ul>
+        </div>
+        """)
+
+    st.markdown("## Individual Answers")
+
     for title, pos in zip(["Nouns","Verbs","Pronouns","Adjectives","Adverbs"],["noun", "verb", "pronoun", "adj", "adv"]):
         df = pd.json_normalize([item for item in st.session_state.question_list if item.get("correct",None) is not None and item["pos"] == pos])
         if len(df) > 0:
@@ -39,6 +61,8 @@ if st.session_state.question_list:
                 if col[:3] == "id.":
                     df.rename(columns={col: col[3:]}, inplace=True)
             
+            df_dict[pos] = df
+
             df = df.copy() \
                 .sort_values(by=["correct", "word"], 
                              key=lambda col: [remove_macrons(unicodedata.normalize("NFC", x)) if isinstance(x, str) else x for x in col])  \
@@ -48,6 +72,79 @@ if st.session_state.question_list:
             st.dataframe(df)
 
 
-# st.area_chart()
+    st.divider()
+
+    st.markdown("## Aggregate Results")
+
+    if not isinstance(df_dict.get("noun", 0), int):
+        st.markdown("### Nouns")
+        st.dataframe(
+            df_dict["noun"].copy().groupby("decl")["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            column_config={
+                "decl": st.column_config.TextColumn("Declension", width=None),
+                "Total": st.column_config.NumberColumn("Total Questions", width=None),
+                "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
+                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+            },
+            width="content"
+        )
+
+    if not isinstance(df_dict.get("verb", 0), int):    
+        st.markdown("### Verbs")
+        st.dataframe(
+            df_dict["verb"].copy().groupby(["conj","tense","voice","mood"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]), 
+            column_config={
+                "conj": st.column_config.TextColumn("Conjugation", width=None),
+                "tense": st.column_config.TextColumn("Tense", width=None),
+                "voice": st.column_config.TextColumn("Voice", width=None),
+                "mood": st.column_config.TextColumn("Mood", width=None),
+                "Total": st.column_config.NumberColumn("Total Questions", width=None),
+                "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
+                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+            },
+            width="content"
+        )
+    
+    if not isinstance(df_dict.get("pronoun", 0), int):
+        st.markdown("### Pronouns")
+        st.dataframe(
+            df_dict["pronoun"].copy().groupby("word")["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            column_config={
+                "word": "Pronoun",
+                "Total": st.column_config.NumberColumn("Total Questions", width=None),
+                "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
+                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+            },
+            width="content"
+        )
+
+    if not isinstance(df_dict.get("adj", 0), int):
+        st.markdown("### Adjectives")
+        st.dataframe(
+            df_dict["adj"].copy().assign(decl_mod = lambda df: df["decl"].where(df["irreg"] != "form", "irreg")).groupby(["decl_mod", "degree"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            column_config={
+                "decl_mod": "Declension (or Irregular Form)",
+                "degree": "Degree",
+                "Total": st.column_config.NumberColumn("Total Questions", width=None),
+                "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
+                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                },
+            width="content"
+        )
+    
+    if not isinstance(df_dict.get("adv", 0), int):
+        st.markdown("### Adverbs")
+        st.dataframe(
+            df_dict["adv"].copy().assign(decl_mod = lambda df: df["decl"].where(df["irreg"] != "form", "irreg")).groupby(["decl_mod", "degree"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            column_config={
+                "decl_mod": "Declension (or Irregular Form)",
+                "degree": "Degree",
+                "Total": st.column_config.NumberColumn("Total Questions", width=None),
+                "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
+                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                },
+            width="content"
+        )
+
 
 # st.session_state.question_list
