@@ -6,19 +6,25 @@ from utils import remove_macrons
 st.set_page_config(page_title="Latin Morph! Data")
 
 st.markdown(
-    """
-    # Session Data
+    f"""
+    # Session Stats and Data
     
-    This page shows the questions that you have answered during your current session, whether correctly or incorrectly, divided up by part of speech. 
-    (Any question that you skipped does not appear.)
+    {"Once you answer at least one question, this page will show" if not st.session_state.question_list else "This page shows"} 
+    the questions that you have answered during your current session, whether correctly or incorrectly, divided up by part of speech. 
+    (Any question that you have skipped does not appear.)
     You can sort the tables by any column; 
     by default, your incorrect answers appear first, 
     and the words are listed in alphabetical order. 
+    
     Further down the page are aggregate results that show how well you have done in each category 
-    (e.g., nouns grouped by declension; verbs grouped by conjugation, tense, voice, and mood; etc.)
+    (e.g., nouns grouped by declension; verbs grouped by conjugation, tense, voice, and mood; etc.).
+    Once you have answered sufficient questions, you may find these aggregated results useful for knowing where to target your review.
 
-    As your answers are not preserved between sessions, you should download any table that you want to save, in order to have a record of your answers and overall results: 
-    to do so, hover over the table and select the first option ("Download as CSV," represented as a downward arrow) from the menu that appears in the upper right.
+    As your answers are not preserved between sessions, you should download any table that you want to save, 
+    in order to have a record of your answers and overall results: 
+    to do so, hover over the table and select the first option 
+    ("Download as CSV," represented as a downward arrow) 
+    from the menu that appears in the upper right.
 
     Eventually, you will also be able to find other useful information about your session and progress on this page.
 
@@ -69,7 +75,10 @@ if st.session_state.question_list:
                 .reset_index(drop=True)
 
             st.markdown(f"### {title}")
-            st.dataframe(df)
+            st.dataframe(df,
+                         column_config={
+                             k:v for k,v in zip(df.columns, df.columns.str.title())
+                         })
 
 
     st.divider()
@@ -118,13 +127,25 @@ if st.session_state.question_list:
             width="content"
         )
 
+    adj_list_order = ["1st/2nd", "3rd", "3rd (cons.)", "comparatives", "comparatives (irreg. stem)", "superlatives", "superlatives (irreg. stem)", "irregular forms"]
     if not isinstance(df_dict.get("adj", 0), int):
         st.markdown("### Adjectives")
         st.dataframe(
-            df_dict["adj"].copy().assign(decl_mod = lambda df: df["decl"].where(df["irreg"] != "form", "irreg")).groupby(["decl_mod", "degree"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            df_dict["adj"].copy() \
+                .assign(decl_mod = lambda df: df["decl"].where(df["degree"] != "super", "superlatives")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(df["degree"] != "comp", "comparatives")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(df["irreg"] != "form", "irregular forms")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(((df["irreg"] != "stem") | (df["degree"] != "comp")), "comparatives (irreg. stem)")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(((df["irreg"] != "stem") | (df["degree"] != "super")), "superlatives (irreg. stem)")) \
+                .groupby([
+                    "decl_mod", 
+                    # "degree"
+                    ])["correct"].agg(Total= "count", Correct= "sum") \
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]),
             column_config={
-                "decl_mod": "Declension (or Irregular Form)",
-                "degree": "Degree",
+                "decl_mod": "Category (Declension/Degree/Irreg. Form)",
+                # "degree": "Degree",
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
                 "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
@@ -135,10 +156,21 @@ if st.session_state.question_list:
     if not isinstance(df_dict.get("adv", 0), int):
         st.markdown("### Adverbs")
         st.dataframe(
-            df_dict["adv"].copy().assign(decl_mod = lambda df: df["decl"].where(df["irreg"] != "form", "irreg")).groupby(["decl_mod", "degree"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            df_dict["adv"].copy() \
+                .assign(decl_mod = lambda df: df["decl"].where(df["degree"] != "super", "superlatives")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(df["degree"] != "comp", "comparatives")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(df["irreg"] != "form", "irregular forms")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(((df["irreg"] != "stem") | (df["degree"] != "comp")), "comparatives (irreg. stem)")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(((df["irreg"] != "stem") | (df["degree"] != "super")), "superlatives (irreg. stem)")) \
+                .groupby([
+                    "decl_mod", 
+                    # "degree"
+                    ])["correct"].agg(Total= "count", Correct= "sum") \
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]),
             column_config={
-                "decl_mod": "Declension (or Irregular Form)",
-                "degree": "Degree",
+                "decl_mod": "Category (Declension/Degree/Irreg. Form)",
+                # "degree": "Degree",
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
                 "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
