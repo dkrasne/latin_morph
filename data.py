@@ -2,8 +2,41 @@ import streamlit as st
 import pandas as pd
 import unicodedata
 from utils import remove_macrons
+from vocab import import_verbs
 
 st.set_page_config(page_title="Latin Morph! Data")
+
+question_list = st.session_state.question_list
+verb_vocab = import_verbs()
+irreg_verbs = list({k:v for k,v in verb_vocab.items() if v.get("irreg")}.keys())
+
+@st.cache_data
+def analyze_question_data(question_list):
+
+    df_dict = {}
+    for pos in ["noun", "verb", "pronoun", "adj", "adv"]:
+        df = pd.json_normalize([item for item in question_list if item.get("correct",None) is not None and item["pos"] == pos])
+        if len(df) > 0:
+            correct_col = df["correct"]
+            answer_col = df["answer"]
+            df = df.copy().drop(["answer","correct"], axis=1, errors="ignore").join(answer_col).astype(str).join(correct_col) \
+                .drop("id", axis=1, errors="ignore") \
+                .replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"}) \
+                .drop("pos", axis=1)
+
+            for col in df.columns:
+                if col[:3] == "id.":
+                    df.rename(columns={col: col[3:]}, inplace=True)
+            
+            df = df.copy() \
+                .sort_values(by=["correct", "word"], 
+                            key=lambda col: [remove_macrons(unicodedata.normalize("NFC", x)) if isinstance(x, str) else x for x in col])  \
+                .reset_index(drop=True)
+
+            df_dict[pos] = df
+    return df_dict
+
+
 
 st.markdown(
     f"""
@@ -15,7 +48,7 @@ st.markdown(
     You can sort the tables by any column; 
     by default, your incorrect answers appear first, 
     and the words are listed in alphabetical order. 
-    
+
     Further down the page are aggregate results that show how well you have done in each category 
     (e.g., nouns grouped by declension; verbs grouped by conjugation, tense, voice, and mood; etc.).
     Once you have answered sufficient questions, you may find these aggregated results useful for knowing where to target your review.
@@ -31,9 +64,9 @@ st.markdown(
 """
 )
 
-df_dict = {}
+# df_dict = {}
 
-if st.session_state.question_list:
+if question_list:
 
     st.divider(width="stretch")
 
@@ -53,39 +86,23 @@ if st.session_state.question_list:
 
     st.markdown("## Individual Answers")
 
+    df_dict = analyze_question_data(question_list)
+
     for title, pos in zip(["Nouns","Verbs","Pronouns","Adjectives","Adverbs"],["noun", "verb", "pronoun", "adj", "adv"]):
-        df = pd.json_normalize([item for item in st.session_state.question_list if item.get("correct",None) is not None and item["pos"] == pos])
-        if len(df) > 0:
-            correct_col = df["correct"]
-            answer_col = df["answer"]
-            df = df.copy().drop(["answer","correct"], axis=1, errors="ignore").join(answer_col).astype(str).join(correct_col) \
-                .drop("id", axis=1, errors="ignore") \
-                .replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"}) \
-                .drop("pos", axis=1)
-
-            for col in df.columns:
-                if col[:3] == "id.":
-                    df.rename(columns={col: col[3:]}, inplace=True)
-            
-            df_dict[pos] = df
-
-            df = df.copy() \
-                .sort_values(by=["correct", "word"], 
-                             key=lambda col: [remove_macrons(unicodedata.normalize("NFC", x)) if isinstance(x, str) else x for x in col])  \
-                .reset_index(drop=True)
-
+        if pos in df_dict:
+            df = df_dict[pos]
             st.markdown(f"### {title}")
             st.dataframe(df,
-                         column_config={
-                             k:v for k,v in zip(df.columns, df.columns.str.title())
-                         })
+                            column_config={
+                                k:v for k,v in zip(df.columns, df.columns.str.title())
+                            })
 
 
     st.divider()
 
     st.markdown("## Aggregate Results")
 
-    if not isinstance(df_dict.get("noun", 0), int):
+    if "noun" in df_dict:
         st.markdown("### Nouns")
         st.dataframe(
             df_dict["noun"].copy().groupby("decl")["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
@@ -98,12 +115,14 @@ if st.session_state.question_list:
             width="content"
         )
 
-    if not isinstance(df_dict.get("verb", 0), int):    
+    if "verb" in df_dict:
         st.markdown("### Verbs")
         st.dataframe(
-            df_dict["verb"].copy().groupby(["conj","tense","voice","mood"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]), 
+            df_dict["verb"].copy() \
+                .assign(conj_mod = lambda df: df["conj"].where(~((df["word"].isin(irreg_verbs)) & (df["tense"].isin(["pres","impf","fut"]))), df["word"]+" (pres. system)")) \
+                .groupby(["conj_mod","tense","voice","mood"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]), 
             column_config={
-                "conj": st.column_config.TextColumn("Conjugation", width=None),
+                "conj_mod": st.column_config.TextColumn("Conjugation", width=None),
                 "tense": st.column_config.TextColumn("Tense", width=None),
                 "voice": st.column_config.TextColumn("Voice", width=None),
                 "mood": st.column_config.TextColumn("Mood", width=None),
@@ -114,7 +133,7 @@ if st.session_state.question_list:
             width="content"
         )
     
-    if not isinstance(df_dict.get("pronoun", 0), int):
+    if "pronoun" in df_dict:
         st.markdown("### Pronouns")
         st.dataframe(
             df_dict["pronoun"].copy().groupby("word")["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
@@ -127,8 +146,8 @@ if st.session_state.question_list:
             width="content"
         )
 
-    adj_list_order = ["1st/2nd", "3rd", "3rd (cons.)", "comparatives", "comparatives (irreg. stem)", "superlatives", "superlatives (irreg. stem)", "irregular forms"]
-    if not isinstance(df_dict.get("adj", 0), int):
+    adj_list_order = ["1st/2nd", "3rd", "3rd (cons.)", "comparatives", "comparatives (irreg. stem)", "superlatives", "superlatives (irreg. stem)", "irregular forms", "duo", "trēs"]
+    if "adj" in df_dict:
         st.markdown("### Adjectives")
         st.dataframe(
             df_dict["adj"].copy() \
@@ -137,6 +156,8 @@ if st.session_state.question_list:
                 .assign(decl_mod = lambda df: df["decl_mod"].where(df["irreg"] != "form", "irregular forms")) \
                 .assign(decl_mod = lambda df: df["decl_mod"].where(((df["irreg"] != "stem") | (df["degree"] != "comp")), "comparatives (irreg. stem)")) \
                 .assign(decl_mod = lambda df: df["decl_mod"].where(((df["irreg"] != "stem") | (df["degree"] != "super")), "superlatives (irreg. stem)")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(df["word"] != "duo", "duo")) \
+                .assign(decl_mod = lambda df: df["decl_mod"].where(df["word"] != "trēs", "trēs")) \
                 .groupby([
                     "decl_mod", 
                     # "degree"
@@ -153,7 +174,7 @@ if st.session_state.question_list:
             width="content"
         )
     
-    if not isinstance(df_dict.get("adv", 0), int):
+    if "adv" in df_dict:
         st.markdown("### Adverbs")
         st.dataframe(
             df_dict["adv"].copy() \

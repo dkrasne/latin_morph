@@ -97,7 +97,10 @@ def gen_question():
     # since sē has no nominative, ensure that nominative can't be chosen.
     form = None
     while form is None:
-        case = random.choice(pronoun_options["case"])
+        if number is None or (number == "sg" and gender == "m"): # for personal pronouns, or for the dictionary entry form, reduce likelihood of nominative
+            case = random.choices(pronoun_options["case"], [10,90,90,90,90])[0]
+        else:
+            case = random.choice(pronoun_options["case"])
         if pronoun_vocab[pronoun].get("genders"):
             form = pronoun_vocab[pronoun][number][case]
         else:

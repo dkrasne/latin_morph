@@ -1,5 +1,6 @@
 import streamlit as st
 
+@st.cache_data
 def import_verbs():
     verb_vocab = {
         "sum": {
@@ -533,6 +534,7 @@ def import_verbs():
     return verb_vocab
 
 
+@st.cache_data
 def import_nouns():
     noun_vocab = {
                 "puella": {"decl": 1,
@@ -573,6 +575,7 @@ def import_nouns():
             }
     return noun_vocab
 
+@st.cache_data
 def import_pronouns():
     pronoun_vocab = {
         "hic": {
@@ -775,6 +778,7 @@ def import_pronouns():
     }
     return pronoun_vocab
 
+@st.cache_data
 def import_adjectives():
     adjective_vocab = {
         # "": {
@@ -936,9 +940,16 @@ def import_adjectives():
                 }
             }
         },
+        "ūnus": {
+            "cardinal": True,
+            "pronominal": True,
+            "decl": (1,2),
+            "no_pl": True,
+            "stem": "ūn"
+        },
         "duo": {
             "cardinal": True,
-            "decl": None,
+            "decl": (1,2),
             "no_sg": True,
             "irreg": {
                 "forms":{
@@ -947,7 +958,8 @@ def import_adjectives():
                         "gen": ("duōrum", "duārum", "duōrum"),
                         "dat": ("duōbus", "duābus", "duōbus"),
                         "acc": (["duo","duōs"], "duās", "duo"),
-                        "abl": ("duōbus", "duābus", "duōbus")
+                        "abl": ("duōbus", "duābus", "duōbus"),
+                        "voc": ("duōbus", "duābus", "duōbus")
                     }
                 }
             }
@@ -958,13 +970,6 @@ def import_adjectives():
             "no_sg": True,
             "stem": "tr",
             "noms": ("trēs", "tria")
-        },
-        "ūnus": {
-            "cardinal": True,
-            "pronominal": True,
-            "decl": (1,2),
-            "no_pl": True,
-            "stem": "ūn"
         },
         "vetus": {
             "cons_stem": True,

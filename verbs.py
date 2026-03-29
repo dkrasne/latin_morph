@@ -766,7 +766,7 @@ else:
 
         # questions_asked.append(verb_id)
 
-        tense_voice_mood = [item for item in [verb_abbrevs[tense], verb_abbrevs[voice] if voice != "dep" else "", verb_abbrevs[mood]] if item]
+        tense_voice_mood = [item for item in [verb_abbrevs[voice] if voice != "dep" else "", verb_abbrevs[tense], verb_abbrevs[mood]] if item]
         question = f"For *{verb}*, give the **{" ".join(tense_voice_mood) if len(tense_voice_mood) < 3 else ", ".join(tense_voice_mood)}**{" in the **" if mood != "inf" else ""}{" ".join([item for item in [verb_abbrevs.get(person)+" person**" if person else "", "**"+verb_abbrevs.get(number)+"**" if number else ""] if item])}."
 
         if show_principal_parts:

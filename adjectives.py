@@ -84,13 +84,22 @@ with option_expander:
                                     value=True, 
                                     key="incl_cardinals", 
                                     help="Select this box to include declinable cardinal numbers (one, two, and three).")
+        cardinal_select = []
+        cardinal_radio = "No"
+        if incl_cardinals:
+            cardinal_radio = st.radio("Include *only* cardinal numbers?",
+                                      options = ["No","Yes"], horizontal=True)
+            cardinal_select = st.multiselect("Choose which numbers to include:", 
+                                             options={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
+                                             default={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
+                                             help="All cardinal numbers selected here will be included if the 'random declension' option is chosen above; otherwise only the numbers belonging to the specified declension will be included. (*ūnus* can be selected here *or* under pronominal adjectives to be included.)")
         # unus nauta adjectives - T/F flag
         incl_pronominals = False
         if declension in ["random", (1,2)]:
             incl_pronominals = st.checkbox("Include pronominal (UNUS NAUTA) adjectives?", 
                         value=True, 
                         key="incl_pronominals", 
-                        help="Select this box to include the nine pronominal (so-called UNUS NAUTA) adjectives: *ūnus*, *nūllus*, *ūllus*, *sōlus*, *neuter*, *alter*, *uter*, *tōtus*, *alius*")
+                        help="Select this box to include the nine pronominal (so-called UNUS NAUTA) adjectives: *ūnus*, *nūllus*, *ūllus*, *sōlus*, *neuter*, *alter*, *uter*, *tōtus*, *alius*. (*ūnus* can be selected here *or* under cardinal numbers to be included.)")
         # non-i-stem 3rd decl. adjectives - T/F flag
         incl_cons_stems = False
         if declension in ["random", 3]:
@@ -122,15 +131,24 @@ with option_expander:
 
 select_vocab = {k:v for k,v in adj_vocab.items()}   # limit based on selections
 
-if not incl_cardinals:
-    select_vocab = {k:v for k,v in select_vocab.items() if not v.get("cardinal")}
-if not incl_pronominals:
-    select_vocab = {k:v for k,v in select_vocab.items() if not v.get("pronominal")}
-if not incl_cons_stems:
-    select_vocab = {k:v for k,v in select_vocab.items() if not v.get("cons_stem")}
+if cardinal_radio == "Yes":
+    select_vocab = {k:v for k,v in select_vocab.items() if v.get("cardinal")}
 if declension != "random":
     select_vocab = {k:v for k,v in select_vocab.items() if v.get("decl") == declension}
-    
+if not incl_cardinals:
+    select_vocab = {k:v for k,v in select_vocab.items() if not v.get("cardinal")}
+else:
+    for cardinal in {k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys():
+        if cardinal not in cardinal_select and cardinal in select_vocab.keys():
+            select_vocab.pop(cardinal)
+if not incl_pronominals:
+    select_vocab = {k:v for k,v in select_vocab.items() if not v.get("pronominal")}
+if "ūnus" not in select_vocab.keys():
+    if ("ūnus" in cardinal_select and declension != [3]) or incl_pronominals:
+        select_vocab["ūnus"] = adj_vocab.get("ūnus")
+if not incl_cons_stems:
+    select_vocab = {k:v for k,v in select_vocab.items() if not v.get("cons_stem")}
+
 
 #st.write(len(select_vocab))
 
@@ -297,9 +315,12 @@ def gen_adj_adv_id():
     # choose adjective or adverb
     reduced_vocab = {k:v for k,v in select_vocab.items()}
 
-    pos = random.choices(pos_list, [7, 1])[0] if len(pos_list) == 2 else pos_list[0]
-    if pos == "adv": # if adverb, only include words that can have adverbs
-        reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (v.get("no_adv") or v.get("cardinal"))}
+    if cardinal_radio == "Yes":
+        pos = "adj"
+    else:
+        pos = random.choices(pos_list, [7, 1])[0] if len(pos_list) == 2 else pos_list[0]
+        if pos == "adv": # if adverb, only include words that can have adverbs
+            reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (v.get("no_adv") or v.get("cardinal"))}
     
     case = None
     number = None
@@ -307,18 +328,27 @@ def gen_adj_adv_id():
     if pos != "adv":
         case = random.choice(adj_options["case"])
         #case = "voc"
-        number = random.choice(adj_options["number"])
+        if cardinal_radio != "Yes" or ("ūnus" in cardinal_select and len(cardinal_select) > 1):
+            number = random.choice(adj_options["number"])
+        elif "ūnus" in cardinal_select:
+            number = "sg"
+        else:
+            number = "pl"
         gender = random.choice(adj_options["gender"])
     for num in ["sg","pl"]:
         if number == num:
             reduced_vocab = {k:v for k,v in reduced_vocab.items() if not v.get(f"no_{num}")}
-    degree = random.choice(degree_list)
+        
+    if cardinal_radio == "Yes":
+        degree = "pos"
+    else:
+        degree = random.choice(degree_list)
     #degree = "comp"
     if degree in ["comp","super"]:
         reduced_vocab = {k:v for k,v in reduced_vocab.items() if v.get("comp", "ok") == "ok" and v.get("super", "ok") == "ok"}
 
     adj = random.choice(list(reduced_vocab.keys()))
-    
+
     return [adj, case, number, gender, pos, degree]
 
 def create_adj_adv(adj_id=None):
@@ -451,7 +481,7 @@ def create_adj_adv(adj_id=None):
                     if not correct_form and not correct_ending:
                         correct_ending = adj_endings[decl][number][case]
                         if correct_ending is None and degree == "pos": #
-                            correct_form = adj_info["noms"]
+                            correct_form = adj_info.get("noms")
                         else:
                             if correct_ending is None:
                                 correct_ending = ""
@@ -496,7 +526,7 @@ def create_adj_adv(adj_id=None):
             "pos": pos,
             "word": adj, 
             "id": {"degree": degree,
-                   "decl": "1st/2nd" if adj_info["decl"] == (1,2) else "3rd (cons.)" if adj in cons_stems else "3rd"},
+                   "decl": "1st/2nd" if adj_info["decl"] == (1,2) else "3rd (cons.)" if adj in cons_stems else "3rd" if adj_info["decl"] is not None else None},
 #            "correct": False
         }
     if pos == "adj":
