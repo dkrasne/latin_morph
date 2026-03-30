@@ -144,11 +144,11 @@ else:
 if not incl_pronominals:
     select_vocab = {k:v for k,v in select_vocab.items() if not v.get("pronominal")}
 if "ūnus" not in select_vocab.keys():
-    if ("ūnus" in cardinal_select and declension != [3]) or incl_pronominals:
+    if ("ūnus" in cardinal_select and declension != 3) or incl_pronominals:
         select_vocab["ūnus"] = adj_vocab.get("ūnus")
 if not incl_cons_stems:
     select_vocab = {k:v for k,v in select_vocab.items() if not v.get("cons_stem")}
-
+#st.write(select_vocab)
 
 #st.write(len(select_vocab))
 
@@ -325,12 +325,13 @@ def gen_adj_adv_id():
     case = None
     number = None
     gender = None
+
     if pos != "adv":
         case = random.choice(adj_options["case"])
         #case = "voc"
-        if cardinal_radio != "Yes" or ("ūnus" in cardinal_select and len(cardinal_select) > 1):
+        if cardinal_radio != "Yes" or ("ūnus" in cardinal_select and len(cardinal_select) > 1 and declension != 3):
             number = random.choice(adj_options["number"])
-        elif "ūnus" in cardinal_select:
+        elif "ūnus" in cardinal_select and declension != 3:
             number = "sg"
         else:
             number = "pl"
@@ -338,7 +339,7 @@ def gen_adj_adv_id():
     for num in ["sg","pl"]:
         if number == num:
             reduced_vocab = {k:v for k,v in reduced_vocab.items() if not v.get(f"no_{num}")}
-        
+
     if cardinal_radio == "Yes":
         degree = "pos"
     else:
@@ -348,7 +349,7 @@ def gen_adj_adv_id():
         reduced_vocab = {k:v for k,v in reduced_vocab.items() if v.get("comp", "ok") == "ok" and v.get("super", "ok") == "ok"}
 
     adj = random.choice(list(reduced_vocab.keys()))
-
+#    adj = "alius"
     return [adj, case, number, gender, pos, degree]
 
 def create_adj_adv(adj_id=None):
@@ -376,17 +377,19 @@ def create_adj_adv(adj_id=None):
 
     # otherwise, find the form.
     else:
+        # st.write(adj_id)
         # deal with irregulars
+        irreg_form = ""
         if irreg_forms: # if the specified form is irregular, find it.
             if pos == "adv":
-                correct_form = irreg_forms.get("adv", {}).get(degree)
+                irreg_form = irreg_forms.get("adv", {}).get(degree)
             else:
                 if degree == "pos":
-                    correct_form = irreg_forms.get(number, {}).get(case)
+                    irreg_form = irreg_forms.get(number, {}).get(case)
                 else:
                     pass
                     # update this later to pull a "comp" or "super" key from the irregular forms part of the dictionary, for words like "plus". Alternatively, these could possibly go under irregular stems with a "no_infix" T/F flag, in which case that part of the code will need updating.
-            if correct_form:
+            if irreg_form:
                 st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
 
         # deal with regular endings (reg. and irreg. stems)
@@ -397,7 +400,7 @@ def create_adj_adv(adj_id=None):
                 st.session_state["irreg_alert_message"] = f"N.B. This form has an irregular stem (*{correct_stem}*-)."
 
             else: # otherwise, get the regular stem
-                correct_stem = adj_info.get("stem")
+                correct_stem = str(adj_info.get("stem"))
             
             infix = ""
             # if correct_stem: # build correct form on correct stem
@@ -442,12 +445,19 @@ def create_adj_adv(adj_id=None):
                         else:
                             decl = "2_us"
                     correct_ending = adj_endings[decl][number][case]
+                    # if degree == "pos" and decl == "2_us" and gender == "m" and case == "voc" and number == "sg":
+                    #     if adj[-3:] == "ius":
+                    #         correct_stem = correct_stem[:-1]
+                    #         correct_ending = "ī"
+                    #     elif adj == "meus":
+                    #         correct_form = "mī"
                     if degree == "pos" and number == "sg" and adj_info.get("pronominal") is True:
                         if case == "dat":
                             correct_ending = "ī"
                         elif case == "gen":
                             correct_ending = "īus"
-                    correct_form = correct_stem + infix + correct_ending
+                    if correct_ending and not correct_form: #DOUBLE CHECK THAT THIS DOESN'T CAUSE ISSUES
+                        correct_form = correct_stem + infix + correct_ending
                 else: # deal with 3rd decl. adjectives and comparatives
                     if degree == "pos" and case == "nom" and number == "sg":
                         correct_form = adj_info["noms"] # assign 3rd. decl. nom. sg. tuple; unpack later
@@ -492,19 +502,31 @@ def create_adj_adv(adj_id=None):
                 correct_form = correct_stem + infix + correct_ending
 
 
-        if isinstance(correct_form, tuple):
-            # neuter is always the last form in the tuple
-            if gender == "n":
-                correct_form = correct_form[-1]
-            # if one- or two-termination, M/F are both the first form
-            elif len(correct_form) in [1,2]:
-                correct_form = correct_form[0]
-            # otherwise, M is the first form, F is the second form
+        for i,form in enumerate([correct_form, irreg_form]):
+            if isinstance(form, tuple):
+                # neuter is always the last form in the tuple
+                if gender == "n":
+                    form = form[-1]
+                # if one- or two-termination, M/F are both the first form
+                elif len(form) in [1,2]:
+                    form = form[0]
+                # otherwise, M is the first form, F is the second form
+                else:
+                    if gender == "m":
+                        form = form[0]
+                    elif gender == "f":
+                        form = form[1]
+            if i == 0:
+                correct_form = form
+            if i == 1:
+                irreg_form = form
+
+        if irreg_form:
+            #st.write(irreg_form, correct_form)
+            if irreg_form != correct_form:
+                correct_form = irreg_form
             else:
-                if gender == "m":
-                    correct_form = correct_form[0]
-                elif gender == "f":
-                    correct_form = correct_form[1]
+                st.session_state.irreg_alert_message = ""
 
     # get/construct nom. sg. forms for dictionary entry
     irreg_noms = False
@@ -560,6 +582,8 @@ st.session_state.gen_func = create_adj_adv
 
 if not degree_list:
     st.markdown('You need to choose at least one degree. (Choose "positive" if you\'re only familiar with regular adjectives.)')
+elif cardinal_radio == "Yes" and not cardinal_select:
+    st.markdown("If you're just reviewing numbers, you need to choose at least one number!")
 # elif not pos_list:
 #     st.markdown("You need to choose at least one part of speech.")
 
@@ -584,7 +608,7 @@ else:
     ## DISPLAY QUESTION ##
 
         st.markdown("### Current question")
-
+        # st.write(st.session_state.correct_answer)
         with st.form(key="adj_adv_form", clear_on_submit=True):
             current_answer = st.text_input(question, key="answer_input")
             

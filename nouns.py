@@ -241,7 +241,7 @@ else:
                 case = last_question["id"].get("case")
         while case == "" or case == last_question.get("id", {}).get("case"):
             case = random.choices(list(noun_options["case"].keys()),case_weights)[0]
-
+        
         # st.write(noun, case, number)
         return [noun, case, number]
 
@@ -255,26 +255,35 @@ else:
         # st.write(f"Give the {noun_options["case"][case]} {noun_options["number"][number]} of *{noun}*.")
 
         noun_decl = noun_vocab.get(noun, {}).get("decl")
+        noun_stem = noun_vocab.get(noun, {}).get("stem")
 
         if case == "nom" and number == "sg":    # nominative singulars don't choose from list
             correct_answer = noun
         else:
             correct_ending = noun_endings[noun_decl][number][case]
+            if noun[-3:] == "ius" and noun_decl == "2_us":
+                if case in ["voc", "gen"]:
+                    noun_stem = noun_stem[:-1]
+                    if case == "voc":
+                        correct_ending = "ī"
+                    if case == "gen":
+                        correct_ending = ["iī","ī"]
+                
 
             if correct_ending is None and number == "sg":   # deal with vocative singular other than 2nd decl. -us nouns
                 correct_answer = noun
-            
+
             else:
                 if correct_ending is None and number == "pl":   # deal with vocative plurals
                     correct_ending = noun_endings[noun_decl][number]["nom"]
-                    correct_answer = noun_vocab[noun]["stem"] + correct_ending
+                    correct_answer = noun_stem + correct_ending
                 elif isinstance(correct_ending, list):    # deal with alternative forms
                     #correct_ending = correct_ending[0]
                     correct_answer = []
                     for ending in correct_ending:
-                        correct_answer.append(active_vocab[noun]["stem"] + ending)
+                        correct_answer.append(noun_stem + ending)
                 else:
-                    correct_answer = noun_vocab[noun]["stem"] + correct_ending
+                    correct_answer = noun_stem + correct_ending
 
         st.session_state["correct_answer"] = correct_answer
 
@@ -304,7 +313,7 @@ else:
             question += f" This is a {decl} declension {third_logic}noun."
 
         if show_stem:
-            question += f" (The base is: {active_vocab[noun]["stem"]}-)"
+            question += f" (The base is: {noun_vocab[noun]["stem"]}-)"
 
         st.markdown("### Current question")
 

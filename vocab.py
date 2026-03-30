@@ -571,6 +571,8 @@ def import_nouns():
                          "stem": "agr"},
                 "equus": {"decl": "2_us",
                           "stem": "equ"},
+                "fīlius": {"decl": "2_us",
+                           "stem": "fīli"}
                 # add vis and deus; need to update logic to deal with irregular nouns
             }
     return noun_vocab
@@ -951,6 +953,7 @@ def import_adjectives():
             "cardinal": True,
             "decl": (1,2),
             "no_sg": True,
+            "stem": "du",
             "irreg": {
                 "forms":{
                     "pl": {
@@ -959,7 +962,7 @@ def import_adjectives():
                         "dat": ("duōbus", "duābus", "duōbus"),
                         "acc": (["duo","duōs"], "duās", "duo"),
                         "abl": ("duōbus", "duābus", "duōbus"),
-                        "voc": ("duōbus", "duābus", "duōbus")
+                        "voc": ("duo", "duae", "duo")
                     }
                 }
             }
@@ -976,6 +979,7 @@ def import_adjectives():
             "decl": 3,
             "stem": "veter",
             "noms": ("vetus",),
+            "no_adv": True,
             "irreg": {
                 "stems": {
                     "comp": "vetust"
