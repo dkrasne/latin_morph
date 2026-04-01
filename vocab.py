@@ -1,6 +1,6 @@
 import streamlit as st
 
-#@st.cache_data
+@st.cache_data
 def import_verbs():
     verb_vocab = {
         "sum": {
@@ -712,7 +712,7 @@ def import_verbs():
     return verb_vocab
 
 
-#@st.cache_data
+@st.cache_data
 def import_nouns():
     noun_vocab = {
                 "puella": {"decl": 1,
@@ -919,51 +919,10 @@ def import_nouns():
                 "fidēs": {"decl": "5_consonant", "stem": "fid"},
                 "spēs": {"decl": "5_consonant", "stem": "sp"},
 
-    ## Irregular nouns
-                "vīs": {
-                    "decl": "3_istem",
-                    "stem": "vī(r)",
-                    "irreg": {
-                        "irreg": True,
-                        "sg": {
-                            "gen": None,
-                            "dat": None,
-                            "acc": "vim",
-                            "abl": "vī",
-                            "voc": None
-                        },
-                        "pl": {
-                            "nom": "vīrēs",
-                            "gen": "vīrium",
-                            "dat": "vīribus",
-                            "acc": ["vīrēs","vīrīs"],
-                            "abl": "vīribus",
-                            "voc": None
-                        }
-                    }
-                },
-                "deus": {
-                    "decl": "2_us",
-                    "stem": "de",
-                    "irreg": {
-                        "irreg": True,
-                        "sg": {
-                            "voc": ["deus", "dīve"]
-                        },
-                        "pl": {
-                            "nom": ["dī", "deī", "diī"],
-                            "gen": ["deum", "deōrum"],
-                            "dat": ["dīs", "deīs", "diīs"],
-                            "abl": ["dīs", "deīs", "diīs"],
-                            "voc": "dī"
-                        }
-                    }
-                }
-                # add vis and deus; need to update logic to deal with irregular nouns
             }
     return noun_vocab
 
-#@st.cache_data
+@st.cache_data
 def import_pronouns():
     pronoun_vocab = {
         "hic": {
@@ -1115,7 +1074,7 @@ def import_pronouns():
             "forms": {
                 "nom": "ego",
                 "gen": "meī",
-                "dat": ["mihi", "mī"],
+                "dat": "mihi",
                 "acc": "mē",
                 "abl": "mē"
             },
@@ -1166,7 +1125,7 @@ def import_pronouns():
     }
     return pronoun_vocab
 
-#@st.cache_data
+@st.cache_data
 def import_adjectives():
     adjective_vocab = {
         # "": {
