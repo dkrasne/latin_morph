@@ -353,7 +353,7 @@ if mood_selector == ["impv"]:
 if mood_selector == ["inf"] and tense_list == ["fut"]:
     verb_vocab = {key: val for key, val in verb_vocab.items() if "ppp" in val or "fap" in val}
 
-st.write(verb_vocab.keys())
+# st.write(verb_vocab.keys())
 
 if len(tense_list) == 0:
     st.write("You need to choose at least one tense.")
@@ -381,6 +381,7 @@ else:
             mood_list.pop("impv")
         if not mood_list:
             st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different or additional options and hit 'New Question' again."
+            return
 
         mood = random.choices(list(mood_list.keys()), list(mood_list.values()))[0]
      #    mood = "ind"    ## UNCOMMENT AND SET FOR TESTING
@@ -397,8 +398,9 @@ else:
                     tense_list.remove(tns)
             if not (verb_vocab[verb].get("ppp") or verb_vocab[verb].get("fap")) and "fut" in tense_list:
                 tense_list.remove("fut")
-        # if not tense_list:
-        #     st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
+        if not tense_list:
+            st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
+            return
 
         if mood == "impv":
             if verb == "fīō":
@@ -470,7 +472,7 @@ else:
             voice = "dep"
 
         # Make sure there are no 2nd person plural future passive imperatives
-        if voice == "pass" and tense == "fut" and mood == "impv" and number == "pl" and person == 2:
+        if voice in ["pass","dep"] and tense == "fut" and mood == "impv" and number == "pl" and person == 2:
             person = 3
 
         return {"verb": verb, "pers": person, "num": number, "tense": tense, "voice": voice, "mood": mood}
@@ -483,6 +485,9 @@ else:
             verb_id = gen_verb_id()
         else:
             verb_id = verb_id
+
+        if verb_id is None:
+            return
 
         verb = verb_id["verb"]
         person = verb_id["pers"]
@@ -613,7 +618,7 @@ else:
                                             vowel = "e"
 
                                     if tense == "fut": # future imperatives
-                                        verb_ending = verb_endings["fut"]["act" if voice == "act" else "pass"]["impv"][number][person]
+                                        verb_ending = verb_endings["fut"]["act" if voice == "act" else "pass"]["impv"][number].get(person)
 
                                     if verb_ending in ["r", "m", "t"] or verb_ending[:2] == "nt": # shorten vowels as needed
                                         vowel = remove_macrons(vowel)
