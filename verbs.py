@@ -505,6 +505,7 @@ else:
             verb_principal_parts.pop(4)
         pres_inf = ""
         verb_form = ""
+        irreg_form = False
 
         if verb_vocab[verb].get("irreg"):
             # If there's an irregular present active/deponent infinitive, grab it now.
@@ -525,6 +526,9 @@ else:
                 if not (isinstance(verb_form, str) or isinstance(verb_form, list)):
                     if verb_form.get(number):
                         verb_form = verb_form[number][person]
+
+            if verb_form:
+                irreg_form = True
 
         # If the pres. inf. isn't irregular, form it for the principal parts.
         pres_act_inf = ""
@@ -774,11 +778,18 @@ else:
         # st.write("Principal parts:", ", ".join([str(val) for val in list(verb_principal_parts.values())]))
         # st.write("Verb form:", verb_form)
 
+        if verb == "sum" and tense == "impf" and mood == "subj":
+            if number == "sg":
+                verb_form = [verb_form] + ["forem" if person == 1 else "forēs" if person == 2 else "foret"]
+            else:
+                verb_form = [verb_form] + ["forēmus" if person == 1 else "forētis" if person == 2 else "forent"]
+
         curr_question = {
                 "pos": "verb",
                 "word": verb, 
-                "id": {k:str(v) if v is not None else v for k,v in verb_id.items() if k != "verb"} | {"conj": str(conj)}
+                "id": {k:str(v) if v is not None else v for k,v in verb_id.items() if k != "verb"} | {"conj": str(conj)} | {"irreg": "irreg" if irreg_form is True else None}
             }
+        
 #        st.write(st.session_state.append_answer)
         if st.session_state.append_answer is True:
             questions_asked.append(

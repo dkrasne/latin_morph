@@ -37,14 +37,14 @@ def import_verbs():
                                         2: "erātis",
                                         3: "erant"}
                                 },
-                            "subj": {
-                                "sg": {1: ["essem","forem"],
-                                    2: ["essēs","forēs"],
-                                    3: ["esset", "foret"]},
-                                "pl": {1: ["essēmus","forēmus"],
-                                        2: ["essētis", "forētis"],
-                                        3: ["essent","forent"]}
-                                }                                
+                            # "subj": {
+                            #     "sg": {1: ["essem","forem"],
+                            #         2: ["essēs","forēs"],
+                            #         3: ["esset", "foret"]},
+                            #     "pl": {1: ["essēmus","forēmus"],
+                            #             2: ["essētis", "forētis"],
+                            #             3: ["essent","forent"]}
+                            #     }                                
                             }
                         },
                     "fut": {
@@ -428,23 +428,27 @@ def import_verbs():
             "irreg": {
                 "forms": {
                     "pres": {
-                        "ind": {
-                            "sg": {
-                                1: "fīō",
-                                2: "fīs",
-                                3: "fit"
+                        "act": {
+                            "ind": {
+                                "sg": {
+                                    1: "fīō",
+                                    2: "fīs",
+                                    3: "fit"
+                                },
+                                "pl": {
+                                    1: "fīmus",
+                                    2: "fītis",
+                                    3: "fīunt"
+                                }
                             },
-                            "pl": {
-                                1: "fīmus",
-                                2: "fītis",
-                                3: "fīunt"
-                            }
+                            "impv": {
+                                "sg": {2: "fī"},
+                                "pl": {2: "fīte"}
+                            },
                         },
-                        "impv": {
-                            "sg": {2: "fī"},
-                            "pl": {2: "fīte"}
-                        },
-                        "inf": "fierī"
+                        "dep": {
+                            "inf": "fierī"
+                        }
                     }
                 }
             }
