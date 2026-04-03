@@ -1,6 +1,6 @@
 import streamlit as st
 
-#@st.cache_data
+@st.cache_data
 def import_verbs():
     verb_vocab = {
         "sum": {
@@ -622,7 +622,6 @@ def import_verbs():
         "accipiō": {"voice": "act", "conj": "3io", "pres": "accip", "perf": "accēp", "ppp": "accept"},
         "interficiō": {"voice": "act", "conj": "3io", "pres": "interfic", "perf": "interfēc", "ppp": "interfect"},
         "perficiō": {"voice": "act", "conj": "3io", "pres": "perfic", "perf": "perfēc", "ppp": "perfect"},
-        "cupiō": {"voice": "act", "conj": "3io", "pres": "cup", "perf": "cupīv", "ppp": "cupīt"},
         "iaciō": {"voice": "act", "conj": "3io", "pres": "iac", "perf": "iēc", "ppp": "iact"},
         "ēiciō": {"voice": "act", "conj": "3io", "pres": "ēic", "perf": "ēiēc", "ppp": "ēiect"},
         "cōnficiō": {"voice": "act", "conj": "3io", "pres": "cōnfic", "perf": "cōnfēc", "ppp": "cōnfect"},
@@ -726,7 +725,7 @@ def import_verbs():
     return verb_vocab
 
 
-#@st.cache_data
+@st.cache_data
 def import_nouns():
     noun_vocab = {
                 "puella": {"decl": 1,
@@ -977,7 +976,7 @@ def import_nouns():
             }
     return noun_vocab
 
-#@st.cache_data
+@st.cache_data
 def import_pronouns():
     pronoun_vocab = {
         "hic": {
@@ -1180,7 +1179,7 @@ def import_pronouns():
     }
     return pronoun_vocab
 
-#@st.cache_data
+@st.cache_data
 def import_adjectives():
     adjective_vocab = {
         # "": {
