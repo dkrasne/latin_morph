@@ -103,7 +103,17 @@ def submit_and_check_answer():
 
             # combine macrons on user answer (just in case)
             user_answer_check = unicodedata.normalize("NFC", st.session_state.answer_to_check)
+
+            # if normalizing v to u is selected, replace all v with u in user answer and correct answer
             correct_answer_check = st.session_state.correct_answer
+            if st.session_state["cons_u_normalize"] is True:
+                user_answer_check = user_answer_check.replace("v", "u")
+                if isinstance(correct_answer_check, list):
+                    for i,answer_option in enumerate(correct_answer_check):
+                        correct_answer_check[i] = answer_option.replace("v", "u")
+                else:
+                    correct_answer_check = correct_answer_check.replace("v", "u")
+
 
             # if 'enforce macrons' isn't checked, remove them from both the user answer and the correct answer
             if not st.session_state.enforce_macrons:

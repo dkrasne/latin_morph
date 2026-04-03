@@ -5,6 +5,7 @@ def import_verbs():
     verb_vocab = {
         "sum": {
             "voice": "act",
+            "no_pass": True,
             "conj": None,
             "irreg": {
                 "forms": {
@@ -37,14 +38,14 @@ def import_verbs():
                                         2: "erātis",
                                         3: "erant"}
                                 },
-                            "subj": {
-                                "sg": {1: ["essem","forem"],
-                                    2: ["essēs","forēs"],
-                                    3: ["esset", "foret"]},
-                                "pl": {1: ["essēmus","forēmus"],
-                                        2: ["essētis", "forētis"],
-                                        3: ["essent","forent"]}
-                                }                                
+                            # "subj": {
+                            #     "sg": {1: ["essem","forem"],
+                            #         2: ["essēs","forēs"],
+                            #         3: ["esset", "foret"]},
+                            #     "pl": {1: ["essēmus","forēmus"],
+                            #             2: ["essētis", "forētis"],
+                            #             3: ["essent","forent"]}
+                            #     }                                
                             }
                         },
                     "fut": {
@@ -81,6 +82,7 @@ def import_verbs():
             "voice": "act",
             "conj": None,
             "no_impv": True,
+            "no_pass": True,
             "irreg": {
                 "forms": {
                     "pres": {
@@ -159,7 +161,7 @@ def import_verbs():
                             "ind": {
                                 "sg": {
                                     1: "feror",
-                                    2: "ferris",
+                                    2: ["ferris", "ferre"],
                                     3: "fertur"
                                     },
                                 "pl": {
@@ -282,6 +284,7 @@ def import_verbs():
         },
         "volō": {
             "voice": "act",
+            "no_pass": True,
             "conj": 3,
             "no_impv": True,
             "irreg": {
@@ -323,6 +326,7 @@ def import_verbs():
         },
         "nōlō": {
             "voice": "act",
+            "no_pass": True,
             "conj": 3,
             "irreg": {
                 "forms": {
@@ -381,6 +385,7 @@ def import_verbs():
         },
         "mālō": {
             "voice": "act",
+            "no_pass": True,
             "conj": 3,
             "no_impv": True,
             "irreg": {
@@ -428,23 +433,27 @@ def import_verbs():
             "irreg": {
                 "forms": {
                     "pres": {
-                        "ind": {
-                            "sg": {
-                                1: "fīō",
-                                2: "fīs",
-                                3: "fit"
+                        "act": {
+                            "ind": {
+                                "sg": {
+                                    1: "fīō",
+                                    2: "fīs",
+                                    3: "fit"
+                                },
+                                "pl": {
+                                    1: "fīmus",
+                                    2: "fītis",
+                                    3: "fīunt"
+                                }
                             },
-                            "pl": {
-                                1: "fīmus",
-                                2: "fītis",
-                                3: "fīunt"
-                            }
+                            "impv": {
+                                "sg": {2: "fī"},
+                                "pl": {2: "fīte"}
+                            },
                         },
-                        "impv": {
-                            "sg": {2: "fī"},
-                            "pl": {2: "fīte"}
-                        },
-                        "inf": "fierī"
+                        "dep": {
+                            "inf": "fierī"
+                        }
                     }
                 }
             }
@@ -494,6 +503,11 @@ def import_verbs():
                   "pres": "fug",
                   "perf": "fūg",
                   "ppp": "fugit"},
+        "cupiō": {"voice": "act",
+                  "conj": "3io",
+                  "pres": "cup",
+                  "perf": "cupīv",
+                  "ppp": "cupīt"},
         "audiō": {"voice": "act",
                 "conj": 4,
                 "pres": "aud",
