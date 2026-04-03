@@ -113,13 +113,13 @@ with option_expander:
 
     # with irreg_col:
         #master_irregular_verbs_list = ["sum", "possum", "eō", "ferō", "fīō", "volō", "nōlō", "mālō"]
-        master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if complete_verb_vocab[key].get("irreg")]
+        master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if "irreg" in complete_verb_vocab[key]]
         if "dō" in master_irregular_verbs_list:
             master_irregular_verbs_list.remove("dō")
         irreg_selector = st.multiselect("Choose which irregular verbs to practice:",
                                         master_irregular_verbs_list,
                                         default=master_irregular_verbs_list,
-                                        help="Selected irregular verbs will be available regardless of any other selections. If you just want to practice irregular verbs, unselect all the conjugations.")
+                                        help="Selected irregular verbs will be available regardless of which conjugations are selected above. If you just want to practice irregular verbs, unselect all the conjugations.")
 
 
         fut_impv = False
@@ -342,41 +342,49 @@ verb_vocab = {key: val for key, val in complete_verb_vocab.items()}
 for vb in master_irregular_verbs_list:
     if vb not in irreg_selector:
         verb_vocab.pop(vb)
-for feature, feature_list in zip(["voice","conj"],[voice_selector,conjugation_selector + [None]]):
-    verb_vocab = {key: val for key, val in verb_vocab.items() if (verb_vocab[key][feature] in feature_list) or (key in irreg_selector)}
-if "act" not in voice_selector:
-    verb_vocab = {key: val for key, val in verb_vocab.items() if not verb_vocab[key].get("impers_pass_only")}
+# for feature, feature_list in zip(["voice","conj"],[voice_selector,conjugation_selector + [None]]):
+#     verb_vocab = {key: val for key, val in verb_vocab.items() if (verb_vocab[key][feature] in feature_list) or (key in irreg_selector)}
+verb_vocab = {key: val for key,val in verb_vocab.items() if verb_vocab[key]["voice"] in voice_selector or ("pass" in voice_selector and verb_vocab[key]["voice"] == "act" and "no_pass" not in verb_vocab[key])}
+verb_vocab = {key: val for key, val in verb_vocab.items() if verb_vocab[key]["conj"] in conjugation_selector + [None] or key in irreg_selector}
+# if "act" not in voice_selector:
+#     verb_vocab = {key: val for key, val in verb_vocab.items() if not (verb_vocab[key].get("impers_pass_only") or verb_vocab[key].get("no_pass"))}
 if mood_selector == ["impv"]:
     verb_vocab = {key: val for key, val in verb_vocab.items() if not verb_vocab[key].get("no_impv")}
+if mood_selector == ["inf"] and tense_list == ["fut"]:
+    verb_vocab = {key: val for key, val in verb_vocab.items() if "ppp" in val or "fap" in val}
 
+# st.write(verb_vocab.keys())
 
-if len(verb_vocab) == 0:
-    st.write("Based on your selections, there are no available verbs to generate forms for.")
-elif len(tense_list) == 0:
+if len(tense_list) == 0:
     st.write("You need to choose at least one tense.")
 elif len(voice_selector) == 0:
     st.write("You need to choose at least one voice.")
 elif len(mood_selector) == 0:
     st.write("You need to choose at least one mood.")
 #    st.session_state.question_generation_error_message = ""
-elif len(mood_list) == 0:
-    st.write("Based on your selections, it is not possible to generate any valid verb forms.")
+elif len(verb_vocab) == 0:
+    st.write("Based on your selections, there are no available verbs to generate forms for.")
+# elif len(mood_list) == 0:
+#     st.write("Based on your selections, it is not possible to generate any valid verb forms.")
+
+# elif (list(mood_list.keys()) == ["inf"] and tense_list == ["fut"] and all([x is None for x in [item.get("ppp") for item in verb_vocab.values()]] + [x is None for x in [item.get("fap") for item in verb_vocab.values()]])):
+#     st.write("Based on your selections, it is not possible to generate any valid verb forms.")
 
 else:
-
     def gen_verb_id():
         st.session_state.question_generation_error_message = ""
         verb = random.choice(list(verb_vocab.keys()))
-    #    verb = "eō"    ## UNCOMMENT AND SET FOR TESTING
+     #    verb = "eō"    ## UNCOMMENT AND SET FOR TESTING
 
         # SET MOOD
         if verb_vocab[verb].get("no_impv") and "impv" in mood_list:
             mood_list.pop("impv")
         if not mood_list:
             st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different or additional options and hit 'New Question' again."
+            return
 
         mood = random.choices(list(mood_list.keys()), list(mood_list.values()))[0]
-    #    mood = "ind"    ## UNCOMMENT AND SET FOR TESTING
+     #    mood = "ind"    ## UNCOMMENT AND SET FOR TESTING
         
         # SET TENSE
         # limit tense options depending on mood
@@ -388,10 +396,11 @@ else:
             for tns in ["impf","plupf","fut_pf"]:
                 if tns in tense_list:
                     tense_list.remove(tns)
-            if not (verb_vocab[verb].get("ppp") or verb_vocab[verb].get("fap")):
+            if not (verb_vocab[verb].get("ppp") or verb_vocab[verb].get("fap")) and "fut" in tense_list:
                 tense_list.remove("fut")
-        # if not tense_list:
-        #     st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
+        if not tense_list:
+            st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
+            return
 
         if mood == "impv":
             if verb == "fīō":
@@ -404,7 +413,7 @@ else:
                 tense = "pres"
         else:
             tense = random.choice(tense_list)
-    #    tense = "fut"    ## UNCOMMENT AND SET FOR TESTING
+     #    tense = "fut"    ## UNCOMMENT AND SET FOR TESTING
 
         # SET PERSON AND NUMBER
         ## only if mood isn't infinitive; limit for imperative
@@ -446,7 +455,7 @@ else:
                     voice = random.choices(list(act_pass_choice_dict.keys()), list(act_pass_choice_dict.values()))[0]
                 elif act_pass_choice_dict:
                     voice = list(act_pass_choice_dict.keys())[0]
-                if voice == "pass":
+                if voice == "pass" and mood != "inf":
                     person = 3
                     number = "sg"
             elif verb in irreg_selector and not act_pass_choice_dict:
@@ -463,7 +472,7 @@ else:
             voice = "dep"
 
         # Make sure there are no 2nd person plural future passive imperatives
-        if voice == "pass" and tense == "fut" and mood == "impv" and number == "pl" and person == 2:
+        if voice in ["pass","dep"] and tense == "fut" and mood == "impv" and number == "pl" and person == 2:
             person = 3
 
         return {"verb": verb, "pers": person, "num": number, "tense": tense, "voice": voice, "mood": mood}
@@ -476,6 +485,9 @@ else:
             verb_id = gen_verb_id()
         else:
             verb_id = verb_id
+
+        if verb_id is None:
+            return
 
         verb = verb_id["verb"]
         person = verb_id["pers"]
@@ -505,6 +517,7 @@ else:
             verb_principal_parts.pop(4)
         pres_inf = ""
         verb_form = ""
+        irreg_form = False
 
         if verb_vocab[verb].get("irreg"):
             # If there's an irregular present active/deponent infinitive, grab it now.
@@ -526,15 +539,18 @@ else:
                     if verb_form.get(number):
                         verb_form = verb_form[number][person]
 
+            if verb_form:
+                irreg_form = True
+
         # If the pres. inf. isn't irregular, form it for the principal parts.
         pres_act_inf = ""
+        if verb == "fīō":
+            pres_act_inf = "fiere"
         
         if not pres_inf:
             pres_stem = verb_vocab[verb].get("pres")
             thematic_vowel = verb_vowels["pres"]["inf"].get(conj)
             pres_act_inf = pres_stem + thematic_vowel + "re"
-            if verb == "fīō":
-                pres_act_inf = "fiere"
             if verb_vocab[verb]["voice"] in ["act","semidep"]:
                 pres_inf = pres_act_inf
             if verb_vocab[verb]["voice"] == "dep":
@@ -602,7 +618,7 @@ else:
                                             vowel = "e"
 
                                     if tense == "fut": # future imperatives
-                                        verb_ending = verb_endings["fut"]["act" if voice == "act" else "pass"]["impv"][number][person]
+                                        verb_ending = verb_endings["fut"]["act" if voice == "act" else "pass"]["impv"][number].get(person)
 
                                     if verb_ending in ["r", "m", "t"] or verb_ending[:2] == "nt": # shorten vowels as needed
                                         vowel = remove_macrons(vowel)
@@ -666,11 +682,12 @@ else:
                 else:
                     # active voice
                     if voice == "act":
+                        alt_form = ""
                         verb_stem = verb_vocab[verb].get("perf")
                         perf_act_inf = verb_form = verb_stem + "isse"
-                        if mood == "inf":
-                            verb_form = perf_act_inf
-                        else:
+                        if mood != "inf":
+                        #     verb_form = perf_act_inf
+                        # else:
                             if mood == "subj" and tense == "plupf":
                                 verb_form = perf_act_inf
                                 if person == 2 or (person == 1 and number == "pl"):
@@ -683,6 +700,46 @@ else:
                                     verb_form = [verb_stem + ending for ending in verb_ending]
                                 else:
                                     verb_form = verb_stem + verb_ending
+                    
+                        # construct alternative 4th conj. perfect forms
+                        if verb_stem[-2:] == "īv":
+                            # if verb_stem[-2] in ["ā","ē","ō"]:
+                            #     alt_stem = verb_stem[:-1]
+                            # elif verb_stem[2] == "ī":
+                            alt_stem = verb_stem[:-2] + "i"
+                            if mood == "inf" or (mood == "subj" and tense == "plupf"):
+                                alt_form = alt_stem + "isse"
+                            if mood != "inf":
+                                if alt_form:
+                                    if person == 2 or (person == 1 and number == "pl"):
+                                        alt_form = alt_form[:-1] + "ē"
+                                    alt_form = alt_form + verb_endings["pres"]["act"].get(number).get(person)
+                                else:
+                                    verb_ending = verb_endings.get(tense,{}).get(voice,{}).get(mood, {}).get(number, {}).get(person)
+                                    if isinstance(verb_ending, list):
+                                        alt_form = [alt_stem + ending for ending in verb_ending]
+                                    else:
+                                        alt_form = alt_stem + verb_ending
+                            if isinstance(alt_form, list):
+                                for form in list(alt_form):
+                                    if "iis" in form:
+                                        alt_form.append(form.replace("iis", "īs"))
+                            else:
+                                if "iis" in alt_form:
+                                    alt_form = [alt_form, alt_form.replace("iis", "īs")]
+
+                        if alt_form:
+                            if isinstance(verb_form, list):
+                                if isinstance(alt_form, list):
+                                    verb_form = verb_form + alt_form
+                                else:
+                                    verb_form.append(alt_form)
+                            else:
+                                if isinstance(alt_form, list):
+                                    verb_form = [verb_form] + alt_form
+                                else:
+                                    verb_form = [verb_form, alt_form]
+
                     # passive or deponent voice
                     else:
                         verb_stem = verb_vocab[verb].get("ppp")
@@ -733,11 +790,22 @@ else:
         # st.write("Principal parts:", ", ".join([str(val) for val in list(verb_principal_parts.values())]))
         # st.write("Verb form:", verb_form)
 
+        if verb == "sum" and tense == "impf" and mood == "subj":
+            if number == "sg":
+                verb_form = [verb_form] + ["forem" if person == 1 else "forēs" if person == 2 else "foret"]
+            else:
+                verb_form = [verb_form] + ["forēmus" if person == 1 else "forētis" if person == 2 else "forent"]
+
         curr_question = {
                 "pos": "verb",
                 "word": verb, 
-                "id": {k:str(v) if v is not None else v for k,v in verb_id.items() if k != "verb"} | {"conj": str(conj)}
+                "id": {k:str(v) if v is not None else v for k,v in verb_id.items() if k != "verb"} | {"conj": str(conj)} | {"irreg": "irreg" if irreg_form is True else None}
             }
+        if verb in ["volō","nōlō","mālō"]:
+            curr_question["id"]["conj"] = "-"
+        elif verb == "fīō":
+            curr_question["id"]["conj"] = "3io"
+        
 #        st.write(st.session_state.append_answer)
         if st.session_state.append_answer is True:
             questions_asked.append(
@@ -759,6 +827,8 @@ else:
         verb_form, verb_id, verb_pp = st.session_state.current_question
         verb, person, number, tense, voice, mood = verb_id.values()
         verb_pp = [val for val in verb_pp.values() if val]
+        if verb == "eō":
+            verb_pp[2] += "/iī"
 
         correct_answer = verb_form
 

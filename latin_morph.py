@@ -64,6 +64,8 @@ if "question_list" not in st.session_state:
     st.session_state["question_list"] = []
 if "store_questions" not in st.session_state:
     st.session_state["store_questions"] = [item for item in st.session_state.question_list]
+if "cons_u_normalize" not in st.session_state:
+    st.session_state["cons_u_normalize"] = False
 
 main_page = st.Page("main_page.py", title="Main Page")
 nouns_page = st.Page("nouns.py", title="Nouns")
@@ -90,6 +92,12 @@ st.sidebar.select_slider("Auto-advance to next question?",
                          format_func=lambda x: "No" if x is False else str(x)+" sec", 
                          key="auto_advance", 
                          help="If you want to automatically advance to the next question after answering, rather than having to click **New Question**, set this to the number of seconds you want to wait before advancing (between 5 and 60 seconds). (You can still use **New Question** to advance or skip a question if you want.)")
+
+st.sidebar.divider()
+
+st.sidebar.checkbox("Use consonantal *u*?", 
+                    help="Only select this if you are learning from a book that does not use the letter *v* but consistently uses *u* instead, such as Jones & Sidwell's *Learning Latin*. If selected, you will still see forms with *v*, but you can safely use *u* in your answers.", 
+                    key="cons_u_normalize")
 
 choose_page.run()
 

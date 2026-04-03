@@ -14,7 +14,7 @@ def analyze_question_data(question_list):
 
     df_dict = {}
     for pos in ["noun", "verb", "pronoun", "adj", "adv"]:
-        df = pd.json_normalize([item for item in question_list if item.get("correct",None) is not None and item["pos"] == pos])
+        df = pd.json_normalize([item for item in question_list if "correct" in item and item["pos"] == pos])
         if len(df) > 0:
             correct_col = df["correct"]
             answer_col = df["answer"]
@@ -121,7 +121,7 @@ if question_list:
                 .assign(conj_mod = lambda df: df["conj"].where(~((df["word"].isin(irreg_verbs)) & (df["tense"].isin(["pres","impf","fut"]))), df["word"]+" (pres. system)")) \
                 .groupby(["conj_mod","tense","voice","mood"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]), 
             column_config={
-                "conj_mod": st.column_config.TextColumn("Conjugation", width=None),
+                "conj_mod": st.column_config.TextColumn("Conjugation/Irreg. Verb", width=None),
                 "tense": st.column_config.TextColumn("Tense", width=None),
                 "voice": st.column_config.TextColumn("Voice", width=None),
                 "mood": st.column_config.TextColumn("Mood", width=None),
