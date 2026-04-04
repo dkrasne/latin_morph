@@ -582,6 +582,8 @@ else:
                         if voice in ["act", "dep"]:
                             if verb_vocab[verb].get("fap"):
                                 verb_form = verb_vocab[verb]["fap"] + "um esse"
+                            elif verb == "fīō":
+                                verb_form = verb_vocab[verb]["ppp"] + "um īrī"
                             else:
                                 verb_form = verb_vocab[verb]["ppp"] + "ūrum esse"
                         else:
@@ -841,10 +843,10 @@ else:
         # questions_asked.append(verb_id)
 
         tense_voice_mood = [item for item in [verb_abbrevs[voice] if voice != "dep" else "", verb_abbrevs[tense], verb_abbrevs[mood]] if item]
-        question = f"For *{verb}*, give the **{" ".join(tense_voice_mood) if len(tense_voice_mood) < 3 else ", ".join(tense_voice_mood)}**{" in the **" if mood != "inf" else ""}{" ".join([item for item in [verb_abbrevs.get(person)+" person**" if person else "", "**"+verb_abbrevs.get(number)+"**" if number else ""] if item])}."
+        question = f'For *{verb}*, give the **{" ".join(tense_voice_mood) if len(tense_voice_mood) < 3 else ", ".join(tense_voice_mood)}**{" in the **" if mood != "inf" else ""}{" ".join([item for item in [verb_abbrevs.get(person)+" person**" if person else "", "**"+verb_abbrevs.get(number)+"**" if number else ""] if item])}.'
 
         if show_principal_parts:
-            question += f" The principal parts are: {", ".join(verb_pp)}."
+            question += f' The principal parts are: {", ".join(verb_pp)}.'
 
         if not st.session_state.question_generation_error_message:
 
