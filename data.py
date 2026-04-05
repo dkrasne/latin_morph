@@ -103,17 +103,22 @@ if question_list:
 
     st.divider()
 
-    st.markdown("## Aggregate Results")
+    st.markdown("## Aggregate Results", help='The column "Most in Need of Review" gives a numerical score from 0-100 that shows how much you need to review a particular category, based on how many times you\'ve tried that category and how many incorrect answers you\'ve had. 100 is the most in need of review, in relative terms.')
 
     if "noun" in df_dict:
         st.markdown("### Nouns")
         st.dataframe(
-            df_dict["noun"].copy().groupby("decl")["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            df_dict["noun"].copy().groupby("decl")["correct"].agg(Total= "count", Correct= "sum") \
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values("review", ascending=False),
             column_config={
                 "decl": st.column_config.TextColumn("Declension", width=None),
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
                 "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "review": "Most in Need of Review",
             },
             width="content"
         )
@@ -127,15 +132,19 @@ if question_list:
                 #.assign(conj_mod = lambda df: df["conj_mod"].where(~(df["conj_mod"] == "-"), df["word"]))
                 .groupby(["conj_mod","tense","voice","mood"])["correct"] \
                 .agg(Total= "count", Correct= "sum") \
-                .assign(pct=lambda df: df["Correct"]/df["Total"]), 
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values("review", ascending=False), 
             column_config={
-                "conj_mod": st.column_config.TextColumn("Conjugation/Irreg. Verb", width=None),
+                "conj_mod": st.column_config.TextColumn("Conj./Irreg. Verb", width=None),
                 "tense": st.column_config.TextColumn("Tense", width=None),
                 "voice": st.column_config.TextColumn("Voice", width=None),
                 "mood": st.column_config.TextColumn("Mood", width=None),
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
-                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "pct": st.column_config.NumberColumn("% Correct", format="percent"),
+                "review": "Most in Need of Review",
             },
             width="content"
         )
@@ -143,12 +152,17 @@ if question_list:
     if "pronoun" in df_dict:
         st.markdown("### Pronouns")
         st.dataframe(
-            df_dict["pronoun"].copy().groupby("word")["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            df_dict["pronoun"].copy().groupby("word")["correct"].agg(Total= "count", Correct= "sum") \
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values("review", ascending=False),
             column_config={
                 "word": "Pronoun",
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
                 "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "review": st.column_config.NumberColumn("Most in Need of Review")
             },
             width="content"
         )
@@ -170,13 +184,17 @@ if question_list:
                     # "degree"
                     ])["correct"].agg(Total= "count", Correct= "sum") \
                 .assign(pct=lambda df: df["Correct"]/df["Total"]) \
-                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]),
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]) \
+                .sort_values("review", ascending=False),
             column_config={
-                "decl_mod": "Category (Declension/Degree/Irreg. Form)",
+                "decl_mod": "Category (Decl./Degree/Irreg. Form)",
                 # "degree": "Degree",
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
-                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "pct": st.column_config.NumberColumn("% Correct", format="percent"),
+                "review": "Most in Need of Review",
                 },
             width="content"
         )
@@ -195,13 +213,17 @@ if question_list:
                     # "degree"
                     ])["correct"].agg(Total= "count", Correct= "sum") \
                 .assign(pct=lambda df: df["Correct"]/df["Total"]) \
-                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]),
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]) \
+                .sort_values("review", ascending=False),
             column_config={
-                "decl_mod": "Category (Declension/Degree/Irreg. Form)",
+                "decl_mod": "Category (Decl./Degree/Irreg. Form)",
                 # "degree": "Degree",
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
-                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "pct": st.column_config.NumberColumn("% Correct", format="percent"),
+                "review": "Most in Need of Review",
                 },
             width="content"
         )
@@ -217,12 +239,16 @@ if question_list:
                 .assign(ptc_type = lambda df: df["ptc_type"].where(df["ptc_type"] != "gdv", "gerundive")) \
                 .assign(ptc_type = lambda df: df["ptc_type"].where((df["irreg"] != "irreg"), df["ptc_type"] +' (irreg.)')) \
                 .groupby("ptc_type")["correct"].agg(Total= "count", Correct= "sum") \
-                .assign(pct=lambda df: df["Correct"]/df["Total"]),
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values("review", ascending=False),
             column_config = {
                 "ptc_type": st.column_config.TextColumn("Type of Verbal Adj."),
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
                 "pct": st.column_config.NumberColumn("Percent Correct", format="percent", width=None),
+                "review": "Most in Need of Review",
             },
             width="content"
         )

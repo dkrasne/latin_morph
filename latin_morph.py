@@ -66,6 +66,9 @@ if "store_questions" not in st.session_state:
     st.session_state["store_questions"] = [item for item in st.session_state.question_list]
 if "cons_u_normalize" not in st.session_state:
     st.session_state["cons_u_normalize"] = False
+if "gen_string" not in st.session_state:
+    st.session_state["gen_string"] = None
+
 
 main_page = st.Page("main_page.py", title="Main Page")
 about_page = st.Page("about.py", title="About")
