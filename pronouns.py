@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import time
+import pandas as pd
 from utils import radio_change, reset, new_question, submit_and_check_answer, clear_page
 from vocab import import_pronouns
 
@@ -13,6 +14,8 @@ page_id = "pronouns"
 clear_page(page_id)
 
 st.markdown("# Pronouns")
+
+st.warning('If you come across any incorrectly generated forms, please fill out the "Latin mistake" part of [this Google form](https://forms.gle/xT8hQ27sjposeXPc9).')
 
 ## IMPORT PRONOUNS ##
 
@@ -59,6 +62,9 @@ pron_list = demonstratives+personal_pron+rel_interr
 
 selected_pronouns = {k: v for k, v in pronoun_vocab.items() if k in pron_list} # filter pronouns based on options selected
 
+
+## LOOKUP TABLES ##
+
 #st.write(selected_pronouns.keys())
 
 abbrevs = {
@@ -85,28 +91,91 @@ pronoun_options = {"case": list(abbrevs["case"].keys()),
                 "gender": list(abbrevs["gender"].keys())}
 
 
+## ADAPTIVE LEARNING ALGORITHM ##
+
+def gen_question():
+    avail_pronouns = list(selected_pronouns.keys())
+
+    dfs = {}
+    pronoun = case = number = gender = ""
+    recent_words = []
+    
+    if questions_asked:
+        pronoun_df = pd.json_normalize([item for item in questions_asked if item["pos"] == "pronoun" and "correct" in item]).replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
+        dfs["pronoun_df"] = pronoun_df
+        if len(pronoun_df) > 0:
+            pronoun_df_wrong_indiv = pronoun_df.copy().groupby([col for col in pronoun_df.columns if col not in ["pos","answer","correct"]]) \
+                .agg(num_correct=("correct","sum"),total_q=("correct","count")) \
+                .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) \
+                .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) \
+                .query("pct_wrong > 0") \
+                .query(f"word in @avail_pronouns")
+            pronoun_df_wrong_agg = pronoun_df.copy().groupby([col for col in pronoun_df.columns if not (col in ["pos","answer","correct"] or col[:3] == "id.")]) \
+                .agg(num_correct=("correct","sum"),total_q=("correct","count")) \
+                .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) \
+                .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) \
+                .query("pct_wrong > 0") \
+                .query(f"word in @avail_pronouns")
+            if len(pronoun_df_wrong_indiv) > 0:
+                dfs["pronoun_df_wrong_indiv"] = pronoun_df_wrong_indiv
+                dfs["pronoun_df_wrong_agg"] = pronoun_df_wrong_agg
+            # st.write(pronoun_df_wrong_indiv)
+            # st.write(pronoun_df_wrong_agg)
+
+        recent = min(len(avail_pronouns)-1,3)
+        recent_words = list(pronoun_df.tail(recent)["word"].values) if recent > 0 else []
+        # st.write(recent_words)
+    if "pronoun_df_wrong_agg" in dfs and pronoun_df_wrong_agg["weight"].max() >= .58:
+        repeat_chance = random.choices(["new","repeat"],[3,1])[0]   # 1 in 4 chance of repeated question
+        if repeat_chance == "repeat" and len(pronoun_df) > 5:
+            # st.write("repeat!")
+            pronoun = pronoun_df_wrong_agg.query("weight >= .58")["weight"].sample(n=1, weights=pronoun_df_wrong_agg.query("weight >= .58")["weight"]).index[0]
+            # st.write(pronoun)
+            word_weight = pronoun_df_wrong_indiv.query("weight >= .58").xs(pronoun,level="word")["weight"] if not pronoun_df_wrong_indiv.query("weight >= .58").empty else None
+            if word_weight is not None:
+                pronoun_id = word_weight.sample(n=1, weights=word_weight).index[0]
+                # st.write(pronoun_id)
+                if pronoun_id is not None:
+                    pronoun_id = [item if item != "-" else None for item in pronoun_id]
+                    # st.write(pronoun_id)
+                    case, number, gender = pronoun_id
+                    if len(case.split()) > 1:
+                        gen_type = case.split()[1][1:-2]
+                        case = case.split()[0]
+                        # if gen_type == "part":
+                        #     part_gen = True
+
+    if not pronoun or pronoun in recent_words:
+        pronoun = random.choice(list(selected_pronouns.keys()))
+        case = ""
+    if not case:
+        number = random.choice(pronoun_options["number"]) if not pronoun_vocab[pronoun].get("pers_pron") else None
+        gender = random.choice(pronoun_options["gender"]) if pronoun_vocab[pronoun].get("genders") else None
+
+        # since sē has no nominative, ensure that nominative can't be chosen.
+        form = None
+        while form is None:
+            if number is None or (number == "sg" and gender == "m"): # for personal pronouns, or for the dictionary entry form, reduce likelihood of nominative
+                case = random.choices(pronoun_options["case"], [10,90,90,90,90])[0]
+            else:
+                case = random.choice(pronoun_options["case"])
+            if pronoun_vocab[pronoun].get("genders"):
+                form = pronoun_vocab[pronoun][number][case]
+            else:
+                form = pronoun_vocab[pronoun]["forms"][case]
+
+    return_val = [pronoun, case, number, gender]
+        # if part_gen:
+        #     return_val += [part_gen]
+    return return_val
+
 
 ## CREATE THE QUIZ ##
 
-def gen_question():
-    pronoun = random.choice(list(selected_pronouns.keys()))
-    
-    number = random.choice(pronoun_options["number"]) if not pronoun_vocab[pronoun].get("pers_pron") else None
-    gender = random.choice(pronoun_options["gender"]) if pronoun_vocab[pronoun].get("genders") else None
-    
-    # since sē has no nominative, ensure that nominative can't be chosen.
-    form = None
-    while form is None:
-        if number is None or (number == "sg" and gender == "m"): # for personal pronouns, or for the dictionary entry form, reduce likelihood of nominative
-            case = random.choices(pronoun_options["case"], [10,90,90,90,90])[0]
-        else:
-            case = random.choice(pronoun_options["case"])
-        if pronoun_vocab[pronoun].get("genders"):
-            form = pronoun_vocab[pronoun][number][case]
-        else:
-            form = pronoun_vocab[pronoun]["forms"][case]
+# def gen_question():
+#     pronoun, case, number, gender = gen_question()
 
-    return [pronoun, case, number, gender]
+#     return [pronoun, case, number, gender]
 
 st.session_state.gen_func = gen_question
 
@@ -137,20 +206,29 @@ if st.session_state.current_question:
             elif gender == "f":
                 correct_form = correct_num_case[1]
     
-    part_gen = False
-    gen_string = None
+    if not st.session_state.gen_string:
+        part_gen = False
+        if gen_forms_diff:
+            part_gen = random.choice([True,False])
+    elif "non" in st.session_state.gen_string:
+        part_gen = False
+    else:
+        part_gen = True
+
+    #gen_string = st.session_state.gen_string
     if isinstance(correct_form,dict):
         if not gen_forms_diff:
             correct_form = list(correct_form.values())
         else:
-            part_gen = random.choice([True,False])
             if part_gen:
                 correct_form = correct_form["partitive"]
-                gen_string = "genitive (partitive form)"
+                st.session_state.gen_string = "genitive (partitive form)"
             else:
                 correct_form = correct_form["non_part"]
-                gen_string = "genitive (non-partitive form)"
+                st.session_state.gen_string = "genitive (non-partitive form)"
 
+
+    gen_string = st.session_state.gen_string
     # st.write("correct form:",correct_form)
     st.session_state.correct_answer = correct_form
 
@@ -158,7 +236,7 @@ if st.session_state.current_question:
             "pos": "pronoun",
             "word": pronoun, 
             "id": {
-                "case": case + " (part.)" if part_gen and gen_string else case + " (non-part.)" if gen_string else case,
+                "case": case + " (part.)" if part_gen and gen_string and gen_forms_diff else case + " (non-part.)" if gen_string and gen_forms_diff else case,
                 "num": number,
                 "gender": gender
             },
@@ -172,7 +250,7 @@ if st.session_state.current_question:
         st.session_state.append_answer = False    
 
 ## CREATE QUESTION PHRASE ##
-    question = f"For *{pronoun}*, give the **{", ".join([item for item in [abbrevs["gender"].get(gender), abbrevs["number"].get(number), gen_string if gen_string else abbrevs["case"].get(case)] if item is not None])}**."
+    question = f"For *{pronoun}*, give the **{", ".join([item for item in [abbrevs["gender"].get(gender), abbrevs["number"].get(number), gen_string if gen_string and gen_forms_diff else abbrevs["case"].get(case)] if item is not None])}**."
 
 ## DISPLAY QUESTION ##
 

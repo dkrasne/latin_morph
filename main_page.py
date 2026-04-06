@@ -10,7 +10,9 @@ st.markdown("""
             # Welcome to Latin Morph!
             
             **Latin Morph!** is a site for practicing your Latin word forms (morphology). 
-            You can practice nouns, verbs, adjectives, and pronouns.
+            The goal is to create randomly-requested forms correctly, 
+            allowing you to both reinforce your existing knowledge and discover from your incorrect answers where your knowledge of forms may be weak. 
+            You can practice nouns, verbs, adjectives, verbal adjectives (i.e., participles and gerundives), and pronouns.
 
             If you haven't learned all the forms of a given part of speech yet
             (e.g., if you only know present indicative verbs, or you only know first and second declension nouns),

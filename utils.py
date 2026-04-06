@@ -47,6 +47,7 @@ def new_question(gen_question):
     st.session_state.answer_display_message = ""
     st.session_state.button_disable = False
     st.session_state.append_answer = True
+    st.session_state.gen_string = None
 
     st.session_state.current_question = gen_question()
     # except:

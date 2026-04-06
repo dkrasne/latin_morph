@@ -13,7 +13,7 @@ irreg_verbs = list({k:v for k,v in verb_vocab.items() if v.get("irreg")}.keys())
 def analyze_question_data(question_list):
 
     df_dict = {}
-    for pos in ["noun", "verb", "pronoun", "adj", "adv"]:
+    for pos in ["noun", "verb", "pronoun", "adj", "adv", "verbal adj."]:
         df = pd.json_normalize([item for item in question_list if "correct" in item and item["pos"] == pos])
         if len(df) > 0:
             correct_col = df["correct"]
@@ -87,10 +87,14 @@ if question_list:
 
     df_dict = analyze_question_data(question_list)
 
-    for title, pos in zip(["Nouns","Verbs","Pronouns","Adjectives","Adverbs"],["noun", "verb", "pronoun", "adj", "adv"]):
+    for title, pos in zip(["Nouns","Verbs","Pronouns","Adjectives","Adverbs", "Verbal Adjectives"],["noun", "verb", "pronoun", "adj", "adv", "verbal adj."]):
         if pos in df_dict:
             df = df_dict[pos]
-            st.markdown(f"### {title}")
+            st.markdown(f"### {title}", help="""fap = future participle  
+                                            pap = present participle  
+                                            ppp = perfect participle  
+                                            gdv = gerundive
+                                            """ if pos == "verbal adj." else None)
             st.dataframe(df,
                             column_config={
                                 k:v for k,v in zip(df.columns, df.columns.str.title())
@@ -99,17 +103,22 @@ if question_list:
 
     st.divider()
 
-    st.markdown("## Aggregate Results")
+    st.markdown("## Aggregate Results", help='The column "Most in Need of Review" gives a numerical score from 0-100 that shows how much you need to review a particular category, based on how many times you\'ve tried that category and how many incorrect answers you\'ve had. 100 is the most in need of review, in relative terms.')
 
     if "noun" in df_dict:
         st.markdown("### Nouns")
         st.dataframe(
-            df_dict["noun"].copy().groupby("decl")["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            df_dict["noun"].copy().groupby("decl")["correct"].agg(Total= "count", Correct= "sum") \
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values("review", ascending=False),
             column_config={
                 "decl": st.column_config.TextColumn("Declension", width=None),
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
                 "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "review": "Most in Need of Review",
             },
             width="content"
         )
@@ -118,16 +127,24 @@ if question_list:
         st.markdown("### Verbs")
         st.dataframe(
             df_dict["verb"].copy() \
-                .assign(conj_mod = lambda df: df["conj"].where(~((df["word"].isin(irreg_verbs)) & (df["tense"].isin(["pres","impf","fut"]))), df["word"]+" (pres. system)")) \
-                .groupby(["conj_mod","tense","voice","mood"])["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]), 
+                .assign(conj_mod = lambda df: df["conj"].where(~(df["word"].isin({k:v for k,v in verb_vocab.items() if v.get("voice") == "semidep"})), df["conj"]+' (semi-dep.)')) \
+                .assign(conj_mod = lambda df: df["conj_mod"].where(~((df["word"].isin(irreg_verbs)) & (df["irreg"] != "-")), df["word"]+" (irreg.)")) \
+                #.assign(conj_mod = lambda df: df["conj_mod"].where(~(df["conj_mod"] == "-"), df["word"]))
+                .groupby(["conj_mod","tense","voice","mood"])["correct"] \
+                .agg(Total= "count", Correct= "sum") \
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values("review", ascending=False), 
             column_config={
-                "conj_mod": st.column_config.TextColumn("Conjugation/Irreg. Verb", width=None),
+                "conj_mod": st.column_config.TextColumn("Conj./Irreg. Verb", width=None),
                 "tense": st.column_config.TextColumn("Tense", width=None),
                 "voice": st.column_config.TextColumn("Voice", width=None),
                 "mood": st.column_config.TextColumn("Mood", width=None),
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
-                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "pct": st.column_config.NumberColumn("% Correct", format="percent"),
+                "review": "Most in Need of Review",
             },
             width="content"
         )
@@ -135,12 +152,17 @@ if question_list:
     if "pronoun" in df_dict:
         st.markdown("### Pronouns")
         st.dataframe(
-            df_dict["pronoun"].copy().groupby("word")["correct"].agg(Total= "count", Correct= "sum").assign(pct=lambda df: df["Correct"]/df["Total"]),
+            df_dict["pronoun"].copy().groupby("word")["correct"].agg(Total= "count", Correct= "sum") \
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values("review", ascending=False),
             column_config={
                 "word": "Pronoun",
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
                 "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "review": st.column_config.NumberColumn("Most in Need of Review")
             },
             width="content"
         )
@@ -162,13 +184,17 @@ if question_list:
                     # "degree"
                     ])["correct"].agg(Total= "count", Correct= "sum") \
                 .assign(pct=lambda df: df["Correct"]/df["Total"]) \
-                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]),
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]) \
+                .sort_values("review", ascending=False),
             column_config={
-                "decl_mod": "Category (Declension/Degree/Irreg. Form)",
+                "decl_mod": "Category (Decl./Degree/Irreg. Form)",
                 # "degree": "Degree",
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
-                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "pct": st.column_config.NumberColumn("% Correct", format="percent"),
+                "review": "Most in Need of Review",
                 },
             width="content"
         )
@@ -187,16 +213,44 @@ if question_list:
                     # "degree"
                     ])["correct"].agg(Total= "count", Correct= "sum") \
                 .assign(pct=lambda df: df["Correct"]/df["Total"]) \
-                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]),
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values(by="decl_mod", key=lambda col: [adj_list_order.index(item) for item in col]) \
+                .sort_values("review", ascending=False),
             column_config={
-                "decl_mod": "Category (Declension/Degree/Irreg. Form)",
+                "decl_mod": "Category (Decl./Degree/Irreg. Form)",
                 # "degree": "Degree",
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
-                "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
+                "pct": st.column_config.NumberColumn("% Correct", format="percent"),
+                "review": "Most in Need of Review",
                 },
             width="content"
         )
 
+    if "verbal adj." in df_dict:
+        st.markdown("### Verbal Adjectives (Participles and Gerundives)")
+        st.dataframe(
+            df_dict["verbal adj."].copy() \
+                #.assign(ptc_type = lambda df: df["ptc_type"].str.upper()) \
+                .assign(ptc_type = lambda df: df["ptc_type"].where(df["ptc_type"] != "fap", "future ptc.")) \
+                .assign(ptc_type = lambda df: df["ptc_type"].where(df["ptc_type"] != "pap", "present ptc.")) \
+                .assign(ptc_type = lambda df: df["ptc_type"].where(df["ptc_type"] != "ppp", "perfect ptc.")) \
+                .assign(ptc_type = lambda df: df["ptc_type"].where(df["ptc_type"] != "gdv", "gerundive")) \
+                .assign(ptc_type = lambda df: df["ptc_type"].where((df["irreg"] != "irreg"), df["ptc_type"] +' (irreg.)')) \
+                .groupby("ptc_type")["correct"].agg(Total= "count", Correct= "sum") \
+                .assign(pct=lambda df: df["Correct"]/df["Total"]) \
+                .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
+                .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
+                .sort_values("review", ascending=False),
+            column_config = {
+                "ptc_type": st.column_config.TextColumn("Type of Verbal Adj."),
+                "Total": st.column_config.NumberColumn("Total Questions", width=None),
+                "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
+                "pct": st.column_config.NumberColumn("Percent Correct", format="percent", width=None),
+                "review": "Most in Need of Review",
+            },
+            width="content"
+        )
 
 # st.session_state.question_list

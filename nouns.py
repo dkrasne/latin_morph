@@ -16,6 +16,8 @@ clear_page(page_id)
 
 st.markdown("# Nouns")
 
+st.warning('If you come across any incorrectly generated forms, please fill out the "Latin mistake" part of [this Google form](https://forms.gle/xT8hQ27sjposeXPc9).')
+
 declension_dict = {"1st": 1, "2nd":["2_us", "2_er", "2_neut"], "3rd": [3, "3_istem", "3_neut", "3_istem_neut"], "4th": [4, "4_neut"], "5th": ["5_vowel", "5_consonant"]}
 
 ## SET OPTIONS ##
@@ -319,7 +321,7 @@ else:
 
         st.session_state["correct_answer"] = correct_answer
 
-        question = f"For *{noun}*, give the **{noun_options["case"][case]} {noun_options["number"][number]}**."
+        question = f'For *{noun}*, give the **{noun_options["case"][case]} {noun_options["number"][number]}**.'
 
         if show_declension:
             for key, val in declension_dict.items():
@@ -345,7 +347,7 @@ else:
             question += f" This is a {decl} declension {third_logic}noun."
 
         if show_stem:
-            question += f" (The base is: {noun_vocab[noun]["stem"]}-)"
+            question += f' (The base is: {noun_vocab[noun]["stem"]}-)'
 
         st.markdown("### Current question")
 

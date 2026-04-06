@@ -19,6 +19,8 @@ perf_sys = ["perf", "plupf", "fut_pf"]
 
 st.markdown("# Verbs")
 
+st.warning('If you come across any incorrectly generated forms, please fill out the "Latin mistake" part of [this Google form](https://forms.gle/xT8hQ27sjposeXPc9).')
+
 ## SET OPTIONS ##
 
 verb_abbrevs = {"ind": "indicative",
@@ -481,12 +483,16 @@ else:
     def build_verb(verb_id=None):
         # logic for if verb is regular
 
-        if verb_id is None:
-            verb_id = gen_verb_id()
+        if verb_id:
+            pass
         else:
-            verb_id = verb_id
-
+            i = 0
+            while verb_id is None and i < 5:
+                verb_id = gen_verb_id()
+                i += 1
+    
         if verb_id is None:
+            st.session_state.question_generation_error_message = ":warning: I'm having trouble generating a question for you based on your selected options; I suggest you make some changes and hit 'New Question' again."
             return
 
         verb = verb_id["verb"]
@@ -578,6 +584,8 @@ else:
                         if voice in ["act", "dep"]:
                             if verb_vocab[verb].get("fap"):
                                 verb_form = verb_vocab[verb]["fap"] + "um esse"
+                            elif verb == "fīō":
+                                verb_form = verb_vocab[verb]["ppp"] + "um īrī"
                             else:
                                 verb_form = verb_vocab[verb]["ppp"] + "ūrum esse"
                         else:
@@ -801,7 +809,7 @@ else:
                 "word": verb, 
                 "id": {k:str(v) if v is not None else v for k,v in verb_id.items() if k != "verb"} | {"conj": str(conj)} | {"irreg": "irreg" if irreg_form is True else None}
             }
-        if verb in ["volō","nōlō","mālō"]:
+        if verb in ["volō","nōlō","mālō"] and irreg_form is True:
             curr_question["id"]["conj"] = "-"
         elif verb == "fīō":
             curr_question["id"]["conj"] = "3io"
@@ -837,10 +845,10 @@ else:
         # questions_asked.append(verb_id)
 
         tense_voice_mood = [item for item in [verb_abbrevs[voice] if voice != "dep" else "", verb_abbrevs[tense], verb_abbrevs[mood]] if item]
-        question = f"For *{verb}*, give the **{" ".join(tense_voice_mood) if len(tense_voice_mood) < 3 else ", ".join(tense_voice_mood)}**{" in the **" if mood != "inf" else ""}{" ".join([item for item in [verb_abbrevs.get(person)+" person**" if person else "", "**"+verb_abbrevs.get(number)+"**" if number else ""] if item])}."
+        question = f'For *{verb}*, give the **{" ".join(tense_voice_mood) if len(tense_voice_mood) < 3 else ", ".join(tense_voice_mood)}**{" in the **" if mood != "inf" else ""}{" ".join([item for item in [verb_abbrevs.get(person)+" person**" if person else "", "**"+verb_abbrevs.get(number)+"**" if number else ""] if item])}.'
 
         if show_principal_parts:
-            question += f" The principal parts are: {", ".join(verb_pp)}."
+            question += f' The principal parts are: {", ".join(verb_pp)}.'
 
         if not st.session_state.question_generation_error_message:
 

@@ -76,7 +76,8 @@ def import_verbs():
             # regular information
             "perf": "fu",
             "fap": "futūr",
-            "pap": None
+            "pap": None,
+            "gdv": None
             },
         "possum": {
             "voice": "act",
@@ -130,7 +131,8 @@ def import_verbs():
             },
             # regular information
             "perf": "potu",
-            "pap": "potēns"
+            "pap": ("potēns", "potent"),
+            "gdv": None
             },
         "ferō": {
             "voice": "act",
@@ -280,7 +282,9 @@ def import_verbs():
             },
             "pres": "ī",
             "perf": "īv", # need to figure out how to do alternative forms of perfect
-            "ppp": "it"
+            "ppp": "it",
+            "pap": ("iēns", "eunt"),
+            "gdv": "eund"
         },
         "volō": {
             "voice": "act",
@@ -322,7 +326,8 @@ def import_verbs():
             },
             "pres": "vol",
             "perf": "volu",
-            "pap": "volēns"
+#            "pap": ("volēns", "volent"),
+            "gdv": None
         },
         "nōlō": {
             "voice": "act",
@@ -381,7 +386,8 @@ def import_verbs():
             },
             "pres": "nōl",
             "perf": "nōlu",
-            "pap": "nōlēns"
+#            "pap": ("nōlēns", "nōlent"),
+            "gdv": None
         },
         "mālō": {
             "voice": "act",
@@ -423,13 +429,17 @@ def import_verbs():
             },
             "pres": "māl",
             "perf": "mālu",
-            "pap": None
+            "pap": None,
+            "gdv": None
         },
     "fīō": {
             "voice": "semidep",
             "conj": 3,
             "pres": "fī",
             "ppp": "fact",
+            "pap": None,
+            "gdv": "faciend",
+            "fap": None,
             "irreg": {
                 "forms": {
                     "pres": {
