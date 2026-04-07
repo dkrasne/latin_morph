@@ -15,7 +15,9 @@ clear_page(page_id)
 
 st.markdown("# Pronouns")
 
-st.warning('If you come across any incorrectly generated forms, please fill out the "Latin mistake" part of [this Google form](https://forms.gle/xT8hQ27sjposeXPc9).')
+st.warning('''N.B. The error that recently caused pronouns to crash should now be fixed.
+           
+If you come across any incorrectly generated forms, please fill out the "Latin mistake" part of [this Google form](https://forms.gle/xT8hQ27sjposeXPc9).''')
 
 ## IMPORT PRONOUNS ##
 
@@ -122,9 +124,11 @@ def gen_question():
             # st.write(pronoun_df_wrong_indiv)
             # st.write(pronoun_df_wrong_agg)
 
-        recent = min(len(avail_pronouns)-1,3)
-        recent_words = list(pronoun_df.tail(recent)["word"].values) if recent > 0 else []
-        # st.write(recent_words)
+        if not pronoun_df.empty:
+            recent = min(len(avail_pronouns)-1,3)
+            # st.write(pronoun_df.tail(recent))
+            recent_words = list(pronoun_df.tail(recent)["word"].values) if recent > 0 else []
+            # st.write(recent_words)
     if "pronoun_df_wrong_agg" in dfs and pronoun_df_wrong_agg["weight"].max() >= .58:
         repeat_chance = random.choices(["new","repeat"],[3,1])[0]   # 1 in 4 chance of repeated question
         if repeat_chance == "repeat" and len(pronoun_df) > 5:
@@ -171,11 +175,6 @@ def gen_question():
 
 
 ## CREATE THE QUIZ ##
-
-# def gen_question():
-#     pronoun, case, number, gender = gen_question()
-
-#     return [pronoun, case, number, gender]
 
 st.session_state.gen_func = gen_question
 
