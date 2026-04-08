@@ -10,6 +10,9 @@ question_list = st.session_state.question_list
 verb_vocab = import_verbs()
 irreg_verbs = list({k:v for k,v in verb_vocab.items() if v.get("irreg")}.keys())
 
+questions_answered = True if [item for item in question_list if "correct" in item] else False
+
+
 def analyze_question_data(question_list):
 
     df_dict = {}
@@ -41,7 +44,7 @@ st.markdown(
     f"""
     # Session Stats and Data
     
-    {"Once you answer at least one question, this page will show" if not st.session_state.question_list else "This page shows"} 
+    {"Once you answer at least one question, this page will show" if not questions_answered else "This page shows"} 
     the questions that you have answered during your current session, whether correctly or incorrectly, divided up by part of speech. 
     (Any question that you have skipped does not appear.)
     You can sort the tables by any column; 
@@ -65,7 +68,7 @@ st.markdown(
 
 # df_dict = {}
 
-if question_list:
+if questions_answered:
 
     st.divider(width="stretch")
 
