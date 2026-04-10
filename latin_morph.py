@@ -80,7 +80,7 @@ verbal_adj_page = st.Page("verbal_adj.py", title="Verbal Adjectives")
 # test_page = st.Page("button_test.py", title="Test page")
 data_page = st.Page("data.py", title="Session Stats & Data")
 
-st.markdown("*Use the navigation menu to choose a part of speech to practice.*")
+st.markdown("*Use the navigation menu to choose a part of speech to practice. (Click on *>>* at the upper left to open the menu.)*")
 
 ## currently disabled because it jumps the page to the top every time the balloons are triggered
 # st.sidebar.checkbox("I like balloons!", key="balloons", help="Select this if you want to see celebratory balloons every time you get an answer right!")

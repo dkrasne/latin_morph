@@ -102,8 +102,9 @@ def gen_question():
     pronoun = case = number = gender = ""
     recent_words = []
     
-    if questions_asked:
+    if questions_asked and len([item for item in questions_asked if item["pos"] == "pronoun" and "correct" in item]) > 0:
         pronoun_df = pd.json_normalize([item for item in questions_asked if item["pos"] == "pronoun" and "correct" in item]).replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
+        #st.write(pronoun_df)
         dfs["pronoun_df"] = pronoun_df
         if len(pronoun_df) > 0:
             pronoun_df_wrong_indiv = pronoun_df.copy().groupby([col for col in pronoun_df.columns if col not in ["pos","answer","correct"]]) \

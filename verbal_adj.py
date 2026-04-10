@@ -1,6 +1,8 @@
 import streamlit as st
 import random
 import time
+import pandas as pd
+import ast
 from utils import reset, new_question, submit_and_check_answer, clear_page, remove_macrons
 from vocab import import_verbs
 
@@ -263,7 +265,7 @@ elif ptc_selector == ["gdv"]:
     verb_vocab = {key:val for key, val in verb_vocab.items() if not ("gdv" in verb_vocab[key] and verb_vocab[key].get("gdv") is None)}
 # If the selection is limited either to just fut.act.ptc or to those and PPPs, then keep the verbs that have either a PPP stem or special fut.act.ptc stem.
 elif all([ptc not in ptc_selector for ptc in ["pap", "gdv"]]) or ptc_selector == ["fap"]:
-    verb_vocab = {key: val for key, val in verb_vocab.items() if any([ptc in verb_vocab[key] for ptc in ["fap","ppp"]])}
+    verb_vocab = {key: val for key, val in verb_vocab.items() if any([ptc in verb_vocab[key] for ptc in ["fap","ppp"]]) and not ("fap" in verb_vocab[key] and verb_vocab[key]["fap"] is None)}
 elif "pap" not in ptc_selector:
     verb_vocab = {key: val for key, val in verb_vocab.items() if any([verb_vocab[key].get(ptc) for ptc in ["fap","ppp","gdv"]])}
 elif "gdv" not in ptc_selector:
@@ -284,8 +286,17 @@ elif len(verb_vocab) == 0:
     st.write("Based on your selections, there are no available verbs to generate forms for.")
 
 else:
+
     def gen_ptc_id():
-        verb = random.choice(list(verb_vocab.keys()))
+        conj_random = random.choice(conjugation_selector + (["irreg"] if irreg_selector else []))
+        # st.write(conj_random)
+        avail_verbs = [v for v,i in verb_vocab.items() if i["conj"]==conj_random and v not in irreg_selector] if conj_random != "irreg" else [v for v in irreg_selector if v in verb_vocab]
+        # st.write(avail_verbs)
+
+        if len(avail_verbs) > 0:
+            verb = random.choice(avail_verbs)
+        else:
+            verb = random.choice(list(verb_vocab.keys()))
         avail_ptc = list(ptc_selector)
 
         # does the selected verb not have a PAP?
@@ -308,14 +319,14 @@ else:
         if verb_vocab[verb].get("no_pass"):
             if "ppp" in avail_ptc:
                 avail_ptc.remove("ppp")
-
+        # st.write(avail_ptc)
         # If there are no options left in the participle selector, we've got a problem.
         if len(avail_ptc) == 0:
             return
                 
         ptc_type = random.choice(avail_ptc)
 
-        if verb_vocab[verb].get("impers_pass_only"):
+        if verb_vocab[verb].get("impers_pass_only") and ptc_type in ["ppp","gdv"]:
             gender = "n"
             number = "sg"
         else:
@@ -324,7 +335,165 @@ else:
         case = random.choice(adj_options["case"])
 
         return [verb, ptc_type, gender, number, case]
-    
+
+    ## ADAPTIVE LEARNING ALGORITHM ##
+
+    def adap_gen_ptc_id():
+        avail_ptc = list(ptc_selector)
+        avail_verbs = list(verb_vocab.keys())
+
+        dfs = {}
+        verb = ptc_type = case = number = gender = None
+        recent_words = []
+        roll_again = False
+
+        if questions_asked and len([item for item in questions_asked if item["pos"] == "verbal adj." and "correct" in item]) > 0:
+            
+            ptc_df = pd.json_normalize([item for item in questions_asked if item["pos"] == "verbal adj." and "correct" in item]).replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
+#            st.write(ptc_df)
+            dfs["ptc_df"] = ptc_df
+
+            if len(ptc_df) > 0:
+                ptc_df_wrong_indiv = ptc_df.copy().query("`id.ptc_type` in @avail_ptc") \
+                    .assign(**{"id.conj": lambda df: df["id.conj"].where(~df["id.irreg"].isin(["irreg"]), df["word"])}) \
+                    .query(f"`id.conj` in {[str(conj) for conj in conjugation_selector]} or word in @irreg_selector") \
+                    .drop("word", axis=1) \
+                    .groupby([col for col in ptc_df.columns if col not in ["pos", "answer", "correct", "word"]]) \
+                    .agg(num_correct=("correct","sum"),total_q=("correct","count")) \
+                    .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) \
+                    .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) \
+                    .query("pct_wrong > 0") #\
+                    # .query("word in @avail_verbs")
+                ptc_df_wrong_agg = ptc_df.copy().query("`id.ptc_type` in @avail_ptc") \
+                    .assign(**{"id.conj": lambda df: df["id.conj"].where(~df["id.irreg"].isin(["irreg"]), df["word"])}) \
+                    .query(f"`id.conj` in {[str(conj) for conj in conjugation_selector]} or word in @irreg_selector") \
+                    .query(f"`id.conj` in {list(ptc_df_wrong_indiv.index.get_level_values("id.conj"))}") \
+                    .groupby(["id.ptc_type","id.conj","id.irreg"]) \
+                    .agg(num_correct=("correct","sum"),total_q=("correct","count")) \
+                    .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) \
+                    .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) \
+                    .query("pct_wrong > 0")
+                if len(ptc_df_wrong_indiv) > 0:
+                    dfs["ptc_df_wrong_indiv"] = ptc_df_wrong_indiv
+                    dfs["ptc_df_wrong_agg"] = ptc_df_wrong_agg
+                
+                # st.write("incorrect answers:",ptc_df_wrong_indiv)
+                # st.write("aggregated incorrect answers:",ptc_df_wrong_agg)
+            
+                recent = min(len(avail_verbs)-1,3)
+                recent_words = list(ptc_df.tail(recent)["word"].values) if recent > 0 else []
+                # st.write(recent_words)
+        if "ptc_df_wrong_agg" in dfs and ptc_df_wrong_agg["weight"].max() >= .58:
+            repeat_chance = random.choices(["new","repeat"],[3,1])[0]   # 1 in 4 chance of repeated question
+            if repeat_chance == "repeat" and len(ptc_df) > 5:
+                roll_again = False
+                # st.write("repeat!")
+                ptc_type_conj = ptc_df_wrong_agg.query("weight >= .58")["weight"].sample(n=1, weights=ptc_df_wrong_agg.query("weight >= .58")["weight"]).index[0]
+                # st.write("ptc. type, conjugation/verb, irregular?",ptc_type_conj)
+
+                conj = ptc_type_conj[1]
+                ptc_type = ptc_type_conj[0]
+                # st.write("Participle type:",ptc_type)
+                if ptc_type in avail_ptc:
+                    if conj == "-":
+                        conj = None
+                        verb = None
+                    elif conj in avail_verbs:
+                        verb = conj
+                        conj = complete_verb_vocab[verb].get("conj")
+                    else:
+                        try:
+                            conj = ast.literal_eval(conj)
+                        except:
+                            pass
+                        verb = None
+
+                    if verb and verb in avail_verbs: # specific irregular participial verb form that needs review
+                        
+                        # st.write("verb:", verb)
+                        pass
+                        # have ptc type and verb; need to assign case/number/gender
+                    else:
+                        if (isinstance(conj, (int,str)) or conj is None) and conj in [ptc_info.get("conj") for ptc_info in verb_vocab.values()]:
+                            # st.write("conjugation:",conj)
+
+                            curr_avail_verbs = {k:v for k,v in verb_vocab.items() if v["conj"] == conj}
+                            # st.write(curr_avail_verbs.keys())
+                            # assign random new verb in conjugation
+                        else:
+                            # st.write("No matches to draw from, spin the conjugation wheel.")
+                            curr_avail_verbs = {k:v for k,v in verb_vocab.items()}
+                            # assign random new verb in ptc. type, unless only incompatible options selected
+                        if ptc_type == "pap":
+                            curr_avail_verbs = {v:i for v,i in curr_avail_verbs.items() if not ("pap" in i and i.get("pap") is None)}
+                        elif ptc_type == "ppp":
+                            curr_avail_verbs = {v:i for v,i in curr_avail_verbs.items() if "ppp" in i}
+                        elif ptc_type == "fap":
+                            curr_avail_verbs = {v:i for v,i in curr_avail_verbs.items() if not all([ptc not in i for ptc in ["fap","ppp"]]) and not ("fap" in i and i.get("fap") is None)}
+                        else: # ptc_type == "gdv"
+                            curr_avail_verbs = {v:i for v,i in curr_avail_verbs.items() if not ("gdv" in i and i.get("gdv") is None)}
+
+                        # st.write(curr_avail_verbs.keys())
+                        if len(curr_avail_verbs) > 0:
+                            verb = random.choice(list(curr_avail_verbs.keys()))
+                            # st.write("verb:", verb)
+                        else:
+                            ptc_type = None
+
+                    if ptc_type:
+                        ptc_df_wrong_indiv_filtered = ptc_df_wrong_indiv.query(f"`id.ptc_type` == @ptc_type and `id.conj` in {[str(conj),verb]} and weight > 1.7")
+                        # st.write(ptc_df_wrong_indiv_filtered)
+                        if not ptc_df_wrong_indiv_filtered.empty:
+                            ptc_weight = ptc_df_wrong_indiv_filtered.xs(ptc_type_conj,level=("id.ptc_type","id.conj","id.irreg"))["weight"]
+                        else:
+                            ptc_weight = None
+                        # st.write("ptc_weight assigned:",ptc_weight)
+                        if ptc_weight is not None:
+                            ptc_id = ptc_weight.sample(n=1, weights=ptc_weight).index[0]
+                            # st.write(ptc_id)
+                            if ptc_id is not None:
+                                gender, number, case = ptc_id
+                        if not gender:
+                            if verb_vocab[verb].get("impers_pass_only") and ptc_type in ["ppp","gdv"]:
+                                gender = "n"
+                                number = "sg"
+                            else:
+                                gender = random.choice(adj_options["gender"])
+                                number = random.choice(adj_options["number"])
+                            case = random.choice(adj_options["case"])
+                else:
+                    ptc_type = None
+                
+                # st.write("repeat question:", verb, ptc_type, case, number, gender)
+                last_q = [item for item in questions_asked if item["pos"] == "verbal adj." and "correct" in item][-1]
+                if verb == last_q["word"] and ptc_type == last_q["id"]["ptc_type"] and case == last_q["id"]["case"] and number == last_q["id"]["number"] and gender == last_q["id"]["gender"]:
+                    roll_again = True
+                    # st.write("This is the same as last time.")
+
+        if not ptc_type or roll_again is True:
+            roll_again = True
+            ptc_id = None
+            while roll_again is True:
+                while ptc_id is None:
+                    ptc_id = gen_ptc_id()
+                # st.write("recent words:", recent_words)
+                if set(recent_words) != set(avail_verbs) and not set(avail_verbs).issubset(set(recent_words)):
+                    if verb not in recent_words:
+                        # st.write("This is a new verb.")
+                        roll_again = False
+                else:
+                    roll_again = False
+                    # st.write("This isn't a new word.")
+            # st.write("new question:", verb, ptc_type, gender, number, case)
+
+            verb, ptc_type, gender, number, case = ptc_id
+            # st.write(ptc_id)
+        return [verb, ptc_type, gender, number, case]
+
+#    adap_gen_ptc_id()
+
+    ## CREATE THE QUIZ ##
+
     def build_ptc(ptc_id=None):
 
         if ptc_id:
@@ -332,7 +501,7 @@ else:
         else:
             i = 0
             while ptc_id is None and i < 5:
-                ptc_id = gen_ptc_id()
+                ptc_id = adap_gen_ptc_id()
                 i += 1
 
         if ptc_id is None:
@@ -445,12 +614,11 @@ else:
                 "pos": "verbal adj.",
                 "word": verb, 
                 "id": {
-                    "verb": verb,
                     "ptc_type": ptc_type,
                     "gender": gender, 
                     "number": number, 
                     "case": case,
-                    "conj": conj,
+                    "conj": str(conj),
                     "irreg": "irreg" if irreg_form is True else None
                 }
             }
