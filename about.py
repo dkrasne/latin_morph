@@ -20,7 +20,7 @@ st.markdown("""
 st.markdown("""
             ### Bibliography
 
-            Generally speaking, information on irregular forms and non-standard patterns was taken from 
+            Generally speaking, the specifications for irregular forms and non-standard patterns adhere to grammatical rules as outlined by 
             <a href="https://dcc.dickinson.edu/allen-greenough/" target="_BLANK">Allen & Greenough</a> 
             and/or <a href="https://www.thelatinlibrary.com/bennett.html" target="_BLANK">Bennett</a>. 
             Extremely rare forms (such as the dative and genitive singular of *vīs*) are (for the most part) simply not requested, 

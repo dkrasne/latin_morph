@@ -15,9 +15,7 @@ clear_page(page_id)
 
 st.markdown("# Pronouns")
 
-st.warning('''N.B. The error that recently caused pronouns to crash should now be fixed.
-           
-If you come across any incorrectly generated forms, please fill out the "Latin mistake" part of [this Google form](https://forms.gle/xT8hQ27sjposeXPc9).''')
+st.warning('''If you come across any incorrectly generated forms, please fill out the "Latin mistake" part of [this Google form](https://forms.gle/xT8hQ27sjposeXPc9).''')
 
 ## IMPORT PRONOUNS ##
 
