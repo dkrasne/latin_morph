@@ -26,6 +26,6 @@ st.markdown("""
 
 st.markdown("""
             :warning:
-            If you encounter any errors, please [report them](https://forms.gle/xT8hQ27sjposeXPc9).
-            """)
+            If you encounter any errors, please <a href="https://forms.gle/xT8hQ27sjposeXPc9" target="_BLANK">report them</a>.
+            """, unsafe_allow_html=True)
 

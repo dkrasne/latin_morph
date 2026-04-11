@@ -68,10 +68,13 @@ if "cons_u_normalize" not in st.session_state:
     st.session_state["cons_u_normalize"] = False
 if "gen_string" not in st.session_state:
     st.session_state["gen_string"] = None
+if "active_expander" not in st.session_state:
+    st.session_state["active_expander"] = ""
 
 
 main_page = st.Page("main_page.py", title="Main Page")
 about_page = st.Page("about.py", title="About")
+faq_page = st.Page("faq.py", title="FAQ")
 nouns_page = st.Page("nouns.py", title="Nouns")
 verbs_page = st.Page("verbs.py", title="Verbs")
 pronouns_page = st.Page("pronouns.py", title="Pronouns")
@@ -85,7 +88,7 @@ st.markdown("*Use the navigation menu to choose a part of speech to practice. (C
 ## currently disabled because it jumps the page to the top every time the balloons are triggered
 # st.sidebar.checkbox("I like balloons!", key="balloons", help="Select this if you want to see celebratory balloons every time you get an answer right!")
 
-choose_page = st.navigation({"**Latin Morph!**": [main_page, about_page], 
+choose_page = st.navigation({"**Latin Morph!**": [main_page, about_page, faq_page], 
                             "Parts of Speech": [
                                 nouns_page, 
                                 verbs_page, 
@@ -112,11 +115,11 @@ st.sidebar.checkbox("Use consonantal *u*?",
 choose_page.run()
 
 #st.markdown(":copyright: 2026 Darcy Krasne ([CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/))", text_alignment="right")
-st.html(
+st.markdown(
     body='''<div style="position:relative;height:5em;width:100%;">
         <p style="font-size:smaller;text-align:right;position:absolute;bottom:0;right:-3em;">
-            &copy; 2026 Darcy Krasne (<a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>)
+            &copy; 2026 Darcy Krasne (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_BLANK">CC BY-NC 4.0</a>)
         </p>
         </div>''',
-    width="stretch"
+    width="stretch", unsafe_allow_html=True
     )

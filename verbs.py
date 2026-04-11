@@ -375,7 +375,16 @@ elif len(verb_vocab) == 0:
 else:
     def gen_verb_id():
         st.session_state.question_generation_error_message = ""
-        verb = random.choice(list(verb_vocab.keys()))
+        conj_random = random.choice(conjugation_selector + (["irreg"] if irreg_selector else []))
+        # st.write(conj_random)
+        avail_verbs = [v for v,i in verb_vocab.items() if i["conj"]==conj_random and v not in irreg_selector] if conj_random != "irreg" else [v for v in irreg_selector if v in verb_vocab]
+        # st.write(avail_verbs)
+
+        if len(avail_verbs) > 0:
+            verb = random.choice(avail_verbs)
+        else:
+            verb = random.choice(list(verb_vocab.keys()))
+
      #    verb = "eō"    ## UNCOMMENT AND SET FOR TESTING
 
         # SET MOOD
