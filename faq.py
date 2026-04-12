@@ -86,7 +86,7 @@ with st.expander("""Do I have to know my macrons (long-marks)?""",
     """)
 
 i+=1
-with st.expander("What should I do about words with variant forms or endings?", 
+with st.expander("How are words with variant forms or endings handled?", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
                 All standard variant forms 

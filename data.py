@@ -131,6 +131,9 @@ if questions_answered:
         st.dataframe(
             df_dict["verb"].copy() \
                 .assign(conj_mod = lambda df: df["conj"].where(~(df["word"].isin({k:v for k,v in verb_vocab.items() if v.get("voice") == "semidep"})), df["conj"]+' (semi-dep.)')) \
+                .assign(conj_mod = lambda df: df["conj_mod"].where(~df["tense"].isin(["perf","plupf","fut_pf"]), "perf. syst.")) \
+                .assign(conj_mod = lambda df: df["conj_mod"].where(~((df["tense"] == "fut") & (df["mood"] == "inf")), "fut. inf.")) \
+                # .assign(conj_mod = lambda df: df["conj_mod"].where(~((df["tense"] == "fut") & (df["mood"] == "inf") & (df["voice"] == "pass")), "fut. pass. inf.")) \
                 .assign(conj_mod = lambda df: df["conj_mod"].where(~((df["word"].isin(irreg_verbs)) & (df["irreg"] != "-")), df["word"]+" (irreg.)")) \
                 #.assign(conj_mod = lambda df: df["conj_mod"].where(~(df["conj_mod"] == "-"), df["word"]))
                 .groupby(["conj_mod","tense","voice","mood"])["correct"] \
@@ -140,13 +143,13 @@ if questions_answered:
                 .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
                 .sort_values("review", ascending=False), 
             column_config={
-                "conj_mod": st.column_config.TextColumn("Conj./Irreg. Verb", width=None),
+                "conj_mod": st.column_config.TextColumn("Conj./Perf. Sys./Irreg.", width=None),
                 "tense": st.column_config.TextColumn("Tense", width=None),
                 "voice": st.column_config.TextColumn("Voice", width=None),
                 "mood": st.column_config.TextColumn("Mood", width=None),
-                "Total": st.column_config.NumberColumn("Total Questions", width=None),
-                "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
-                "pct": st.column_config.NumberColumn("% Correct", format="percent"),
+                "Total": st.column_config.NumberColumn("Total Quest.", width=None),
+                "Correct": st.column_config.NumberColumn("Corr. Answers", width=None),
+                "pct": st.column_config.NumberColumn("% Corr.", format="percent"),
                 "review": "Most in Need of Review",
             },
             width="content"

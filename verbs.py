@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import time
+import pandas as pd
 from utils import radio_change, reset, new_question, remove_macrons, submit_and_check_answer, clear_page
 from vocab import import_verbs
 
@@ -373,6 +374,66 @@ elif len(verb_vocab) == 0:
 #     st.write("Based on your selections, it is not possible to generate any valid verb forms.")
 
 else:
+
+    ## ADAPTIVE LEARNING ALGORITHM ##
+
+    # def adap_gen_verb_id():
+    #     # conj_random = random.choice(conjugation_selector + (["irreg"] if irreg_selector else []))
+    #     # # st.write(conj_random)
+    #     # avail_verbs = [v for v,i in verb_vocab.items() if i["conj"]==conj_random and v not in irreg_selector] if conj_random != "irreg" else [v for v in irreg_selector if v in verb_vocab]
+    #     # # st.write(avail_verbs)
+
+    #     avail_verbs = list(verb_vocab.keys())   ## ONLY FOR TESTING -- ACTUALLY REDUCED VERSION ABOVE
+
+    #     dfs = {}
+    #     verb = person = number = tense = voice = mood = None
+    #     recent_words = []
+    #     roll_again = False
+
+    #     verb_qs_answered = [item for item in questions_asked if item["pos"] == "verb" and "correct" in item]
+
+    #     if questions_asked and len(verb_qs_answered) > 0:
+            
+    #         verb_df = pd.json_normalize(verb_qs_answered).replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
+    #         st.write(verb_df)
+    #         dfs["verb_df"] = verb_df
+
+    #         if len(verb_df) > 0:
+    #             verb_df_wrong_indiv = verb_df.copy().query("word in @avail_verbs") \
+    #                 .assign(**{"id.conj": lambda df: df["id.conj"].where(~df["id.irreg"].isin(["irreg"]), df["word"])}) \
+    #                 .query(f"`id.conj` in {[str(conj) for conj in conjugation_selector]} or word in @irreg_selector") \
+    #                 .drop(["word","pos"], axis=1) \
+    #                 .groupby([col for col in verb_df.columns if col not in ["pos", "answer", "correct", "word"]]) \
+    #                 .agg(num_correct=("correct","sum"),total_q=("correct","count")) \
+    #                 .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) \
+    #                 .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) \
+    #                 .query("pct_wrong > 0")
+    #             verb_df_wrong_agg = verb_df.copy().query("word in @avail_verbs") \
+    #                 .assign(**{"id.conj": lambda df: df["id.conj"].where(~df["id.irreg"].isin(["irreg"]), df["word"])}) \
+    #                 .assign(conj_adap = lambda df: df["id.conj"].where((~df["id.tense"].isin(["perf","plupf","fut_pf"])) | (df["id.irreg"] == "irreg"), "perf_sys")) \
+    #                 .assign(conj_adap = lambda df: df["conj_adap"].where((~((df["id.tense"] == "fut") | (df["id.mood"] == "inf"))) | (df["id.irreg"] == "irreg"), "fut_inf")) \
+    #                 .query(f"`id.conj` in {[str(conj) for conj in conjugation_selector]} or word in @irreg_selector") \
+    #                 .query(f"`id.conj` in {list(verb_df_wrong_indiv.index.get_level_values("id.conj"))}") \
+    #                 .groupby(["conj_adap","id.irreg","id.tense","id.voice","id.mood"]) \
+    #                 .agg(num_correct=("correct","sum"),total_q=("correct","count")) \
+    #                 .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) \
+    #                 .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) \
+    #                 .query("pct_wrong > 0")
+    #             if len(verb_df_wrong_indiv) > 0:
+    #                 dfs["verb_df_wrong_indiv"] = verb_df_wrong_indiv
+    #                 dfs["verb_df_wrong_agg"] = verb_df_wrong_agg
+                
+    #             st.write("incorrect answers:",verb_df_wrong_indiv)
+    #             st.write("aggregated incorrect answers:",verb_df_wrong_agg)
+            
+    #             recent = min(len(avail_verbs)-1,3)
+    #             recent_words = list(verb_df.tail(recent)["word"].values) if recent > 0 else []
+        
+
+    #     return
+
+    # adap_gen_verb_id()
+
     def gen_verb_id():
         st.session_state.question_generation_error_message = ""
         conj_random = random.choice(conjugation_selector + (["irreg"] if irreg_selector else []))
@@ -478,7 +539,10 @@ else:
             # extend this logic later to include 3rd person singular passive
             voice = "act"
             if verb == "fīō" and mood == "inf":
-                voice = "dep"
+                if tense in ["pres","perf"]:
+                    voice = "dep"
+                else:
+                    voice = "pass"
         elif not voice:
             voice = "dep"
 
@@ -487,7 +551,6 @@ else:
             person = 3
 
         return {"verb": verb, "pers": person, "num": number, "tense": tense, "voice": voice, "mood": mood}
-
 
     def build_verb(verb_id=None):
         # logic for if verb is regular
@@ -593,10 +656,11 @@ else:
                         if voice in ["act", "dep"]:
                             if verb_vocab[verb].get("fap"):
                                 verb_form = verb_vocab[verb]["fap"] + "um esse"
-                            elif verb == "fīō":
-                                verb_form = verb_vocab[verb]["ppp"] + "um īrī"
                             else:
                                 verb_form = verb_vocab[verb]["ppp"] + "ūrum esse"
+                        elif verb == "fīō":
+                            verb_form = verb_vocab[verb]["ppp"] + "um īrī"
+                            irreg_form = True
                         else:
                             verb_form = verb_vocab[verb]["ppp"] + "um īrī"
                     else:
@@ -853,7 +917,7 @@ else:
 
         # questions_asked.append(verb_id)
 
-        tense_voice_mood = [item for item in [verb_abbrevs[voice] if voice != "dep" else "", verb_abbrevs[tense], verb_abbrevs[mood]] if item]
+        tense_voice_mood = [item for item in [verb_abbrevs[voice] if (voice != "dep" and verb != "fīō") else "", verb_abbrevs[tense], verb_abbrevs[mood]] if item]
         question = f'For *{verb}*, give the **{" ".join(tense_voice_mood) if len(tense_voice_mood) < 3 else ", ".join(tense_voice_mood)}**{" in the **" if mood != "inf" else ""}{" ".join([item for item in [verb_abbrevs.get(person)+" person**" if person else "", "**"+verb_abbrevs.get(number)+"**" if number else ""] if item])}.'
 
         if show_principal_parts:
