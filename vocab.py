@@ -68,7 +68,7 @@ def import_verbs():
                                     3: "suntō"
                                 }
                             },
-                            "inf": ["futūrum esse", "fore"]
+                            # "inf": ["futūrum esse", "fore"]
                         }
                     },                
                 }

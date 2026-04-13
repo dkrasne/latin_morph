@@ -92,7 +92,7 @@ with st.expander("How are words with variant forms or endings handled?",
                 All standard variant forms 
                 (e.g., \u2011*\u0113runt* vs. \u2011*\u0113re* for the ending of 3rd person plural perfect active indicative verbs) 
                 should be accepted as valid. Infinitives that include a participial form are only accepted in the neuter singular, 
-                but finite verbs that include a participial form accept any gender in the correct number.
+                but finite verbs that include a participial form accept any valid gender in the correct number.
                 (N.B. \u2011*iī* forms of \u2011*īvī* perfect verbs, including uncontracted \u2011*iis*- forms, are accepted as correct answers, 
                 but other syncopated perfects are not.)
                 """)
@@ -127,7 +127,7 @@ i+=1
 with st.expander("Did you use GenAI to build this?", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
-                The short answer is no. I ideated and designed the site and the adaptive learning algorithms and wrote all of the Python code by hand.
+                The short answer is no. I ideated and designed the site and the adaptive learning algorithms and wrote all of the Python code myself.
                 
                 What I *did* use GenAI for (specifically, Gemini Pro) was helping me to proofread my code, in particular to double-check &ndash; 
                 after I thought everything was operating correctly and had run numerous tests myself &ndash; 

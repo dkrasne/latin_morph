@@ -143,7 +143,7 @@ if questions_answered:
                 .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
                 .sort_values("review", ascending=False), 
             column_config={
-                "conj_mod": st.column_config.TextColumn("Conj./Perf. Sys./Irreg.", width=None),
+                "conj_mod": st.column_config.TextColumn("Conj./Verb Type/Irreg.", width=None),
                 "tense": st.column_config.TextColumn("Tense", width=None),
                 "voice": st.column_config.TextColumn("Voice", width=None),
                 "mood": st.column_config.TextColumn("Mood", width=None),
