@@ -101,7 +101,10 @@ with st.expander("How are words with variant forms or endings handled?",
 i+=1
 with st.expander("Why can't I use Latin Morph! offline?", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
-    st.markdown("""This is a limitation of the framework used to build Latin Morph! I truly hope to be able to produce an offline app version in the future.""")
+    st.markdown("""
+                This is a limitation of the framework used to build Latin Morph! 
+                I truly hope to be able to produce an offline app version in the future.
+                """)
 
 i+=1
 with st.expander("I'm getting a red error notification on one of the pages.", 
