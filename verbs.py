@@ -356,7 +356,7 @@ if mood_selector == ["impv"]:
     verb_vocab = {key: val for key, val in verb_vocab.items() if not verb_vocab[key].get("no_impv")}
 if mood_selector == ["inf"] and tense_list == ["fut"]:
     verb_vocab = {key: val for key, val in verb_vocab.items() if "ppp" in val or "fap" in val}
-if set(tense_list) <= {"fut","fut_pf"} and "ind" not in mood_selector:
+if (set(tense_list) <= {"fut","fut_pf"} and "ind" not in mood_selector) or (("subj" not in mood_selector and "ind" not in mood_selector) and (set(tense_list) <= {"fut","fut_pf","impf","plupf"})):
     if not fut_impv:
         verb_vocab = {key:val for key, val in verb_vocab.items() if "ppp" in val or val.get("fap") is not None}
     else:
@@ -366,7 +366,8 @@ if set(tense_list) <= {"fut","fut_pf"} and "ind" not in mood_selector:
                     if verb in verb_vocab:
                         verb_vocab.pop(verb)
 
-# st.write(verb_vocab.keys())
+
+#st.write(verb_vocab.keys())
 
 if len(conjugation_selector) == 0 and len(irreg_selector) == 0:
     st.write("You need to choose at least one conjugation or irregular verb.")
@@ -424,6 +425,10 @@ else:
         while i == 0 or not tense_list_copy:
             if not tense_list_copy:
                 tense_list_copy = list(avail_tenses)
+            # st.write(tense_list_copy)
+            if inval_moods and set(mood_list) <= set(inval_moods):
+                tense_list_copy = list(avail_tenses)
+                inval_moods = []
             while (mood := random.choices(list(mood_list.keys()), list(mood_list.values()))[0]) in inval_moods:
                 # st.write(mood)
                 pass
