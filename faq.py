@@ -90,7 +90,8 @@ with st.expander("How are words with variant forms or endings handled?",
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
                 All standard variant forms 
-                (e.g., \u2011*\u0113runt* vs. \u2011*\u0113re* for the ending of 3rd person plural perfect active indicative verbs) 
+                (e.g., \u2011*\u0113runt* vs. \u2011*\u0113re* for the ending of 3rd person plural perfect active indicative verbs, 
+                or \u2011*\u012bs* and \u2011*\u0113* for plural accusative i-stem nouns) 
                 should be accepted as valid. Infinitives that include a participial form are only accepted in the neuter singular, 
                 but finite verbs that include a participial form accept any valid gender in the correct number.
                 (N.B. \u2011*iī* forms of \u2011*īvī* perfect verbs, including uncontracted \u2011*iis*- forms, are accepted as correct answers, 
@@ -133,7 +134,8 @@ with st.expander("Did you use GenAI to build this?",
                 after I thought everything was operating correctly and had run numerous tests myself &ndash; 
                 that unexpected invalid or non-existent forms wouldn't be requested or produced, 
                 or that particular types of error wouldn't occur 
-                (although even then, I still had to double-check *its* claims). 
+                (although even then, I still had to double-check *its* claims, 
+                and I still never let it write any code for me). 
                 It also sometimes assisted me in isolating the cause of errors, 
                 as well as in understanding certain peculiarities of the Streamlit framework.
                 """, 

@@ -134,7 +134,7 @@ with option_expander:
 
 ## DEFINE AVAILABLE VERBS AND VERB ENDINGS ##
 
-tense_list = tense_selector
+tense_list = list(tense_selector)
 mood_list = dict(zip(["ind","subj","impv","inf"], [70, 70, 10, 30]))
 moods = list(mood_list.keys())
 for md in moods:
@@ -378,129 +378,6 @@ elif len(verb_vocab) == 0:
 
 else:
 
-    ## ADAPTIVE LEARNING ALGORITHM ##
-
-    # def adap_gen_verb_id():
-    #     avail_verbs = list(verb_vocab.keys())
-
-    #     dfs = {}
-    #     verb = person = number = tense = voice = mood = None
-    #     recent_words = []
-    #     roll_again = False
-
-    #     verb_qs_answered = [item for item in questions_asked if item["pos"] == "verb" and "correct" in item]
-
-    #     if questions_asked and len(verb_qs_answered) > 0:
-            
-    #         verb_df = (
-    #             pd.json_normalize(verb_qs_answered)
-    #                 .replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
-    #                 .assign(**{"id.conj": lambda df: df["id.conj"]
-    #                         .where(~df["id.irreg"].isin(["irreg"]), df["word"])}) 
-    #                 .assign(conj_adap = lambda df: df["id.conj"]
-    #                         .where((~df["id.tense"].isin(["perf","plupf","fut_pf"])) | (df["id.irreg"] == "irreg"), "perf_sys")) 
-    #                 .assign(conj_adap = lambda df: df["conj_adap"]
-    #                         .where((~((df["id.tense"] == "fut") & (df["id.mood"] == "inf"))) | (df["id.irreg"] == "irreg"), "fut_inf")) 
-    #                 .assign(conj_adap = lambda df: df["conj_adap"]
-    #                         .where(~(df["conj_adap"] == "-"), df["word"])) 
-    #                 .assign(**{"id.conj": lambda df: df["id.conj"].where(~((df["word"] == "fīō") & (df["conj_adap"] == "perf_sys")), "3")}) # since fio is categorized as 3rd conj for word-construction purposes
-    #                    )
-    #         st.write(verb_df)
-    #         dfs["verb_df"] = verb_df
-
-    #         if len(verb_df) > 0:
-    #             verb_df_filtered = (
-    #                 verb_df.copy()
-    #                     .query("word in @avail_verbs")
-    #                     .query(f"`id.conj` in {[str(conj) for conj in conjugation_selector]} or word in @irreg_selector") # filter to only currently-selected categories
-    #                     .query("`id.mood` in @mood_selector")
-    #                     .query("`id.voice` in @voice_selector")
-    #                     .query("`id.tense` in @tense_selector")
-    #                 )
-
-    #             verb_df_wrong_indiv = (
-    #                 verb_df_filtered.copy()
-    #                     .drop(["word","pos"], axis=1) 
-    #                     .groupby([col for col in verb_df.columns if col not in ["pos", "answer", "correct", "word"]]) 
-    #                     .agg(num_correct=("correct","sum"),total_q=("correct","count")) 
-    #                     .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
-    #                     .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
-    #                     .query("pct_wrong > 0")
-    #                 )
-    #             verb_df_wrong_agg = (
-    #                 verb_df_filtered.copy()
-    #                     # filter to only categories that the user has gotten *wrong*
-    #                     .query(f"`conj_adap` in {list(verb_df_wrong_indiv.index.get_level_values("conj_adap"))}")
-    #                     .query(f"`id.mood` in {list(verb_df_wrong_indiv.index.get_level_values("id.mood"))}")
-    #                     .query(f"`id.voice` in {list(verb_df_wrong_indiv.index.get_level_values("id.voice"))}")
-    #                     .query(f"`id.tense` in {list(verb_df_wrong_indiv.index.get_level_values("id.tense"))}")
-    #                     .groupby(["conj_adap","id.irreg","id.tense","id.voice","id.mood"])
-    #                     .agg(num_correct=("correct","sum"),total_q=("correct","count")) 
-    #                     .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
-    #                     .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
-    #                     .query("pct_wrong > 0")
-    #                 )
-
-    #             if len(verb_df_wrong_indiv) > 0:
-    #                 dfs["verb_df_wrong_indiv"] = verb_df_wrong_indiv
-    #                 dfs["verb_df_wrong_agg"] = verb_df_wrong_agg
-                
-    #             st.write("incorrect answers:",verb_df_wrong_indiv)
-    #             st.write("aggregated incorrect answers:",verb_df_wrong_agg)
-            
-    #             recent = min(len(avail_verbs)-1,3)
-    #             recent_words = list(verb_df.tail(recent)["word"].values) if recent > 0 else []
-
-    #     if "verb_df_wrong_agg" in dfs and verb_df_wrong_agg["weight"].max() >= .58:
-    #         repeat_chance = random.choices(["new","repeat"],[3,1])[0]   # 1 in 4 chance of repeated question
-    #         repeat_chance = "repeat"
-    #         if repeat_chance == "repeat" and len(verb_df) > 5:
-    #             roll_again = False
-    #             # st.write("repeat!")
-    #             verb_conj_id = (verb_df_wrong_agg
-    #                             .query("weight >= .58")["weight"]
-    #                             .sample(n=1, weights=verb_df_wrong_agg
-    #                                     .query("weight >= .58")["weight"])
-    #                             .index[0])
-    #             st.write(verb_conj_id)
-
-    #             conj, vb_irreg, tense, voice, mood = [item if item != "-" else None for item in verb_conj_id]
-                
-
-    #             if conj == "perf_sys":
-    #                 # verb is in perfect system
-    #                 st.write("perfect system:",tense)
-    #                 conj = None
-    #                 # conj = random.choices(conjugation_selector + ([None] if any([vb in irreg_selector for vb in ["sum","possum"]]) and voice == "act" else []), [len(conjugation_selector) for item in conjugation_selector] + ([1] if any([vb in irreg_selector for vb in ["sum","possum"]]) and voice == "act" else []))[0]
-    #             elif conj == "fut_inf":
-    #                 # verb is a future infinitive
-    #                 st.write("future infinitive:",voice)
-    #                 conj = None
-    #                 # conj = random.choices(conjugation_selector + ([None] if any([vb in irreg_selector for vb in ["sum","possum"]]) and voice == "act" else []), [len(conjugation_selector) for item in conjugation_selector] + ([1] if any([vb in irreg_selector for vb in ["sum","possum"]]) and voice == "act" else []))[0]
-    #             elif conj in complete_verb_vocab:
-    #                 # verb is an irregular form
-    #                 st.write("irregular:", conj)
-    #                 verb = conj
-    #                 conj = complete_verb_vocab.get(verb)["conj"]
-    #                 st.write("conj:",conj)
-    #             elif conj is None:
-    #                 st.write("I think this shouldn't happen, it's sum or possum")
-    #             else:
-    #                 try:
-    #                     conj = ast.literal_eval(conj)
-    #                 except:
-    #                     conj = conj
-    #                 # verb is a regularly-formed present system verb, so conjugation matters
-    #                 finally:
-    #                     st.write("regular present system:",conj)
-    #                     ## Get rid of finally statement after testing
-
-    #             st.write(verb_df_wrong_indiv.xs(verb_conj_id,level=("conj_adap","id.irreg","id.tense","id.voice","id.mood")))
-
-    #     return
-
-    # adap_gen_verb_id()
-
     def gen_verb_id():
         st.session_state.question_generation_error_message = ""
         conj_random = random.choice(conjugation_selector + (["irreg"] if irreg_selector else []))
@@ -518,6 +395,9 @@ else:
         # SET MOOD
         if verb_vocab[verb].get("no_impv") and "impv" in mood_list:
             mood_list.pop("impv")
+        if tense_list == ["fut"] and "inf" in mood_list:
+            if "ppp" not in verb_vocab[verb] and verb_vocab[verb].get("fap") is None:
+                mood_list.pop("inf")
         if not mood_list:
             st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different or additional options and hit 'New Question' again."
             return
@@ -618,6 +498,259 @@ else:
             person = 3
 
         return {"verb": verb, "pers": person, "num": number, "tense": tense, "voice": voice, "mood": mood}
+
+    ## ADAPTIVE LEARNING ALGORITHM ##
+
+    def adap_gen_verb_id():
+        avail_verbs = list(verb_vocab.keys())
+
+        dfs = {}
+        verb = person = number = tense = voice = mood = None
+        recent_words = []
+        roll_again = False
+
+        verb_qs_answered = [item for item in questions_asked if item["pos"] == "verb" and "correct" in item]
+
+        if questions_asked and len(verb_qs_answered) > 0:
+            
+            verb_df = (
+                pd.json_normalize(verb_qs_answered)
+                    .replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
+                    .assign(**{"id.conj": lambda df: df["id.conj"]
+                            .where(~df["id.irreg"].isin(["irreg"]), df["word"])}) 
+                    .assign(conj_adap = lambda df: df["id.conj"]
+                            .where((~df["id.tense"].isin(["perf","plupf","fut_pf"])) | (df["id.irreg"] == "irreg"), "perf_sys")) 
+                    .assign(conj_adap = lambda df: df["conj_adap"]
+                            .where((~((df["id.tense"] == "fut") & (df["id.mood"] == "inf"))) | (df["id.irreg"] == "irreg"), "fut_inf")) 
+                    .assign(conj_adap = lambda df: df["conj_adap"]
+                            .where(~(df["conj_adap"] == "-"), df["word"])) 
+                    .assign(**{"id.conj": lambda df: df["id.conj"].where(~((df["word"] == "fīō") & (df["conj_adap"] == "perf_sys")), "3")}) # since fio is categorized as 3rd conj for word-construction purposes
+                       )
+            # st.write(verb_df)
+            dfs["verb_df"] = verb_df
+
+            # If any questions have been answered, check if some are incorrect thar match the current selections of conjugation, tense, voice, mood.
+            if len(verb_df) > 0:
+                verb_df_filtered = (
+                    verb_df.copy()
+                        .query("word in @avail_verbs")
+                        .query(f"`id.conj` in {[str(conj) for conj in conjugation_selector]} or word in @irreg_selector") # filter to only currently-selected categories
+                        .query("`id.mood` in @mood_selector")
+                        .query("`id.voice` in @voice_selector")
+                        .query("`id.tense` in @tense_selector")
+                    )
+
+                verb_df_wrong_indiv = (
+                    verb_df_filtered.copy()
+                        .drop(["word","pos"], axis=1) 
+                        .groupby([col for col in verb_df.columns if col not in ["pos", "answer", "correct", "word"]]) 
+                        .agg(num_correct=("correct","sum"),total_q=("correct","count")) 
+                        .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
+                        .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
+                        .query("pct_wrong > 0")
+                    )
+                if not verb_df_wrong_indiv.empty:
+                    verb_df_wrong_agg = (
+                        verb_df_filtered.copy()
+                            # filter to only categories that the user has gotten *wrong*
+                            .query(f"`conj_adap` in {list(verb_df_wrong_indiv.index.get_level_values("conj_adap"))}")
+                            .query(f"`id.mood` in {list(verb_df_wrong_indiv.index.get_level_values("id.mood"))}")
+                            .query(f"`id.voice` in {list(verb_df_wrong_indiv.index.get_level_values("id.voice"))}")
+                            .query(f"`id.tense` in {list(verb_df_wrong_indiv.index.get_level_values("id.tense"))}")
+                            .groupby(["conj_adap","id.irreg","id.tense","id.voice","id.mood"])
+                            .agg(num_correct=("correct","sum"),total_q=("correct","count")) 
+                            .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
+                            .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
+                            .query("pct_wrong > 0")
+                        )
+
+                if len(verb_df_wrong_indiv) > 0:
+                    dfs["verb_df_wrong_indiv"] = verb_df_wrong_indiv
+                    dfs["verb_df_wrong_agg"] = verb_df_wrong_agg
+                
+                    # st.write("incorrect answers:",verb_df_wrong_indiv)
+                    # st.write("aggregated incorrect answers:",verb_df_wrong_agg)
+            
+                recent = min(len(avail_verbs)-1,3)
+                recent_words = list(verb_df.tail(recent)["word"].values) if recent > 0 else []
+
+        # If there are incorrectly-answered verbs that match the current selections, decide whether to repeat a question.
+        if "verb_df_wrong_agg" in dfs and verb_df_wrong_agg["weight"].max() >= .58:
+            repeat_chance = random.choices(["new","repeat"],[3,1])[0]   # 1 in 4 chance of repeated question
+            # repeat_chance = "repeat"
+            if repeat_chance == "repeat" and len(verb_df) > 5:
+                roll_again = False
+                # st.write("repeat!")
+                verb_conj_id = (verb_df_wrong_agg
+                                .query("weight >= .58")["weight"]
+                                .sample(n=1, weights=verb_df_wrong_agg
+                                        .query("weight >= .58")["weight"])
+                                .index[0])
+                # st.write(verb_conj_id)
+
+                conj, vb_irreg, tense, voice, mood = [item if item != "-" else None for item in verb_conj_id]
+                
+
+                if conj == "perf_sys":
+                    # verb is in perfect system
+                    # st.write("perfect system:",tense)
+                    conj = None
+                    # conj = random.choices(conjugation_selector + ([None] if any([vb in irreg_selector for vb in ["sum","possum"]]) and voice == "act" else []), [len(conjugation_selector) for item in conjugation_selector] + ([1] if any([vb in irreg_selector for vb in ["sum","possum"]]) and voice == "act" else []))[0]
+                elif conj == "fut_inf":
+                    # verb is a future infinitive
+                    # st.write("future infinitive:",voice)
+                    conj = None
+                    # conj = random.choices(conjugation_selector + ([None] if any([vb in irreg_selector for vb in ["sum","possum"]]) and voice == "act" else []), [len(conjugation_selector) for item in conjugation_selector] + ([1] if any([vb in irreg_selector for vb in ["sum","possum"]]) and voice == "act" else []))[0]
+                elif conj in complete_verb_vocab:
+                    # verb is an irregular form
+                    # st.write("irregular:", conj)
+                    verb = conj
+                    conj = complete_verb_vocab.get(verb)["conj"]
+                    # st.write("conj:",conj)
+                # elif conj is None:
+                #     st.write("I think this shouldn't happen, it's sum or possum")
+                else:
+                    if isinstance(conj,str) and conj.isdigit():
+                        conj = int(conj)
+                    # try:
+                    #     conj = ast.literal_eval(conj)
+                    # except:
+                    #     conj = conj
+                    # verb is a regularly-formed present system verb, so conjugation matters
+                    # finally:
+                    #     st.write("regular present system:",conj)
+                    #     ## Get rid of finally statement after testing
+
+                # st.write(verb_df_wrong_indiv.xs(verb_conj_id,level=("conj_adap","id.irreg","id.tense","id.voice","id.mood")))
+
+                # st.write(verb, conj, tense, voice, mood)
+                
+                if verb is None:
+                    # since we need to pick a verb, reduce available vocab to fit the current restrictions of voice, tense, mood
+                    verb_vocab_filtered = {k:v for k,v in verb_vocab.items()}
+                    if voice == "pass":
+                        verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("no_pass") is not True and v["voice"] not in ["dep","semidep"]}
+                        if tense in perf_sys or (tense == "fut" and mood == "inf"):
+                            verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("ppp") is not None}
+                    elif voice == "dep":
+                        verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v["voice"] == "dep"}
+                        if tense in perf_sys:
+                            verb_vocab_filtered = verb_vocab_filtered | {k:v for k,v in verb_vocab.items() if v["voice"] == "semidep"}
+                    else:
+                        verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v["voice"] != "dep"}
+                        if tense in perf_sys:
+                            verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v["voice"] != "semidep"}
+                    if mood == "impv":
+                        verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if not v.get("no_impv") is True}
+                    if tense == "fut" and mood == "inf" and voice == "act":
+                        verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("ppp") is not None or ("fap" in v and v["fap"] is not None)}
+                        st.write(verb_vocab_filtered.keys())
+
+                    if len(verb_vocab_filtered) == 0:
+                        return
+
+                    ## KEEP FILTERING FOR OTHER NON-EXISTENT SITUATIONS
+
+                    # st.write(verb_vocab_filtered.keys())
+                    avail_conj = list(set([verb["conj"] for verb in verb_vocab_filtered.values()] + ([3, "3io"] if "fīō" in verb_vocab_filtered else []) + (["-"] if "sum" in verb_vocab_filtered or "possum" in verb_vocab_filtered else [])))
+                    # st.write(avail_conj)
+
+                    # if there's a matching form in verb_df_wrong_indiv that has a weight > 1.7, slice from there for person and number (and conjugation as relevant).
+                    # st.write("to match:", tense,voice,mood,conj,verb)
+                    df_slice = verb_df_wrong_indiv.query(f"weight > 1.7 and `id.tense` == @tense and `id.voice` == @voice and `id.mood` == @mood and `id.conj` in {[str(conj)] if conj else [str(item) for item in avail_conj+list(verb_vocab_filtered.keys())]}")
+                    # st.write("possible verbs:",df_slice)
+                    if not df_slice.empty:
+                        vb_info_weights = df_slice.xs((tense,voice,mood),level=("id.tense","id.voice","id.mood"))["weight"]
+                        vb_select = df_slice.reset_index(level=["id.tense","id.voice","id.mood"],drop=True).sample(n=1,weights=vb_info_weights).index[0]
+                        person,number = vb_select[:2]
+                        if conj is None:
+                            conj = vb_select[2]
+                        if isinstance(conj, str) and conj.isdigit():
+                            conj = int(conj)
+                        # try:
+                        #     conj = ast.literal_eval(conj)
+                        # except:
+                        #     conj = conj
+                        if conj == "-":
+                            verb = random.choice(["sum","possum"])
+                            conj = None
+                            # st.write(verb)
+                        person = None if person == "-" else int(person)
+                        number = None if number == "-" else number
+                        
+                    # st.write(conj, person, number)
+
+                # Since we need to pick a conjugation and verb, pick a conjugation that exists in the current reduced verb set
+                if conj is None and verb is None:
+                    avail_conj = list(set([verb["conj"] for verb in verb_vocab_filtered.values()]))
+                    conj = random.choice(avail_conj)
+                
+                if verb is None and conj is not None:
+                    # since we need to pick a verb, reduce available vocab to the selected conjugation
+                    verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v["conj"] == conj}
+                    if "fīō" in irreg_selector and conj in [3,"3io"]:
+                        # since fio is classed under 3rd conj for forms but is really 3rd io and is listed as 3rd io, make sure it's there for both conjugations.
+                        verb_vocab_filtered["fīō"] = complete_verb_vocab["fīō"]
+                    if number:
+                        # if person/number is already chosen, make sure that 
+                        if voice == "pass":
+                            if number != "sg" or person != 3:
+                                verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("impers_pass_only") is not True}
+                    if not set(list(verb_vocab_filtered.keys())) <= set(recent_words):
+                        roll_again = True
+                    i = 0
+                    while (roll_again is True or i < 1) and verb is None:
+                        verb = random.choice(list(verb_vocab_filtered.keys()))
+                        i += 1
+                        if verb not in recent_words:
+                            roll_again = False
+                        elif roll_again is True:
+                            verb = None
+                # st.write(verb, conj)
+                # need to assign person and number if not already assigned
+                if mood != "inf" and not person:
+                    # assign person and number within constraints
+                    if voice == "pass" and complete_verb_vocab[verb].get("impers_pass_only") is True:
+                        number = "sg"
+                        person = 3
+                    else:
+                        number = random.choice(["sg","pl"])
+                        person = random.choice([1,2,3])
+
+
+                st.write("repeat:",verb, person, number, tense, voice, mood)
+        #     else:
+        #         st.write("There's stuff to choose from, but get new verb")
+        # else:
+        #     st.write("Nothing to choose from, get new verb")
+        
+        if not verb:
+            if len(avail_verbs) > 3 and questions_asked and verb_qs_answered:
+#                st.write("Generate a new verb question but not the most recent word")
+                last_verb = verb_qs_answered[-1]["word"]
+                roll_again = True
+                while roll_again is True:
+                    verb_id = gen_verb_id()
+                    verb = verb_id["verb"]
+                    if verb != last_verb:
+                        roll_again = False
+            else:
+                # st.write("Generate a new verb question; it might overlap with recent words")
+                verb_id = gen_verb_id()
+    
+            verb = verb_id["verb"]
+            person = verb_id["pers"]
+            number = verb_id["num"]
+            tense = verb_id["tense"]
+            voice = verb_id["voice"]
+            mood = verb_id["mood"]
+
+            st.write("new:",verb_id)
+            if not verb_id:
+                return
+        return {"verb": verb, "pers": person, "num": number, "tense": tense, "voice": voice, "mood": mood}
+
+#    adap_gen_verb_id()
 
     def build_verb(verb_id=None):
         # logic for if verb is regular
