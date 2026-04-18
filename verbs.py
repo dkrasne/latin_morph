@@ -356,6 +356,15 @@ if mood_selector == ["impv"]:
     verb_vocab = {key: val for key, val in verb_vocab.items() if not verb_vocab[key].get("no_impv")}
 if mood_selector == ["inf"] and tense_list == ["fut"]:
     verb_vocab = {key: val for key, val in verb_vocab.items() if "ppp" in val or "fap" in val}
+if set(tense_list) <= {"fut","fut_pf"} and "ind" not in mood_selector:
+    if not fut_impv:
+        verb_vocab = {key:val for key, val in verb_vocab.items() if "ppp" in val or val.get("fap") is not None}
+    else:
+        if irreg_selector:
+            for verb in irreg_selector:
+                if not any([complete_verb_vocab[verb]["irreg"]["forms"].get("fut", {}).get(voice, {}).get("impv") for voice in ["act","pass","dep"]]) and not all(["ppp" in complete_verb_vocab[verb] or complete_verb_vocab[verb].get("fap") is not None, "inf" in mood_selector]):
+                    if verb in verb_vocab:
+                        verb_vocab.pop(verb)
 
 # st.write(verb_vocab.keys())
 
@@ -379,6 +388,7 @@ elif len(verb_vocab) == 0:
 else:
 
     def gen_verb_id():
+        avail_tenses = list(tense_list)
         st.session_state.question_generation_error_message = ""
         conj_random = random.choice(conjugation_selector + (["irreg"] if irreg_selector else []))
         # st.write(conj_random)
@@ -395,43 +405,64 @@ else:
         # SET MOOD
         if verb_vocab[verb].get("no_impv") and "impv" in mood_list:
             mood_list.pop("impv")
-        if tense_list == ["fut"] and "inf" in mood_list:
-            if "ppp" not in verb_vocab[verb] and verb_vocab[verb].get("fap") is None:
-                mood_list.pop("inf")
+        if set(avail_tenses) <= {"fut","fut_pf"}:
+            if "subj" in mood_list:
+                mood_list.pop("subj")
+            if "inf" in mood_list:
+                if "ppp" not in verb_vocab[verb] and verb_vocab[verb].get("fap") is None:
+                    mood_list.pop("inf")
+            if "impv" in mood_list:
+                if (fut_impv and verb == "fīō") or not fut_impv:
+                    mood_list.pop("impv")
         if not mood_list:
-            st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different or additional options and hit 'New Question' again."
+            #st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different or additional options and hit 'New Question' again."
             return
 
-        mood = random.choices(list(mood_list.keys()), list(mood_list.values()))[0]
-     #    mood = "ind"    ## UNCOMMENT AND SET FOR TESTING
-        
-        # SET TENSE
-        # limit tense options depending on mood
-        if mood == "subj":
-            for tns in ["fut", "fut_pf"]:
-                if tns in tense_list:
-                    tense_list.remove(tns)
-        elif mood == "inf":
-            for tns in ["impf","plupf","fut_pf"]:
-                if tns in tense_list:
-                    tense_list.remove(tns)
-            if not (verb_vocab[verb].get("ppp") or verb_vocab[verb].get("fap")) and "fut" in tense_list:
-                tense_list.remove("fut")
-        if not tense_list:
-            st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
-            return
+        i = 0
+        tense_list_copy = list(avail_tenses)
+        inval_moods = []
+        while i == 0 or not tense_list_copy:
+            if not tense_list_copy:
+                tense_list_copy = list(avail_tenses)
+            while (mood := random.choices(list(mood_list.keys()), list(mood_list.values()))[0]) in inval_moods:
+                # st.write(mood)
+                pass
+            
+            # SET TENSE
+            # limit tense options depending on mood
+            if mood == "subj":
+                for tns in ["fut", "fut_pf"]:
+                    if tns in tense_list_copy:
+                        tense_list_copy.remove(tns)
+            elif mood == "inf":
+                for tns in ["impf","plupf","fut_pf"]:
+                    if tns in tense_list_copy:
+                        tense_list_copy.remove(tns)
+                if not (verb_vocab[verb].get("ppp") or verb_vocab[verb].get("fap")) and "fut" in tense_list:
+                    tense_list_copy.remove("fut")
+            elif mood == "impv" and verb == "fīō":
+                tense_list_copy.remove("fut")
+            # st.write(i, verb,mood,tense_list_copy)
+            if not tense_list_copy:
+                inval_moods.append(mood)
+            if i > 5 and not tense_list_copy:
+                # st.write("problem!")
+                st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
+                return
+            i+=1
+        avail_tenses = list(tense_list_copy)
 
         if mood == "impv":
-            if verb == "fīō":
-                tense = "pres"  # this forces a present tense even if only future imperatives are selected, since fīō has no future imperatives
-            elif "pres" in tense_list and "fut" in tense_list and fut_impv:
-                tense = random.choices(["pres", "fut"], [95, 5])[0]
-            elif "fut" in tense_list and fut_impv:
+            # if verb == "fīō":
+            #     tense = "pres"  # this forces a present tense even if only future imperatives are selected, since fīō has no future imperatives
+            if "pres" in avail_tenses and "fut" in avail_tenses and fut_impv:
+                tense = random.choices(["pres", "fut"], [25, 5])[0]
+            elif "fut" in avail_tenses and fut_impv:
                 tense = "fut"
             else:
                 tense = "pres"
         else:
-            tense = random.choice(tense_list)
+            tense = random.choice(avail_tenses)
      #    tense = "fut"    ## UNCOMMENT AND SET FOR TESTING
 
         # SET PERSON AND NUMBER
@@ -539,38 +570,42 @@ else:
                         .query("`id.voice` in @voice_selector")
                         .query("`id.tense` in @tense_selector")
                     )
+                if not fut_impv:
+                    verb_df_filtered = verb_df_filtered.query("`id.tense` != 'fut' and `id.mood` != 'impv'")
+                st.write(verb_df_filtered)
 
-                verb_df_wrong_indiv = (
-                    verb_df_filtered.copy()
-                        .drop(["word","pos"], axis=1) 
-                        .groupby([col for col in verb_df.columns if col not in ["pos", "answer", "correct", "word"]]) 
-                        .agg(num_correct=("correct","sum"),total_q=("correct","count")) 
-                        .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
-                        .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
-                        .query("pct_wrong > 0")
-                    )
-                if not verb_df_wrong_indiv.empty:
-                    verb_df_wrong_agg = (
+                if not verb_df_filtered.empty:
+                    verb_df_wrong_indiv = (
                         verb_df_filtered.copy()
-                            # filter to only categories that the user has gotten *wrong*
-                            .query(f"`conj_adap` in {list(verb_df_wrong_indiv.index.get_level_values("conj_adap"))}")
-                            .query(f"`id.mood` in {list(verb_df_wrong_indiv.index.get_level_values("id.mood"))}")
-                            .query(f"`id.voice` in {list(verb_df_wrong_indiv.index.get_level_values("id.voice"))}")
-                            .query(f"`id.tense` in {list(verb_df_wrong_indiv.index.get_level_values("id.tense"))}")
-                            .groupby(["conj_adap","id.irreg","id.tense","id.voice","id.mood"])
+                            .drop(["word","pos"], axis=1) 
+                            .groupby([col for col in verb_df.columns if col not in ["pos", "answer", "correct", "word"]]) 
                             .agg(num_correct=("correct","sum"),total_q=("correct","count")) 
                             .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
                             .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
                             .query("pct_wrong > 0")
                         )
+                    if not verb_df_wrong_indiv.empty:
+                        verb_df_wrong_agg = (
+                            verb_df_filtered.copy()
+                                # filter to only categories that the user has gotten *wrong*
+                                .query(f"`conj_adap` in {list(verb_df_wrong_indiv.index.get_level_values("conj_adap"))}")
+                                .query(f"`id.mood` in {list(verb_df_wrong_indiv.index.get_level_values("id.mood"))}")
+                                .query(f"`id.voice` in {list(verb_df_wrong_indiv.index.get_level_values("id.voice"))}")
+                                .query(f"`id.tense` in {list(verb_df_wrong_indiv.index.get_level_values("id.tense"))}")
+                                .groupby(["conj_adap","id.irreg","id.tense","id.voice","id.mood"])
+                                .agg(num_correct=("correct","sum"),total_q=("correct","count")) 
+                                .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
+                                .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
+                                .query("pct_wrong > 0")
+                            )
 
-                if len(verb_df_wrong_indiv) > 0:
-                    dfs["verb_df_wrong_indiv"] = verb_df_wrong_indiv
-                    dfs["verb_df_wrong_agg"] = verb_df_wrong_agg
+                    if len(verb_df_wrong_indiv) > 0:
+                        dfs["verb_df_wrong_indiv"] = verb_df_wrong_indiv
+                        dfs["verb_df_wrong_agg"] = verb_df_wrong_agg
+                    
+                        # st.write("incorrect answers:",verb_df_wrong_indiv)
+                        # st.write("aggregated incorrect answers:",verb_df_wrong_agg)
                 
-                    # st.write("incorrect answers:",verb_df_wrong_indiv)
-                    # st.write("aggregated incorrect answers:",verb_df_wrong_agg)
-            
                 recent = min(len(avail_verbs)-1,3)
                 recent_words = list(verb_df.tail(recent)["word"].values) if recent > 0 else []
 
@@ -612,14 +647,6 @@ else:
                 else:
                     if isinstance(conj,str) and conj.isdigit():
                         conj = int(conj)
-                    # try:
-                    #     conj = ast.literal_eval(conj)
-                    # except:
-                    #     conj = conj
-                    # verb is a regularly-formed present system verb, so conjugation matters
-                    # finally:
-                    #     st.write("regular present system:",conj)
-                    #     ## Get rid of finally statement after testing
 
                 # st.write(verb_df_wrong_indiv.xs(verb_conj_id,level=("conj_adap","id.irreg","id.tense","id.voice","id.mood")))
 
@@ -642,6 +669,12 @@ else:
                             verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v["voice"] != "semidep"}
                     if mood == "impv":
                         verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if not v.get("no_impv") is True}
+                        if tense == "fut":
+                            if not fut_impv:
+                                st.write("This situation shouldn't happen.")
+                            else:
+                                verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if k not in irreg_selector or any([v.get("irreg",{}).get("forms",{}).get("fut",{}).get(vc,{}).get("impv") for vc in ["act","pass"]])}
+                                st.write(verb_vocab_filtered.keys())
                     if tense == "fut" and mood == "inf" and voice == "act":
                         verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("ppp") is not None or ("fap" in v and v["fap"] is not None)}
                         st.write(verb_vocab_filtered.keys())
@@ -725,7 +758,7 @@ else:
         #     st.write("Nothing to choose from, get new verb")
         
         if not verb:
-            if len(avail_verbs) > 3 and questions_asked and verb_qs_answered:
+            if len(avail_verbs) > 3 and conjugation_selector and questions_asked and verb_qs_answered:
 #                st.write("Generate a new verb question but not the most recent word")
                 last_verb = verb_qs_answered[-1]["word"]
                 roll_again = True
@@ -737,20 +770,22 @@ else:
             else:
                 # st.write("Generate a new verb question; it might overlap with recent words")
                 verb_id = gen_verb_id()
-    
-            verb = verb_id["verb"]
-            person = verb_id["pers"]
-            number = verb_id["num"]
-            tense = verb_id["tense"]
-            voice = verb_id["voice"]
-            mood = verb_id["mood"]
 
-            st.write("new:",verb_id)
             if not verb_id:
+                st.write("nothing chosen")
                 return
+            else:
+                verb = verb_id["verb"]
+                person = verb_id["pers"]
+                number = verb_id["num"]
+                tense = verb_id["tense"]
+                voice = verb_id["voice"]
+                mood = verb_id["mood"]
+
+                st.write("new:",verb_id)
         return {"verb": verb, "pers": person, "num": number, "tense": tense, "voice": voice, "mood": mood}
 
-#    adap_gen_verb_id()
+    # adap_gen_verb_id()
 
     def build_verb(verb_id=None):
         # logic for if verb is regular
@@ -865,8 +900,10 @@ else:
                             verb_form = verb_vocab[verb]["ppp"] + "um īrī"
                     else:
                         verb_stem = verb_vocab[verb].get("irreg",{}).get("stems",{}).get("pres", {}).get("subj")
+                        irreg_form = True
                         if not verb_stem or not (mood == "subj" and tense == "pres"):
                             verb_stem = verb_vocab[verb].get("pres")
+                            irreg_form = False
                         
                         if mood == "inf":
                             if tense == "pres":
