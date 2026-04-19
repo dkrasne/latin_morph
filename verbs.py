@@ -739,7 +739,7 @@ else:
                             if number != "sg" or person != 3:
                                 verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("impers_pass_only") is not True}
                     else:
-                        if voice == "pass" and mood == "impv" and tense == "pres":
+                        if voice == "pass" and mood == "impv":
                             verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("impers_pass_only") is not True}
                     if len(verb_vocab_filtered) == 0:
                         return
