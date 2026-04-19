@@ -406,6 +406,8 @@ else:
         # SET MOOD
         if verb_vocab[verb].get("no_impv") and "impv" in mood_list:
             mood_list.pop("impv")
+        if verb_vocab[verb].get("impers_pass_only") and "impv" in mood_list and "act" not in voice_selector:
+            mood_list.pop("impv")
         if set(avail_tenses) <= {"fut","fut_pf"}:
             if "subj" in mood_list:
                 mood_list.pop("subj")
@@ -452,7 +454,7 @@ else:
                 inval_moods.append(mood)
             if i > 5 and not tense_list_copy:
                 # st.write("problem!")
-                st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
+                # st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different options and hit 'New Question' again."
                 return
             i+=1
         avail_tenses = list(tense_list_copy)
@@ -494,7 +496,7 @@ else:
                 act_pass_choice_dict.pop(vc)
 
         voice = None
-        if verb_vocab[verb].get("impers_pass_only") and mood == "impv":
+        if verb_vocab[verb].get("impers_pass_only") and mood == "impv" and "act" in voice_selector:
             voice = "act"
 
         ## only if verb is active (or semidep?)
