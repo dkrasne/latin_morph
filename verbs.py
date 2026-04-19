@@ -353,7 +353,9 @@ verb_vocab = {key: val for key, val in verb_vocab.items() if verb_vocab[key]["co
 # if "act" not in voice_selector:
 #     verb_vocab = {key: val for key, val in verb_vocab.items() if not (verb_vocab[key].get("impers_pass_only") or verb_vocab[key].get("no_pass"))}
 if mood_selector == ["impv"]:
-    verb_vocab = {key: val for key, val in verb_vocab.items() if not verb_vocab[key].get("no_impv")}
+    verb_vocab = {key: val for key, val in verb_vocab.items() if not val.get("no_impv")}
+    if "act" not in voice_selector:
+        verb_vocab = {key: val for key, val in verb_vocab.items() if not val.get("impers_pass_only")}
 if mood_selector == ["inf"] and tense_list == ["fut"]:
     verb_vocab = {key: val for key, val in verb_vocab.items() if "ppp" in val or "fap" in val}
 if (set(tense_list) <= {"fut","fut_pf"} and "ind" not in mood_selector) or (("subj" not in mood_selector and "ind" not in mood_selector) and (set(tense_list) <= {"fut","fut_pf","impf","plupf"})):
