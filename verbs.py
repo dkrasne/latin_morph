@@ -551,6 +551,7 @@ else:
             
             verb_df = (
                 pd.json_normalize(verb_qs_answered)
+                    .reindex(columns=["pos","word","answer","correct","id.pers","id.num","id.tense","id.voice","id.mood","id.conj","id.irreg"])
                     .replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
                     .assign(**{"id.conj": lambda df: df["id.conj"]
                             .where(~df["id.irreg"].isin(["irreg"]), df["word"])}) 
@@ -577,7 +578,7 @@ else:
                     )
                 if not fut_impv:
                     verb_df_filtered = verb_df_filtered.query("`id.tense` != 'fut' and `id.mood` != 'impv'")
-                st.write(verb_df_filtered)
+                # st.write(verb_df_filtered)
 
                 if not verb_df_filtered.empty:
                     verb_df_wrong_indiv = (
@@ -679,7 +680,7 @@ else:
                                 st.write("This situation shouldn't happen.")
                             else:
                                 verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if k not in irreg_selector or any([v.get("irreg",{}).get("forms",{}).get("fut",{}).get(vc,{}).get("impv") for vc in ["act","pass"]])}
-                                st.write(verb_vocab_filtered.keys())
+                                # st.write(verb_vocab_filtered.keys())
                     if tense == "fut" and mood == "inf" and voice == "act":
                         verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("ppp") is not None or ("fap" in v and v["fap"] is not None)}
                         st.write(verb_vocab_filtered.keys())
@@ -719,11 +720,14 @@ else:
                     # st.write(conj, person, number)
 
                 # Since we need to pick a conjugation and verb, pick a conjugation that exists in the current reduced verb set
+                pick_sum_possum = False
                 if conj is None and verb is None:
                     avail_conj = list(set([verb["conj"] for verb in verb_vocab_filtered.values()]))
                     conj = random.choice(avail_conj)
+                    if conj is None:
+                        pick_sum_possum = True
                 
-                if verb is None and conj is not None:
+                if (verb is None and conj is not None) or pick_sum_possum is True:
                     # since we need to pick a verb, reduce available vocab to the selected conjugation
                     verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v["conj"] == conj}
                     if "fīō" in irreg_selector and conj in [3,"3io"]:
@@ -734,6 +738,11 @@ else:
                         if voice == "pass":
                             if number != "sg" or person != 3:
                                 verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("impers_pass_only") is not True}
+                    else:
+                        if voice == "pass" and mood == "impv" and tense == "pres":
+                            verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("impers_pass_only") is not True}
+                    if len(verb_vocab_filtered) == 0:
+                        return
                     if not set(list(verb_vocab_filtered.keys())) <= set(recent_words):
                         roll_again = True
                     i = 0
@@ -752,32 +761,46 @@ else:
                         number = "sg"
                         person = 3
                     else:
+                        if mood == "impv":
+                            if tense == "fut":
+                                if voice == "act":
+                                    person = random.choice([2,3])
+                                else:
+                                    person = 3
+                            else:
+                                person = 2
+                        else:
+                            person = random.choice([1,2,3])
                         number = random.choice(["sg","pl"])
-                        person = random.choice([1,2,3])
 
 
-                st.write("repeat:",verb, person, number, tense, voice, mood)
+                # st.write("repeat:",verb, person, number, tense, voice, mood)
         #     else:
         #         st.write("There's stuff to choose from, but get new verb")
         # else:
         #     st.write("Nothing to choose from, get new verb")
         
         if not verb:
-            if len(avail_verbs) > 3 and conjugation_selector and questions_asked and verb_qs_answered:
+            if len(avail_verbs) > 5 and conjugation_selector and questions_asked and verb_qs_answered:
 #                st.write("Generate a new verb question but not the most recent word")
                 last_verb = verb_qs_answered[-1]["word"]
                 roll_again = True
+                i = 0
                 while roll_again is True:
                     verb_id = gen_verb_id()
-                    verb = verb_id["verb"]
-                    if verb != last_verb:
-                        roll_again = False
-            else:
+                    if verb_id:
+                        verb = verb_id["verb"]
+                        if verb != last_verb:
+                            roll_again = False
+                    if i > 5:
+                        break
+                    i += 1
+            if not verb:
                 # st.write("Generate a new verb question; it might overlap with recent words")
                 verb_id = gen_verb_id()
 
             if not verb_id:
-                st.write("nothing chosen")
+                # st.write("nothing chosen")
                 return
             else:
                 verb = verb_id["verb"]
@@ -787,7 +810,7 @@ else:
                 voice = verb_id["voice"]
                 mood = verb_id["mood"]
 
-                st.write("new:",verb_id)
+                # st.write("new:",verb_id)
         return {"verb": verb, "pers": person, "num": number, "tense": tense, "voice": voice, "mood": mood}
 
     # adap_gen_verb_id()
@@ -800,7 +823,7 @@ else:
         else:
             i = 0
             while verb_id is None and i < 5:
-                verb_id = gen_verb_id()
+                verb_id = adap_gen_verb_id()
                 i += 1
     
         if verb_id is None:

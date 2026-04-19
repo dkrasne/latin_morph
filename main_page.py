@@ -17,7 +17,7 @@ st.markdown("""
             If you haven't learned all the forms of a given part of speech yet
             (e.g., if you only know present indicative verbs, or you only know first and second declension nouns),
             you can limit your practice to just the forms you know. 
-            Similarly, if there are particular words or forms that you specifically want to practice, you can choose to target those.
+            Similarly, if there are particular forms or irregular words that you specifically want to practice, you can choose to target those.
 
             To automatically advance to the next question, set the auto-advance option in the navigation menu.
             """)

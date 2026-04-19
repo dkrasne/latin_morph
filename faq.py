@@ -133,7 +133,8 @@ with st.expander("Did you use GenAI to build this?",
     st.markdown("""
                 The short answer is no. I ideated and designed the site and the adaptive learning algorithms and wrote all of the Python code myself.
                 
-                What I *did* use GenAI for (specifically, Gemini Pro) was helping me to proofread my code, in particular to double-check &ndash; 
+                What I *did* use GenAI for (specifically, Gemini Pro) was helping me to proofread my code, 
+                in particular to double-check &ndash; 
                 after I thought everything was operating correctly and had run numerous tests myself &ndash; 
                 that unexpected invalid or non-existent forms wouldn't be requested or produced, 
                 or that particular types of error wouldn't occur 
