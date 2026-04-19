@@ -390,6 +390,7 @@ else:
 
     def gen_verb_id():
         avail_tenses = list(tense_list)
+        avail_moods = dict(mood_list)
         st.session_state.question_generation_error_message = ""
         conj_random = random.choice(conjugation_selector + (["irreg"] if irreg_selector else []))
         # st.write(conj_random)
@@ -404,20 +405,20 @@ else:
      #    verb = "eō"    ## UNCOMMENT AND SET FOR TESTING
 
         # SET MOOD
-        if verb_vocab[verb].get("no_impv") and "impv" in mood_list:
-            mood_list.pop("impv")
-        if verb_vocab[verb].get("impers_pass_only") and "impv" in mood_list and "act" not in voice_selector:
-            mood_list.pop("impv")
+        if verb_vocab[verb].get("no_impv") and "impv" in avail_moods:
+            avail_moods.pop("impv")
+        if verb_vocab[verb].get("impers_pass_only") and "impv" in avail_moods and "act" not in voice_selector:
+            avail_moods.pop("impv")
         if set(avail_tenses) <= {"fut","fut_pf"}:
-            if "subj" in mood_list:
-                mood_list.pop("subj")
-            if "inf" in mood_list:
+            if "subj" in avail_moods:
+                avail_moods.pop("subj")
+            if "inf" in avail_moods:
                 if "ppp" not in verb_vocab[verb] and verb_vocab[verb].get("fap") is None:
-                    mood_list.pop("inf")
-            if "impv" in mood_list:
+                    avail_moods.pop("inf")
+            if "impv" in avail_moods:
                 if (fut_impv and verb == "fīō") or not fut_impv:
-                    mood_list.pop("impv")
-        if not mood_list:
+                    avail_moods.pop("impv")
+        if not avail_moods:
             #st.session_state.question_generation_error_message = ":warning: Your selected options have resulted in an impossibility! Try selecting some different or additional options and hit 'New Question' again."
             return
 
@@ -428,10 +429,10 @@ else:
             if not tense_list_copy:
                 tense_list_copy = list(avail_tenses)
             # st.write(tense_list_copy)
-            if inval_moods and set(mood_list) <= set(inval_moods):
+            if inval_moods and set(avail_moods) <= set(inval_moods):
                 tense_list_copy = list(avail_tenses)
                 inval_moods = []
-            while (mood := random.choices(list(mood_list.keys()), list(mood_list.values()))[0]) in inval_moods:
+            while (mood := random.choices(list(avail_moods.keys()), list(avail_moods.values()))[0]) in inval_moods:
                 # st.write(mood)
                 pass
             
