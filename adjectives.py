@@ -534,10 +534,22 @@ def adap_gen_adj_adv_id():
                         else:
                             irreg_forms = dict(adj_vocab[adj].get("irreg",{}).get("forms",{}).items())
                             # st.write(irreg_forms)
-                            if irreg_forms:
-                                number = random.choice([num for num in list(irreg_forms) if num in ["sg","pl"]])
-                                case = random.choice(list(irreg_forms[number]))
-                                gender = random.choice(adj_options["gender"])
+                            if irreg_forms and any(num in irreg_forms for num in ["sg","pl"]):
+                                num_case_options = {}
+                                for num in ["sg","pl"]:
+                                    if irreg_forms.get(num):
+                                        num_case_options[num] = []
+                                        for case in irreg_forms[num]:
+                                            if irreg_forms[num][case]:
+                                                num_case_options[num].append(case)
+                                number_options = [num for num in num_case_options if num_case_options[num]]
+                                if number_options:
+                                    number = random.choice(number_options)
+                                # number = random.choice([num for num in list(irreg_forms) if num in ["sg","pl"]])
+                                    case_options = num_case_options[number]
+                                    case = random.choice(case_options)
+                                    gender = random.choice(adj_options["gender"])
+
                                 # st.write("Should be irregular:",adj,pos,degree,gender,number,case)
             elif decl == "pronom":
                 # This is a special pronominal form (gen/dat. sg.) that they've been getting wrong
