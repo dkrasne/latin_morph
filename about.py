@@ -17,13 +17,13 @@ st.markdown("""
             
             """, unsafe_allow_html=True)
 
-st.markdown("""
+st.markdown(f"""
             ### About the Adaptive Learning Algorithm
 
             Adaptive learning is currently in the process of being implemented so that words and/or forms you struggle with are more likely to recur.
-            So far, it has been implemented on **pronouns**, **verbal adjectives**, and **verbs**.
+            So far, it has been implemented on **pronouns**, **verbal adjectives**, **verbs**, and **adjectives/adverbs**.
 
-            There is a 1 in 4 chance that instead of being asked for a completely random form, 
+            There is a 1 in {st.session_state["adap_learning_frequency"]+1} chance that instead of being asked for a completely random form, 
             you'll be asked for a word or form that you have previously gotten wrong more than a (proportionally) small number of times. 
             The precise calculation depends on the part of speech, but it's similar to the way that 
             "Most in Need of Review" is calculated on the Session Stats & Data page: 

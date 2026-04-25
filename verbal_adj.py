@@ -384,7 +384,7 @@ else:
                 recent_words = list(ptc_df.tail(recent)["word"].values) if recent > 0 else []
                 # st.write(recent_words)
         if "ptc_df_wrong_agg" in dfs and ptc_df_wrong_agg["weight"].max() >= .58:
-            repeat_chance = random.choices(["new","repeat"],[3,1])[0]   # 1 in 4 chance of repeated question
+            repeat_chance = random.choices(["new","repeat"],[st.session_state["adap_learning_frequency"],1])[0]   # 1 in 3 chance of repeated question
             if repeat_chance == "repeat" and len(ptc_df) > 5:
                 roll_again = False
                 # st.write("repeat!")

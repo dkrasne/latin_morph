@@ -64,6 +64,8 @@ if "question_list" not in st.session_state:
     st.session_state["question_list"] = []
 if "store_questions" not in st.session_state:
     st.session_state["store_questions"] = [item for item in st.session_state.question_list]
+if "adap_learning_frequency" not in st.session_state:
+    st.session_state["adap_learning_frequency"] = 2
 if "cons_u_normalize" not in st.session_state:
     st.session_state["cons_u_normalize"] = False
 if "gen_string" not in st.session_state:

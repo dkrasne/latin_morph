@@ -622,7 +622,7 @@ else:
 
         # If there are incorrectly-answered verbs that match the current selections, decide whether to repeat a question.
         if "verb_df_wrong_agg" in dfs and verb_df_wrong_agg["weight"].max() >= .58:
-            repeat_chance = random.choices(["new","repeat"],[3,1])[0]   # 1 in 4 chance of repeated question
+            repeat_chance = random.choices(["new","repeat"],[st.session_state["adap_learning_frequency"],1])[0]   # 1 in 3 chance of repeated question
             # repeat_chance = "repeat"
             if repeat_chance == "repeat" and len(verb_df) > 5:
                 roll_again = False

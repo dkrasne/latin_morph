@@ -1,6 +1,8 @@
 import streamlit as st
 import random
 import time
+import pandas as pd
+import ast
 from utils import reset, new_question, submit_and_check_answer, clear_page, remove_macrons
 from vocab import import_adjectives
 
@@ -14,6 +16,7 @@ clear_page(page_id)
 
 adj_vocab = import_adjectives()
 cons_stems = ["vetus","compos", "dīves", "particeps", "pauper", "prīnceps", "sōspes", "superstes"]
+l_stems = ["facilis","difficilis","similis","dissimilis","gracilis","humilis"]
 # for word in adj_vocab.keys():
 #     if adj_vocab[word].get("cardinal") or adj_vocab[word].get("pronominal"):
 #         adj_vocab[word]["comp"] = None
@@ -80,27 +83,30 @@ with option_expander:
             help='Positive degree refers to "regular" adjectives and adverbs that are neither comparative nor superlative.'
             )
         # numerals
-        incl_cardinals = st.checkbox("Include cardinal numbers?", 
-                                    value=True, 
-                                    key="incl_cardinals", 
-                                    help="Select this box to include declinable cardinal numbers (one, two, and three).")
         cardinal_select = []
         cardinal_radio = "No"
-        if incl_cardinals:
-            cardinal_radio = st.radio("Include *only* cardinal numbers?",
-                                      options = ["No","Yes"], horizontal=True,
-                                      help="If 'Yes' is selected, then degree is ignored since numbers have no comparative or superlative forms.")
-            cardinal_select = st.multiselect("Choose which numbers to include:", 
-                                             options={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
-                                             default={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
-                                             help="All cardinal numbers selected here will be included if the 'random declension' option is chosen above; otherwise only the numbers belonging to the specified declension will be included. (*ūnus* can be selected here *or* under pronominal adjectives to be included.)")
-        # unus nauta adjectives - T/F flag
+        incl_cardinals = False
         incl_pronominals = False
-        if declension in ["random", (1,2)]:
-            incl_pronominals = st.checkbox("Include pronominal (UNUS NAUTA) adjectives?", 
-                        value=True, 
-                        key="incl_pronominals", 
-                        help="Select this box to include the nine pronominal (so-called UNUS NAUTA) adjectives: *ūnus*, *nūllus*, *ūllus*, *sōlus*, *neuter*, *alter*, *uter*, *tōtus*, *alius*. (*ūnus* can be selected here *or* under cardinal numbers to be included.)")
+
+        if "pos" in degree_list:
+            incl_cardinals = st.checkbox("Include cardinal numbers?", 
+                                        value=True, 
+                                        key="incl_cardinals", 
+                                        help="Select this box to include declinable cardinal numbers (one, two, and three).")
+            if incl_cardinals:
+                cardinal_radio = st.radio("Include *only* cardinal numbers?",
+                                        options = ["No","Yes"], horizontal=True,
+                                        help="If 'Yes' is selected, then degree is ignored since numbers have no comparative or superlative forms.")
+                cardinal_select = st.multiselect("Choose which numbers to include:", 
+                                                options={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
+                                                default={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
+                                                help="All cardinal numbers selected here will be included if the 'random declension' option is chosen above; otherwise only the numbers belonging to the specified declension will be included. (*ūnus* can be selected here *or* as part of pronominal adjectives to be included.)")
+            # unus nauta adjectives - T/F flag
+            if declension in ["random", (1,2)]:
+                incl_pronominals = st.checkbox("Include pronominal (UNUS NAUTA) adjectives?", 
+                            value=True, 
+                            key="incl_pronominals", 
+                            help="Select this box to include the nine pronominal (so-called UNUS NAUTA) adjectives: *ūnus*, *nūllus*, *ūllus*, *sōlus*, *neuter*, *alter*, *uter*, *tōtus*, *alius*. (*ūnus* can be selected here *or* under cardinal numbers to be included.)")
         # non-i-stem 3rd decl. adjectives - T/F flag
         incl_cons_stems = False
         if declension in ["random", 3]:
@@ -145,11 +151,11 @@ else:
 if not incl_pronominals:
     select_vocab = {k:v for k,v in select_vocab.items() if not v.get("pronominal")}
 if "ūnus" not in select_vocab:
-    if ("ūnus" in cardinal_select and declension != 3) or incl_pronominals:
+    if ("ūnus" in cardinal_select and declension != 3) or (incl_pronominals and cardinal_radio == "No"):
         select_vocab["ūnus"] = adj_vocab.get("ūnus")
 if not incl_cons_stems:
     select_vocab = {k:v for k,v in select_vocab.items() if not v.get("cons_stem")}
-#st.write(select_vocab)
+# st.write(select_vocab.keys())
 
 #st.write(len(select_vocab))
 
@@ -315,6 +321,7 @@ adv_endings = {
 def gen_adj_adv_id():
     # choose adjective or adverb
     reduced_vocab = {k:v for k,v in select_vocab.items()}
+    pronominals = list({k:v for k,v in adj_vocab.items() if v.get("pronominal")})
 
     if cardinal_radio == "Yes":
         pos = "adj"
@@ -329,7 +336,7 @@ def gen_adj_adv_id():
 
     if pos != "adv":
         case = random.choice(adj_options["case"])
-        #case = "voc"
+        # case = "voc"
         if cardinal_radio != "Yes" or ("ūnus" in cardinal_select and len(cardinal_select) > 1 and declension != 3):
             number = random.choice(adj_options["number"])
         elif "ūnus" in cardinal_select and declension != 3:
@@ -346,18 +353,317 @@ def gen_adj_adv_id():
     else:
         degree = random.choice(degree_list)
     #degree = "comp"
-    if degree in ["comp","super"]:
-        reduced_vocab = {k:v for k,v in reduced_vocab.items() if v.get("comp", "ok") == "ok" and v.get("super", "ok") == "ok"}
+    # if degree in ["comp","super"]:
+        # reduced_vocab = {k:v for k,v in reduced_vocab.items() if v.get("comp", "ok") == "ok" and v.get("super", "ok") == "ok"}
+    if degree == "comp":
+        reduced_vocab = {k:v for k,v in reduced_vocab.items() if not ("comp" in v and v.get("comp") is None)}
+    elif degree == "super":
+        reduced_vocab = {k:v for k,v in reduced_vocab.items() if not ("super" in v and v.get("super") is None)}
+#    st.write(degree, reduced_vocab.keys())
+
+    # if case == "voc" and number == "sg":
+    #     reduced_vocab = {k:v for k,v in reduced_vocab.items() if k not in pronominals or k == "ūnus"}
+
+    reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (degree == "pos" and case in v.get("irreg",{}).get("forms",{}).get(number, {}) and v.get("irreg",{}).get("forms",{}).get(number,{})[case] is None)}
+#    st.write(list(reduced_vocab))
 
     adj = random.choice(list(reduced_vocab.keys()))
-#    adj = "alius"
+    # adj = "pulcher"
+    # adj = "alius"
     return [adj, case, number, gender, pos, degree]
+
+## ADAPTIVE LEARNING ALGORITHM ##
+
+def adap_gen_adj_adv_id():
+    avail_adj_vocab = list(select_vocab.keys())
+    pronominals = list({k:v for k,v in adj_vocab.items() if v.get("pronominal") is True}.keys())
+
+    adj = case = number = gender = pos = degree = None
+
+    dfs = {}
+    adj_qs_answered = [item for item in questions_asked if item["pos"] in ["adj","adv"] and "correct" in item and item["word"] in avail_adj_vocab]
+
+    if not incl_adv:
+        adj_qs_answered = [item for item in adj_qs_answered if item["pos"] == "adj"]
+
+    if questions_asked and len(adj_qs_answered) > 0:
+        adj_df = (
+            pd.json_normalize(adj_qs_answered)
+                .reindex(columns=["pos","word","answer","correct","id.degree","id.decl","id.case","id.num","id.gender","id.irreg"])
+                .replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
+                .drop("answer", axis=1)
+                .assign(**{"id.decl": lambda df: df["id.decl"].astype(str)})
+                .replace({"id.decl": {
+                    "1st/2nd": "(1,2)", 
+                    "3rd (cons.)": "3", 
+                    "3rd": "3"
+                }})
+            )
+        
+        dfs["adj_df"] = adj_df
+
+        recent = min(len(avail_adj_vocab)-1,3)
+        recent_words = list(adj_df.tail(recent)["word"].values) if recent > 0 else []
+
+        # st.write("All answered questions:",adj_df)
+
+
+        if not adj_df.empty:
+
+            def adj_combo_logic(df_row):
+                if df_row["id.irreg"] == "stem":
+                    return df_row["word"]
+                elif df_row["word"] in l_stems and df_row["id.degree"] == "super":
+                    return "l_stem"
+                elif df_row["word"] in cons_stems and df_row["id.degree"] == "pos":
+                    return "cons_stem"
+                elif df_row["word"][-2:] == "er" and ((df_row["id.decl"] == "(1,2)" and df_row["id.degree"] == "pos") or df_row["id.degree"] == "super"):
+                    return "er"
+                else:
+                    return "-"
+
+            adj_df_filtered = (
+                adj_df.copy()
+                    .query(f"`id.degree` in {degree_list}")
+                    .assign(adj_info = "-")
+                    .assign(adj_info = lambda df: df["adj_info"].where(~df["word"].isin(["duo","trēs"]), df["word"])) # cardinal (other than unus)
+                    .assign(adj_info = lambda df: df["adj_info"].where(~(df["word"].isin(pronominals)) | ~(df["id.case"].isin(["gen","dat"])) | ~(df["id.num"] == "sg"), "pronom")) # special pronominal form
+                    .assign(adj_info = lambda df: df["adj_info"].where(df["id.irreg"] != "form", df["word"])) # irregular form
+                    .assign(adj_info = lambda df: df["adj_info"].where(~(df["adj_info"].isin(["-","stem"])),df["id.decl"]))
+                    .assign(adj_info = lambda df: df["adj_info"].astype(str))
+                    .assign(adj_combo = lambda df: df.apply(adj_combo_logic, axis=1))
+            )
+
+            # Function to apply the same aggregation to different levels of grouping
+            def agg_df(gb):
+                # `gb` is a pandas GroupBy object
+                df = (
+                    gb.agg(num_correct=("correct","sum"),total_q=("correct","count")) 
+                        .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
+                        .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
+                        .query("pct_wrong > 0")
+                    )
+                return df
+
+            if not adj_df_filtered.empty:
+                adj_df_wrong_indiv = (
+                    adj_df_filtered.copy()
+                        .drop(["word","id.decl"], axis=1)
+                        .groupby(["pos","id.degree","adj_info","adj_combo"] + 
+                                 [col for col in adj_df.columns if col.startswith("id.") and col not in ["id.degree","id.decl","id.irreg"]])
+                )
+
+                adj_df_wrong_indiv = agg_df(adj_df_wrong_indiv)
+
+                if not adj_df_wrong_indiv.empty:
+                    ## add a superset grouping that just looks at adj_info and degree, and then a finer breakdown that includes adj_combo, 
+                    ## before looking at individual questions -- if there's a classification in adj_combo that's weighted higher than 
+                    ## the vanilla version of that group (labelled as -), then include that in the weighting scheme, otherwise just use the
+                    ## vanilla version.
+
+                    adj_df_wrong_agg_superset = adj_df_filtered.copy().groupby(["pos","id.degree","adj_info"])
+                    adj_df_wrong_agg_superset = agg_df(adj_df_wrong_agg_superset)
+                    adj_df_wrong_agg = adj_df_filtered.copy().groupby(["pos","id.degree","adj_info","adj_combo"])
+                    adj_df_wrong_agg = agg_df(adj_df_wrong_agg)
+
+                    dfs["adj_df_wrong_indiv"] = adj_df_wrong_indiv
+                    dfs["adj_df_wrong_agg"] = adj_df_wrong_agg
+                    dfs["adj_df_wrong_agg_superset"] = adj_df_wrong_agg_superset
+
+                    # st.write("Individual wrong answers with weights:",adj_df_wrong_indiv)
+                    # st.write("More finely aggregated wrong answers:",adj_df_wrong_agg)
+                    # st.write("More coarsely aggregated wrong answers:",adj_df_wrong_agg_superset)
+                    
+                    ## if they're having trouble with *stems*, that's likely to include irregular stems, 
+                    ## -er superlatives, maybe -er 1/2 adjectives, and -l- superlatives.
+
+                    adj_df_wrong_agg_superlatives = adj_df_filtered.copy().query("`id.degree` == 'super'")
+                    if not adj_df_wrong_agg_superlatives.empty:
+                        adj_df_wrong_agg_superlatives = agg_df(adj_df_wrong_agg_superlatives
+                                                                .assign(adj_combo = lambda df: df
+                                                                       .adj_combo.replace({"er":"er_nom"}))
+                                                                .groupby(["pos","adj_combo"]))
+                        # st.write("Superlatives aggregation:",adj_df_wrong_agg_superlatives)                        
+
+                        dfs["adj_df_wrong_agg_superlatives"] = adj_df_wrong_agg_superlatives
+
+
+    if "adj_df_wrong_agg_superset" in dfs and adj_df_wrong_agg_superset["weight"].max() >= .58:
+        # If there are incorrectly-answered adjectives that match the current selections, decide whether to repeat a question.
+        repeat_chance = random.choices(["new","repeat"],[st.session_state["adap_learning_frequency"],1])[0]   # 1 in 3 chance of repeated question
+        # repeat_chance = "repeat"
+        if repeat_chance == "repeat" and len(adj_df) > 5:
+            reduced_vocab = {k:v for k,v in adj_vocab.items() if k in avail_adj_vocab}
+
+            # First check the superset for general category
+            adj_category = (adj_df_wrong_agg_superset.query("weight >= .58")["weight"]
+                                .sample(n=1,weights=adj_df_wrong_agg_superset
+                                                        .query("weight >= .58")["weight"])
+                                .index[0])
+
+            pos, degree, decl = adj_category
+            # adj = case = number = gender = None
+            # st.write(adj_category)
+
+            if degree == "comp":
+                reduced_vocab = {k:v for k,v in reduced_vocab.items() if not ("comp" in v and v.get("comp") is None)}
+            elif degree == "super":
+                reduced_vocab = {k:v for k,v in reduced_vocab.items() if not ("super" in v and v.get("super") is None)}
+
+            if decl in adj_vocab:
+                # st.write("Irregular form! (Or two/three...)")
+                adj = decl
+                decl = adj_vocab[adj]["decl"]
+                if pos == "adj":
+                    # this is (probably) an irregular form, so check in individual errors table for specific form(s) that were repeatedly incorrect.
+                    df_slice = adj_df_wrong_indiv.query("weight > 1 and (adj_info == @adj or adj_combo == @adj) and `id.degree` == @degree and pos == @pos")
+                    if not df_slice.empty:
+                        # get weights, pick form
+                        # st.write("Possible forms to choose:",df_slice)
+                        adj_info_weights = df_slice.xs(adj_category,level=["pos","id.degree","adj_info"])["weight"]
+                        adj_id = df_slice.reset_index(level=["pos","id.degree","adj_info"],drop=True).sample(n=1,weights=adj_info_weights).index[0][1:]
+                        # st.write("Reuse id:",adj_id)
+                        case, number, gender = adj_id
+                    else:
+                        # assign random case, number, gender within limits, or else wait to do so
+                        # If two/three, just assign any form.
+                        if adj_vocab[adj].get("cardinal"):
+                            number = "pl"
+                            # pick random case and gender
+                        # Otherwise, pick a form from the word's irregular forms.
+                        else:
+                            irreg_forms = dict(adj_vocab[adj].get("irreg",{}).get("forms",{}).items())
+                            # st.write(irreg_forms)
+                            if irreg_forms:
+                                number = random.choice([num for num in list(irreg_forms) if num in ["sg","pl"]])
+                                case = random.choice(list(irreg_forms[number]))
+                                gender = random.choice(adj_options["gender"])
+                                # st.write("Should be irregular:",adj,pos,degree,gender,number,case)
+            elif decl == "pronom":
+                # This is a special pronominal form (gen/dat. sg.) that they've been getting wrong
+                adj = random.choice(pronominals)
+                decl = (1,2)
+                case = random.choice(["gen","dat"])
+                number = "sg"
+                gender = random.choice(adj_options["gender"])
+            else: # non-irregular, non-special-categories
+                if degree != "super": # non-superlatives
+                    # get more info about the possible non-irregular forms that might need choosing from
+                    df_slice = adj_df_wrong_agg.query("weight > 1 and pos == @pos and `id.degree` == @degree and adj_info == @decl")
+                    # st.write("Now check it here:",df_slice)
+                    if not df_slice.empty: # There may be a specific word or special form that needs attention
+                        adj_info_weights = df_slice.xs(adj_category,level=["pos","id.degree","adj_info"])["weight"]
+                        adj = df_slice.reset_index(level=["pos","id.degree","adj_info"],drop=True).sample(n=1,weights=adj_info_weights).index[0]
+                        
+                        if adj in adj_vocab:
+                            pass
+                        elif adj == "cons_stem":
+                            try:
+                                adj = random.choice([adj for adj in cons_stems if adj in reduced_vocab])
+                            except:
+                                adj = None
+                        elif adj == "er":
+                            adj = random.choice([adj for adj in reduced_vocab if adj[-2:] == "er" and adj_vocab[adj]["decl"] == ast.literal_eval(decl)])
+                        elif adj == "-":
+                            adj = None
+                        else:
+                            # st.write("Possible other situation?",adj)
+                            adj = None
+                        # st.write("New result:",adj)
+
+                        df_slice = adj_df_wrong_indiv.query("weight > 1.7 and pos == @pos and `id.degree` == @degree and adj_info == @decl")
+                        if not df_slice.empty:
+                            # st.write("Further narrow down:",df_slice)
+                            adj_info_weights = df_slice.xs(adj_category,level=["pos","id.degree","adj_info"])["weight"]
+                            adj_id = df_slice.reset_index(level=["pos","id.degree","adj_info"],drop=True).sample(n=1,weights=adj_info_weights).index[0][1:]
+                            case, number, gender = adj_id
+                        
+                else: # superlatives
+                    # pick either a vanilla superlative or one with a particular type of special/irregular stem
+                    df_slice = adj_df_wrong_agg_superlatives.query("weight > 1 and pos == @pos")
+                    # adj_info_weights = adj_df_wrong_agg_superlatives.xs((pos,),level=["pos"])["weight"]
+                    if not df_slice.empty:
+                        adj_info_weights = df_slice.xs((pos,), level=["pos"])["weight"]
+                        adj = df_slice.reset_index(level="pos",drop=True).sample(n=1,weights=adj_info_weights).index[0]
+                        if adj in adj_vocab:
+                            # st.write("Already assigned")
+                            pass
+                        elif adj == "er_nom":
+                            adj = random.choice([adj for adj in reduced_vocab if adj[-2:] == "er"])
+                        elif adj == "l_stem":
+                            adj = random.choice([adj for adj in l_stems if adj in reduced_vocab])
+                        elif adj == "-":
+                            adj = None
+                        # else:
+                        #     st.write("check:",adj)
+                        # st.write("New result:",adj)
+                if adj == "-" or adj is None:
+                    adj = None
+                    decl = ast.literal_eval(decl) if isinstance(decl,str) else decl
+                    # st.write("Pick more generally")
+            if pos == "adv":
+                # get an adjective if we don't have one, and then we're done, since it can't be any more specific than the degree and declension if not irregular
+                decl = ast.literal_eval(decl) if isinstance(decl,str) else decl
+                if adj is None:
+                    reduced_vocab = {k:v for k,v in reduced_vocab.items() if v["decl"] == decl and (not (v.get("no_adv") or v.get("cardinal")))}
+                    
+                    # st.write(list(reduced_vocab))
+                    adj = random.choice(list(reduced_vocab))
+                    # st.write("New pick for adverb:",adj)
+                # else:
+                #     st.write("adverb of:", adj,degree)
+                case = number = gender = None
+            else:
+                # assign case, number, gender, first checking the individual wrongs to see if there's anything that needs special attention
+                df_slice = adj_df_wrong_indiv.query(f"weight > 1.7 and pos == @pos and `id.degree` == @degree and adj_info == '{str(decl)}' and adj_combo == '-'")
+                if isinstance(decl,str):
+                    decl = ast.literal_eval(decl)
+                if not (case and gender):
+                    if not number and not df_slice.empty:
+                        adj_info_weights = df_slice.xs(adj_category,level=["pos","id.degree","adj_info"])["weight"]
+                        adj_id = df_slice.reset_index(level=["pos","id.degree","adj_info"],drop=True).sample(n=1,weights=adj_info_weights).index[0][1:]
+                        case, number, gender = adj_id
+                    else:
+                        # st.write("Assign case and gender, and number if not assigned")
+                        if not case:
+                            case = random.choice(adj_options["case"])
+                        if not gender:
+                            gender = random.choice(adj_options["gender"])
+                        if not number:
+                            number = random.choice(adj_options["number"])
+                if not adj:
+                    # st.write("Now assign adjective based on declension")
+                    for num in ["sg","pl"]:
+                        if number == num:
+                            reduced_vocab = {k:v for k,v in reduced_vocab.items() if not v.get(f"no_{num}")}
+                    reduced_vocab = {k:v for k,v in reduced_vocab.items() if v["decl"] == decl}
+                    reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (degree == "pos" and case in v.get("irreg",{}).get("forms",{}).get(number, {}) and v.get("irreg",{}).get("forms",{}).get(number,{})[case] is None)}
+                    if reduced_vocab:
+                        adj = random.choice(list(reduced_vocab))
+    if not adj:
+        last_q_id = None
+        if adj_qs_answered:
+            last_q = adj_qs_answered[-1]
+            if last_q["pos"] == "adv":
+                last_q_id = [last_q["word"],None,None,None,"adv",last_q["id"]["degree"]]
+            else:
+                last_q_id = [last_q["word"],last_q["id"]["case"],last_q["id"]["num"],last_q["id"]["gender"],"adj",last_q["id"]["degree"]]
+            # st.write("last:",last_q_id)
+        adj_id = gen_adj_adv_id()
+
+        while adj_id == last_q_id:
+            # st.write("Rolling again...")
+            adj_id = gen_adj_adv_id()
+        adj, case, number, gender, pos, degree = adj_id
+    return [adj, case, number, gender, pos, degree]
+
+# adap_gen_adj_adv_id()
 
 def create_adj_adv(adj_id=None):
     if adj_id:
         adj_id = adj_id
     else:
-        adj_id = gen_adj_adv_id()
+        adj_id = adap_gen_adj_adv_id()
     adj, case, number, gender, pos, degree = adj_id
 #    st.write(adj, case, number, gender, pos, degree)
 
@@ -373,7 +679,7 @@ def create_adj_adv(adj_id=None):
     irreg_stems = adj_info.get("irreg", {}).get("stems", {})
 
     # if specified form is the lemma, assign it and be done.
-    if case == "nom" and number == "sg" and gender == "m" and pos == "adj" and degree == "pos":
+    if number == "sg" and gender == "m" and pos == "adj" and degree == "pos" and (case == "nom" or (case == "voc" and (adj[-2:] != "us" or adj_info["decl"] != (1,2)))):
         correct_form = adj
 
     # otherwise, find the form.
@@ -419,7 +725,7 @@ def create_adj_adv(adj_id=None):
                         infix = "rim"
                     elif adj_info["decl"] == 3 and correct_stem[-2:] == "er":
                         infix = "rim"
-                    elif adj in ["facilis","difficilis","similis","dissimilis","gracilis","humilis"]:
+                    elif adj in l_stems:
                         infix = "lim"
 
             decl = ""   # prepare to assign declension in order to get correct endings
@@ -457,6 +763,10 @@ def create_adj_adv(adj_id=None):
                             correct_ending = "ī"
                         elif case == "gen":
                             correct_ending = "īus"
+                    if "noms" in adj_info and degree == "pos" and number == "sg" and (case == "nom" or (case == "acc" and gender == "n") or (case == "voc" and (gender != "m" or adj[-2:] != "us"))): # deal with nominatives/accusatives like 'aliud'
+                        irreg_form = adj_info["noms"] # assign nom. sg. tuple; unpack later
+                        #### ADD IRREGULAR ALERT?
+                        st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
                     if correct_ending and not correct_form: #DOUBLE CHECK THAT THIS DOESN'T CAUSE ISSUES
                         correct_form = correct_stem + infix + correct_ending
                 else: # deal with 3rd decl. adjectives and comparatives
@@ -497,10 +807,19 @@ def create_adj_adv(adj_id=None):
                             if correct_ending is None:
                                 correct_ending = ""
         if not correct_form:
-            if isinstance(correct_ending, list):
-                correct_form = [correct_stem + infix + end for end in correct_ending]
-            else:
-                correct_form = correct_stem + infix + correct_ending
+            try:
+                if isinstance(correct_ending, list):
+                    correct_form = [correct_stem + infix + end for end in correct_ending]
+                else:
+                    correct_form = correct_stem + infix + correct_ending
+            except:
+                st.error(f"""
+                        Please report this error:
+                        - stem: {correct_stem}
+                        - infix: {infix}
+                        - ending: {correct_ending}
+                        {adj_id} 
+                        """)
 
 
         for i,form in enumerate([correct_form, irreg_form]):

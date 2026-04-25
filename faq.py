@@ -91,7 +91,7 @@ with st.expander("How are words with variant forms or endings handled?",
     st.markdown("""
                 All standard variant forms 
                 (e.g., \u2011*\u0113runt* vs. \u2011*\u0113re* for the ending of 3rd person plural perfect active indicative verbs, 
-                or \u2011*\u012bs* and \u2011*\u0113* for plural accusative i-stem nouns) 
+                or \u2011*\u012bs* and \u2011*\u0113s* for plural accusative i-stem nouns) 
                 should be accepted as valid. Infinitives that include a participial form are only accepted in the neuter singular, 
                 but finite verbs that include a participial form accept any valid gender in the correct number.
                 (N.B. \u2011*iī* forms of \u2011*īvī* perfect verbs, including uncontracted \u2011*iis*- forms, are accepted as correct answers, 

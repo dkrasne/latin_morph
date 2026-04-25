@@ -100,7 +100,7 @@ if questions_answered:
                                             """ if pos == "verbal adj." else None)
             st.dataframe(df,
                             column_config={
-                                k:v for k,v in zip(df.columns, df.columns.str.title())
+                                k:(v if k != "answer" else "Your Answer") for k,v in zip(df.columns, df.columns.str.title())
                             })
 
 

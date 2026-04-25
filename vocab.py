@@ -961,7 +961,13 @@ def import_adjectives():
         "ingēns": {
             "noms": ("ingēns",),
             "stem": ("ingent"),
-            "decl": 3
+            "decl": 3,
+            "no_adv": True
+        },
+        "innocēns": {
+            "noms": ("innocēns",),
+            "stem": ("innocent"),
+            "decl": 3,
         },
         "omnis": {
             "noms": ("omnis", "omne"),
@@ -993,13 +999,15 @@ def import_adjectives():
             "pronominal": True,
             "decl": (1,2),
             "stem": "ali",
+            "noms": ("alius", "alia", "aliud"),
             "irreg": {
                 "forms": {
                     "sg": {
-                        "nom": ("alius", "alia", "aliud"),
+                        # "nom": ("alius", "alia", "aliud"),
                         "gen": ("alterīus",),
-                        "dat": ("alterī",),
-                        "acc": ("alium", "aliam", "aliud"),
+                        "dat": (["alterī","aliī"],),
+                        # "acc": ("alium", "aliam", "aliud"),
+                        "voc": None
                     },
                     "adv": {
                         "pos": "aliter"
@@ -1057,5 +1065,7 @@ def import_adjectives():
         if adjective_vocab[word].get("cardinal") or adjective_vocab[word].get("pronominal"):
             adjective_vocab[word]["comp"] = None
             adjective_vocab[word]["super"] = None
+        if adjective_vocab[word].get("pronominal") and word != "ūnus":
+            adjective_vocab[word].setdefault("irreg",{}).setdefault("forms",{}).setdefault("sg",{})["voc"] = None
 
     return adjective_vocab

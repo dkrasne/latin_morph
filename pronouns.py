@@ -129,7 +129,7 @@ def gen_question():
             recent_words = list(pronoun_df.tail(recent)["word"].values) if recent > 0 else []
             # st.write(recent_words)
     if "pronoun_df_wrong_agg" in dfs and pronoun_df_wrong_agg["weight"].max() >= .58:
-        repeat_chance = random.choices(["new","repeat"],[3,1])[0]   # 1 in 4 chance of repeated question
+        repeat_chance = random.choices(["new","repeat"],[st.session_state["adap_learning_frequency"],1])[0]   # 1 in 3 chance of repeated question
         if repeat_chance == "repeat" and len(pronoun_df) > 5:
             # st.write("repeat!")
             pronoun = pronoun_df_wrong_agg.query("weight >= .58")["weight"].sample(n=1, weights=pronoun_df_wrong_agg.query("weight >= .58")["weight"]).index[0]
