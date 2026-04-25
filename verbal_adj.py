@@ -248,7 +248,7 @@ with option_expander:
                                         help="Selected irregular verbs will be available regardless of which conjugations are selected above. If you just want to practice irregular verbs, unselect all the conjugations.")
 
 
-verb_vocab = {key: val for key, val in complete_verb_vocab.items() if not (all([val.get(ptc) is None for ptc in ["pap","ppp","fap","gdv"]]) and all([ptc in val for ptc in ["pap","gdv"]]))}
+verb_vocab = {key: val for key, val in complete_verb_vocab.items() if not (all(val.get(ptc) is None for ptc in ["pap","ppp","fap","gdv"]) and all(ptc in val for ptc in ["pap","gdv"]))}
 for vb in master_irregular_verbs_list:
     if vb not in irreg_selector:
         verb_vocab.pop(vb)
@@ -264,14 +264,14 @@ elif ptc_selector == ["ppp"]:
 elif ptc_selector == ["gdv"]:
     verb_vocab = {key:val for key, val in verb_vocab.items() if not ("gdv" in verb_vocab[key] and verb_vocab[key].get("gdv") is None)}
 # If the selection is limited either to just fut.act.ptc or to those and PPPs, then keep the verbs that have either a PPP stem or special fut.act.ptc stem.
-elif all([ptc not in ptc_selector for ptc in ["pap", "gdv"]]) or ptc_selector == ["fap"]:
-    verb_vocab = {key: val for key, val in verb_vocab.items() if any([ptc in verb_vocab[key] for ptc in ["fap","ppp"]]) and not ("fap" in verb_vocab[key] and verb_vocab[key]["fap"] is None)}
+elif all(ptc not in ptc_selector for ptc in ["pap", "gdv"]) or ptc_selector == ["fap"]:
+    verb_vocab = {key: val for key, val in verb_vocab.items() if any(ptc in verb_vocab[key] for ptc in ["fap","ppp"]) and not ("fap" in verb_vocab[key] and verb_vocab[key]["fap"] is None)}
 elif "pap" not in ptc_selector:
-    verb_vocab = {key: val for key, val in verb_vocab.items() if any([verb_vocab[key].get(ptc) for ptc in ["fap","ppp","gdv"]])}
+    verb_vocab = {key: val for key, val in verb_vocab.items() if any(verb_vocab[key].get(ptc) for ptc in ["fap","ppp","gdv"])}
 elif "gdv" not in ptc_selector:
-    verb_vocab = {key: val for key, val in verb_vocab.items() if any([verb_vocab[key].get(ptc) for ptc in ["fap","ppp","pap"]])}
+    verb_vocab = {key: val for key, val in verb_vocab.items() if any(verb_vocab[key].get(ptc) for ptc in ["fap","ppp","pap"])}
 else:
-    verb_vocab = {key: val for key, val in verb_vocab.items() if not (all([val.get(ptc) is None for ptc in ptc_selector]) and all([ptc in val for ptc in ptc_selector if ptc != "ppp"]))}
+    verb_vocab = {key: val for key, val in verb_vocab.items() if not (all(val.get(ptc) is None for ptc in ptc_selector) and all(ptc in val for ptc in ptc_selector if ptc != "ppp"))}
 
 #st.write(verb_vocab.keys())
 
@@ -308,7 +308,7 @@ else:
             if "ppp" in avail_ptc:
                 avail_ptc.remove("ppp")
         # Does the selected verb have neither a PPP nor a FAP form?
-        if all([ptc not in verb_vocab[verb] for ptc in ["fap","ppp"]]) or ("fap" in verb_vocab[verb] and verb_vocab[verb].get("fap") is None):
+        if all(ptc not in verb_vocab[verb] for ptc in ["fap","ppp"]) or ("fap" in verb_vocab[verb] and verb_vocab[verb].get("fap") is None):
             if "fap" in avail_ptc:
                 avail_ptc.remove("fap")
         # Does the selected verb have no gerundive?
@@ -429,7 +429,7 @@ else:
                         elif ptc_type == "ppp":
                             curr_avail_verbs = {v:i for v,i in curr_avail_verbs.items() if "ppp" in i}
                         elif ptc_type == "fap":
-                            curr_avail_verbs = {v:i for v,i in curr_avail_verbs.items() if not all([ptc not in i for ptc in ["fap","ppp"]]) and not ("fap" in i and i.get("fap") is None)}
+                            curr_avail_verbs = {v:i for v,i in curr_avail_verbs.items() if not all(ptc not in i for ptc in ["fap","ppp"]) and not ("fap" in i and i.get("fap") is None)}
                         else: # ptc_type == "gdv"
                             curr_avail_verbs = {v:i for v,i in curr_avail_verbs.items() if not ("gdv" in i and i.get("gdv") is None)}
 

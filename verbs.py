@@ -364,7 +364,7 @@ if (set(tense_list) <= {"fut","fut_pf"} and "ind" not in mood_selector) or (("su
     else:
         if irreg_selector:
             for verb in irreg_selector:
-                if not any([complete_verb_vocab[verb]["irreg"]["forms"].get("fut", {}).get(voice, {}).get("impv") for voice in ["act","pass","dep"]]) and not all(["ppp" in complete_verb_vocab[verb] or complete_verb_vocab[verb].get("fap") is not None, "inf" in mood_selector]):
+                if not any(complete_verb_vocab[verb]["irreg"]["forms"].get("fut", {}).get(voice, {}).get("impv") for voice in ["act","pass","dep"]) and not all("ppp" in complete_verb_vocab[verb] or complete_verb_vocab[verb].get("fap") is not None, "inf" in mood_selector):
                     if verb in verb_vocab:
                         verb_vocab.pop(verb)
 
@@ -684,7 +684,7 @@ else:
                             if not fut_impv:
                                 st.write("This situation shouldn't happen.")
                             else:
-                                verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if k not in irreg_selector or any([v.get("irreg",{}).get("forms",{}).get("fut",{}).get(vc,{}).get("impv") for vc in ["act","pass"]])}
+                                verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if k not in irreg_selector or any(v.get("irreg",{}).get("forms",{}).get("fut",{}).get(vc,{}).get("impv") for vc in ["act","pass"])}
                                 # st.write(verb_vocab_filtered.keys())
                     if tense == "fut" and mood == "inf" and voice == "act":
                         verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v.get("ppp") is not None or ("fap" in v and v["fap"] is not None)}

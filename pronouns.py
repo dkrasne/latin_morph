@@ -44,7 +44,7 @@ with option_expander:
                                         default=[k for k,v in pronoun_vocab.items() if v.get("rel_interrog")])
 
         # if nos or vos selected: option to distinguish between partitive and non-partitive genitive forms of nōs and vōs
-        if any([pn in personal_pron for pn in ["nōs","vōs"]]):
+        if any(pn in personal_pron for pn in ["nōs","vōs"]):
             gen_forms_diff = st.checkbox("Distinguish between partitive and non-partitive genitive?", help="If this box is selected, you will be asked to provide either the partitive or non-partitive genitive for *nōs* and *vōs*. If not selected, both forms will count as correct.")
 
     with options_col:
