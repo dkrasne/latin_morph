@@ -561,85 +561,113 @@ def import_verbs():
 #@st.cache_data
 def import_nouns():
     noun_vocab = {
-                "puella": {"decl": 1,
-                         "stem": "puell"},
-                "puer": {"decl": "2_er",
-                         "stem": "puer"},
-                "servus": {"decl": "2_us",
-                           "stem": "serv"},
-                "agricola": {"decl": 1,
-                             "stem": "agricol"},
-                "cīvis": {"decl": "3_istem",
-                          "stem": "cīv"},
-                "leo": {"decl": 3,
-                        "stem": "leōn"},
-                "manus": {"decl": 4,
-                          "stem": "man"},
-                "senātus": {"decl": 4,
-                            "stem": "senāt"},
-                "rēs": {"decl": "5_consonant",
-                        "stem": "r"},
-                "diēs": {"decl": "5_vowel",
-                         "stem": "di"},
-                "animal": {"decl": "3_istem_neut",
-                           "stem": "animāl"},
-                "mīles": {"decl": 3,
-                          "stem": "mīlit"},
-                "cornū": {"decl": "4_neut",
-                           "stem": "corn"},
-                "nōmen": {"decl": "3_neut",
-                           "stem": "nōmin"},
-                "templum": {"decl": "2_neut",
-                           "stem": "templ"},
-                "ager": {"decl": "2_er",
-                         "stem": "agr"},
-                "equus": {"decl": "2_us",
-                          "stem": "equ"},
-                "fīlius": {"decl": "2_us",
-                           "stem": "fīli"},
+        # 1st declension
+        "puella": {"decl": 1,
+                    "stem": "puell"},
+        "hōra": {"decl": 1,
+                    "stem": "hōr"},
+        "agricola": {"decl": 1,
+                        "stem": "agricol"},
+        # 2nd declension
+        "servus": {"decl": "2_us",
+                    "stem": "serv"},
+        "equus": {"decl": "2_us",
+                    "stem": "equ"},
+        "fīlius": {"decl": "2_us",
+                    "stem": "fīli"},
+        "puer": {"decl": "2_er",
+                    "stem": "puer"},
+        "vir": {"decl": "2_er",
+                "stem": "vir"},
+        "ager": {"decl": "2_er",
+                    "stem": "agr"},
+        "liber": {"decl": "2_er",
+                    "stem": "libr"},
+        "templum": {"decl": "2_neut",
+                    "stem": "templ"},
+        "verbum": {"decl": "2_neut",
+                    "stem": "verb"},
+        # 3rd declension
+        "leo": {"decl": 3,
+                "stem": "leōn"},
+        "mīles": {"decl": 3,
+                    "stem": "mīlit"},
+        "sōl": {"decl": 3,
+                "stem": "sōl"},
+        "cīvis": {"decl": "3_istem",
+                    "stem": "cīv"},
+        "urbs": {"decl": "3_istem",
+                    "stem": "urb"},
+        "nōmen": {"decl": "3_neut",
+                    "stem": "nōmin"},
+        "animal": {"decl": "3_istem_neut",
+                    "stem": "animāl"},
+        # 4th declension
+        "manus": {"decl": 4,
+                    "stem": "man"},
+        "senātus": {"decl": 4,
+                    "stem": "senāt"},
+        "cornū": {"decl": "4_neut",
+                    "stem": "corn"},
+        # 5th declension
+        "rēs": {"decl": "5_consonant",
+                "stem": "r"},
+        "diēs": {"decl": "5_vowel",
+                    "stem": "di"},
 
-    ## Irregular nouns
-                "vīs": {
-                    "decl": "3_istem",
-                    "stem": "vī(r)",
-                    "irreg": {
-                        "irreg": True,
-                        "sg": {
-                            "gen": None,
-                            "dat": None,
-                            "acc": "vim",
-                            "abl": "vī",
-                            "voc": None
-                        },
-                        "pl": {
-                            "nom": "vīrēs",
-                            "gen": "vīrium",
-                            "dat": "vīribus",
-                            "acc": ["vīrēs","vīrīs"],
-                            "abl": "vīribus",
-                            "voc": None
-                        }
-                    }
+        ## Irregular nouns
+        "vīs": {
+            "decl": "3_istem",
+            "stem": "vī(r)",
+            "irreg": {
+                "irreg": True,
+                "sg": {
+                    "gen": None,
+                    "dat": None,
+                    "acc": "vim",
+                    "abl": "vī",
+                    "voc": None
                 },
-                "deus": {
-                    "decl": "2_us",
-                    "stem": "de",
-                    "irreg": {
-                        "irreg": True,
-                        "sg": {
-                            "voc": ["deus", "dīve"]
-                        },
-                        "pl": {
-                            "nom": ["dī", "deī", "diī"],
-                            "gen": ["deum", "deōrum"],
-                            "dat": ["dīs", "deīs", "diīs"],
-                            "abl": ["dīs", "deīs", "diīs"],
-                            "voc": "dī"
-                        }
-                    }
+                "pl": {
+                    "nom": "vīrēs",
+                    "gen": "vīrium",
+                    "dat": "vīribus",
+                    "acc": ["vīrēs","vīrīs"],
+                    "abl": "vīribus",
+                    "voc": None
                 }
-                # add vis and deus; need to update logic to deal with irregular nouns
             }
+        },
+        "deus": {
+            "decl": "2_us",
+            "stem": "de",
+            "irreg": {
+                "irreg": True,
+                "sg": {
+                    "voc": ["deus", "dīve"]
+                },
+                "pl": {
+                    "nom": ["dī", "deī", "diī"],
+                    "gen": ["deum", "deōrum"],
+                    "dat": ["dīs", "deīs", "diīs"],
+                    "abl": ["dīs", "deīs", "diīs"],
+                    "voc": "dī"
+                }
+            }
+        },
+        "bōs": {
+            "decl": 3,
+            "stem": "bov",
+            "irreg": {
+                "irreg": True,
+                "pl": {
+                    "gen": ["bovum","boum"],
+                    "dat": ["bōbus","būbus"],
+                    "abl": ["bōbus","būbus"],
+                }
+            }
+        }
+    }
     return noun_vocab
 
 #@st.cache_data
