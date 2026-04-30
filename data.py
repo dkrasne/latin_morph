@@ -111,13 +111,15 @@ if questions_answered:
     if "noun" in df_dict:
         st.markdown("### Nouns")
         st.dataframe(
-            df_dict["noun"].copy().groupby("decl")["correct"].agg(Total= "count", Correct= "sum") \
+            df_dict["noun"].copy()
+                .assign(decl = lambda df: df["decl"].where(~(df["irreg"] == "irreg"), df["word"]))
+                .groupby("decl")["correct"].agg(Total= "count", Correct= "sum") \
                 .assign(pct=lambda df: df["Correct"]/df["Total"]) \
                 .assign(review = lambda df: ((df["Total"]-df["Correct"])/(df["Correct"]+1))**0.5) \
                 .assign(review = lambda df: round((df["review"]/df["review"].max())*100)) \
                 .sort_values("review", ascending=False),
             column_config={
-                "decl": st.column_config.TextColumn("Declension", width=None),
+                "decl": st.column_config.TextColumn("Declension/Irreg.", width=None),
                 "Total": st.column_config.NumberColumn("Total Questions", width=None),
                 "Correct": st.column_config.NumberColumn("Correct Answers", width=None),
                 "pct": st.column_config.NumberColumn("Percent Correct", format="percent"),
