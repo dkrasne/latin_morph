@@ -1,6 +1,8 @@
 import streamlit as st
 import random
 import time
+import pandas as pd
+import ast
 from utils import radio_change, reset, new_question, submit_and_check_answer, clear_page
 from vocab import import_nouns
 
@@ -18,7 +20,13 @@ st.markdown("# Nouns")
 
 st.warning('If you come across any incorrectly generated forms, please fill out the "Latin mistake" part of [this Google form](https://forms.gle/xT8hQ27sjposeXPc9).')
 
-declension_dict = {"1st": 1, "2nd":["2_us", "2_er", "2_neut"], "3rd": [3, "3_istem", "3_neut", "3_istem_neut"], "4th": [4, "4_neut"], "5th": ["5_vowel", "5_consonant"]}
+declension_dict = {
+    "1st": 1, 
+    "2nd":["2_us", "2_er", "2_neut"], 
+    "3rd": [3, "3_istem", "3_neut", "3_istem_neut"], 
+    "4th": [4, "4_neut"], 
+    "5th": ["5_vowel", "5_consonant"]
+    }
 
 ## SET OPTIONS ##
 
@@ -248,19 +256,23 @@ else:
         # st.write(decl_dict_subset)
         
         if isinstance(decl_dict_subset, list):
-            vocab_subset = {k: v for k,v in active_vocab.items() if v["decl"] in decl_dict_subset}
+            decl_rand_subset = random.choice(decl_dict_subset)
+            vocab_subset = {k: v for k,v in active_vocab.items() if v["decl"] == decl_rand_subset}
         else:
             vocab_subset = {k: v for k,v in active_vocab.items() if v["decl"] == decl_dict_subset}
         noun = random.choice(list(vocab_subset.keys()))
         number = random.choice(list(noun_options["number"].keys()))
         if number == "sg":
-            case_weights = [10,90,90,90,90]
-            if decl_rand == "2nd":
-                case_weights.append(80)
+            case_weights = [1,9,9,9,9]
+            # if decl_rand == "2nd":
+            if decl_rand == "2nd" and noun[-2:] == "us":
+                case_weights.append(8)
+            elif noun[-2:] == "us" or decl_rand == "2nd":
+                case_weights.append(5)
             else:
-                case_weights.append(10)
+                case_weights.append(1)
         else:
-            case_weights = [90,90,90,90,90,10]
+            case_weights = [9,9,9,9,9,1]
         case = ""
         if last_question:
             if noun_vocab[noun]["decl"] == last_question["id"].get("decl") and number == last_question["id"].get("num"):
@@ -270,6 +282,168 @@ else:
         
         # st.write(noun, case, number)
         return [noun, case, number]
+
+
+    ## ADAPTIVE LEARNING ALGORITHM
+
+    def adap_gen_question():
+        avail_nouns = dict(active_vocab)
+        noun_qs_answered = [{k:(v.copy() if isinstance(v,dict) else v) for k,v in q.copy().items()} for q in questions_asked if (q["pos"] == "noun" and "correct" in q and q["word"] in avail_nouns)]
+        for i,q in enumerate(noun_qs_answered):
+            noun_qs_answered[i]["id"]["decl"] = noun_vocab[q["word"]]["decl"]
+        
+        dfs = {}
+        noun = case = number = decl = None
+        
+        if questions_asked and noun_qs_answered:
+
+            noun_df = (
+                pd.json_normalize(noun_qs_answered)
+                    .reindex(columns=["pos","word","answer","correct","id.case","id.num","id.decl","id.irreg"])
+                    .replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
+                    .drop("answer",axis=1)
+                    .assign(**{"id.decl": lambda df: df["id.decl"].replace({"5_consonant":5,"5_vowel":5}).astype(str)})
+                    .assign(decl_mod = lambda df: df["id.decl"].apply(lambda x: x[0]))
+                    .assign(decl_mod = lambda df: df["decl_mod"].where(~(df["id.irreg"] == "irreg"), df["word"]))
+                    .drop("id.irreg",axis=1)
+                )
+            # st.write(noun_df)
+            dfs["noun_df"] = noun_df
+
+            def agg_df(gb):
+                df = (
+                    gb.agg(num_correct=("correct","sum"),total_q=("correct","count")) 
+                        .assign(pct_wrong = lambda df: (df["total_q"]-df["num_correct"])/df["total_q"]) 
+                        .assign(weight = lambda df: ((df["total_q"]-df["num_correct"])/(df["num_correct"]+1))**0.5) 
+                        .query("pct_wrong > 0")
+                )
+                return df
+
+            if not noun_df.empty and len(noun_df) > 5:
+                # create individual case/number df
+                noun_df_wrong_indiv = agg_df(
+                    noun_df.copy()
+                        .groupby(["decl_mod","id.decl","id.case","id.num"])
+                    )
+                st.write(noun_df_wrong_indiv)
+                
+                if not noun_df_wrong_indiv.empty:
+                    # create superset aggregated df, declensions overall (+ irregulars)
+                    noun_df_wrong_agg_superset = agg_df(
+                        noun_df.copy()
+                            .groupby("decl_mod")
+                        )
+
+                    # create aggregated df, declension categories (+ irregulars)                
+                    noun_df_wrong_agg = agg_df(
+                        noun_df.copy()
+                            .groupby(["decl_mod","id.decl"])
+                    )
+                    
+                    st.write(noun_df_wrong_agg_superset)
+                    st.write(noun_df_wrong_agg)
+
+                    dfs["noun_df_wrong_indiv"] = noun_df_wrong_indiv
+                    dfs["noun_df_wrong_agg_superset"] = noun_df_wrong_agg_superset
+                    dfs["noun_df_wrong_agg"] = noun_df_wrong_agg
+
+        if "noun_df_wrong_agg" in dfs and noun_df_wrong_agg["weight"].max() >= .58:
+            repeat_chance = random.choices(["new","repeat"],[st.session_state["adap_learning_frequency"],1])[0]   # 1 in 3 chance of repeated question
+            # repeat_chance = "repeat"
+
+            if repeat_chance == "repeat":
+                noun_info = None
+
+                # get noun declension (or irregular noun) from superset df
+                noun_decl_cat = (
+                    noun_df_wrong_agg_superset["weight"]
+                        .sample(n=1, weights=noun_df_wrong_agg_superset["weight"])
+                        .index[0]
+                    )
+                # st.write(noun_decl_cat)
+
+                if noun_decl_cat not in noun_vocab:
+                    # if relevant, get noun sub-declension from agg df
+                    if not noun_df_wrong_agg.query("weight >= .58").xs(noun_decl_cat,level="decl_mod").empty:
+
+                        df_slice = noun_df_wrong_agg.query("weight >= .58").xs(noun_decl_cat,level="decl_mod")
+                        # st.write("Choose a declension from here:",df_slice)
+                        decl = df_slice.sample(n=1,weights=df_slice["weight"]).index[0]
+                        # st.write("Chosen declension:",decl)
+
+                if decl:
+                    # We already have a specific problematic sub-declension
+                    # st.write("See what's in the individual df for this specific declension")
+                    df_slice = noun_df_wrong_indiv.xs((noun_decl_cat,decl),level=["decl_mod","id.decl"]).query("weight > 1.7")
+
+                    # st.write(df_slice)
+                else:
+                    # just go with the overall declension category or specific irregular noun
+                    # st.write("See what's in the individual df for this general declension/word")
+                    df_slice = noun_df_wrong_indiv.xs(noun_decl_cat,level="decl_mod").query("weight > 1.7")
+                    # st.write(df_slice)
+
+                if not df_slice.empty:                
+                    # st.write(df_slice.index.names)
+                    noun_info = df_slice.sample(n=1, weights=df_slice["weight"]).index[0]
+                    # st.write(noun_info)
+                    if len(noun_info) == 2:
+                        # st.write("We have a specific declension already assigned, get both items (case and number) from a sampled index tuple")
+                        case, number = noun_info
+                    else:
+                        if noun_decl_cat in noun_vocab:
+                            # st.write("We have an irregular noun: get the 2nd and 3rd items from a sampled index tuple")
+                            case, number = noun_info[1:]
+                            noun = noun_decl_cat
+                        else:
+                            # st.write("We need to get specific declension, case, and number (1st, 2nd, and 3rd items) from a sampled index tuple")
+                            decl, case, number = noun_info
+
+                if decl and decl != "5":
+                    decl = int(decl) if decl.isdigit() else decl
+                    # st.write("Check this declension:", decl)
+                    # st.write("Choose a noun from the subset of nouns in this specific sub-declension, but exclude irregulars")
+                elif noun_decl_cat in noun_vocab:
+                    noun = noun_decl_cat
+                    # st.write("Irregular noun:",noun)
+                else:
+                    # st.write("Check this declension category, but exclude irregulars:",noun_decl_cat)
+                    decl = next(val for key,val in declension_dict.items() if key.startswith(noun_decl_cat))
+                if not noun:
+                    if noun_decl_cat == "5":
+                        # st.write("Fifth declension selected, so need to include both vowel- and consonant-stem options when choosing noun")
+                        avail_nouns = {k:v for k,v in avail_nouns.items() if v["decl"] in decl and not v.get("irreg", {}).get("irreg")}
+                    else:
+                        if isinstance(decl, list):
+                            decl = random.choice(decl)
+                        avail_nouns = {k:v for k,v in avail_nouns.items() if v["decl"] == decl and not v.get("irreg", {}).get("irreg")}
+                    # st.write(decl)
+                    # st.write(avail_nouns.keys())
+                    noun = random.choice(list(avail_nouns))
+                st.write(noun)
+
+                # st.write("Double-check what needs to be done regarding declension, at this point; but we may have an irregular noun already")
+                if not noun_info:
+                    # st.write("Assign random case and number (within what exists for selected noun)")
+                    number = random.choice(list(noun_options["number"].keys()))
+                    if number == "sg" and noun != "deus":
+                        case_weights = [1,9,9,9,9]
+                        # if decl_rand == "2nd":
+                        if decl == "2_us":
+                            case_weights.append(8)
+                        elif noun[-2:] == "us" or (isinstance(decl, str) and decl.startswith("2")):
+                            case_weights.append(5)
+                        else:
+                            case_weights.append(1)
+                    else:
+                        case_weights = [9,9,9,9,9,1]
+                    case = ""
+                    while case == "" or (case in noun_vocab[noun].get("irreg", {}).get(number, {}) and noun_vocab[noun]["irreg"][number][case] is None):
+                        case = random.choices(list(noun_options["case"].keys()),case_weights)[0]
+                st.write(case, number)
+        return
+
+    # adap_gen_question()
 
     st.session_state.gen_func = gen_question
 
@@ -295,7 +469,7 @@ else:
                     correct_answer = irreg_form
             if not correct_answer:
                 correct_ending = noun_endings[noun_decl][number][case]
-                if noun[-3:] == "ius" and noun_decl == "2_us":
+                if noun[-3:] == "ius" and noun_decl == "2_us" and number == "sg":
                     if case in ["voc", "gen"]:
                         noun_stem = noun_stem[:-1]
                         if case == "voc":
@@ -373,7 +547,15 @@ else:
                 "id": {
                     "case": case,
                     "num": number,
-                    "decl": "1st" if str(noun_decl)[0] == "1" else "2nd" if str(noun_decl)[0] == "2" else "3rd (i-stem)" if "istem" in str(noun_decl) else "3rd" if str(noun_decl)[0] == "3" else "4th" if str(noun_decl)[0] == "4" else "5th"
+                    "decl": (
+                        "1st" if str(noun_decl)[0] == "1" 
+                        else "2nd" if str(noun_decl)[0] == "2" 
+                        else "3rd (i-stem)" if "istem" in str(noun_decl) 
+                        else "3rd" if str(noun_decl)[0] == "3" 
+                        else "4th" if str(noun_decl)[0] == "4" 
+                        else "5th"
+                        ),
+                    "irreg": "irreg" if noun_vocab[noun].get("irreg",{}).get("irreg") is True else None
                 },
     #            "correct": False
             }
