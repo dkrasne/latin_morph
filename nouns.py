@@ -325,7 +325,7 @@ else:
                     noun_df.copy()
                         .groupby(["decl_mod","id.decl","id.case","id.num"])
                     )
-                st.write(noun_df_wrong_indiv)
+                # st.write(noun_df_wrong_indiv)
                 
                 if not noun_df_wrong_indiv.empty:
                     # create superset aggregated df, declensions overall (+ irregulars)
@@ -340,8 +340,8 @@ else:
                             .groupby(["decl_mod","id.decl"])
                     )
                     
-                    st.write(noun_df_wrong_agg_superset)
-                    st.write(noun_df_wrong_agg)
+                    # st.write(noun_df_wrong_agg_superset)
+                    # st.write(noun_df_wrong_agg)
 
                     dfs["noun_df_wrong_indiv"] = noun_df_wrong_indiv
                     dfs["noun_df_wrong_agg_superset"] = noun_df_wrong_agg_superset
@@ -364,9 +364,10 @@ else:
 
                 if noun_decl_cat not in noun_vocab:
                     # if relevant, get noun sub-declension from agg df
-                    if not noun_df_wrong_agg.query("weight >= .58").xs(noun_decl_cat,level="decl_mod").empty:
+                    # st.write(noun_decl_cat)
+                    if not noun_df_wrong_agg.xs(noun_decl_cat,level="decl_mod").query("weight >= .58").empty:
 
-                        df_slice = noun_df_wrong_agg.query("weight >= .58").xs(noun_decl_cat,level="decl_mod")
+                        df_slice = noun_df_wrong_agg.xs(noun_decl_cat,level="decl_mod").query("weight >= .58")
                         # st.write("Choose a declension from here:",df_slice)
                         decl = df_slice.sample(n=1,weights=df_slice["weight"]).index[0]
                         # st.write("Chosen declension:",decl)
@@ -420,7 +421,7 @@ else:
                     # st.write(decl)
                     # st.write(avail_nouns.keys())
                     noun = random.choice(list(avail_nouns))
-                st.write(noun)
+                # st.write(noun)
 
                 # st.write("Double-check what needs to be done regarding declension, at this point; but we may have an irregular noun already")
                 if not noun_info:
@@ -440,12 +441,15 @@ else:
                     case = ""
                     while case == "" or (case in noun_vocab[noun].get("irreg", {}).get(number, {}) and noun_vocab[noun]["irreg"][number][case] is None):
                         case = random.choices(list(noun_options["case"].keys()),case_weights)[0]
-                st.write(case, number)
-        return
+                # st.write("Old question:", noun,case, number)
+        if not noun:
+            noun, case, number = gen_question()
+            # st.write("New question:",noun,case,number)
+        return [noun, case, number]
 
     # adap_gen_question()
 
-    st.session_state.gen_func = gen_question
+    st.session_state.gen_func = adap_gen_question
 
     if st.session_state.current_question:
         noun, case, number = st.session_state.current_question
@@ -571,7 +575,7 @@ else:
     new_question_col, results_col, score_col = st.columns(3)
 
     with new_question_col:
-        st.button("New Question", on_click=new_question, args=(gen_question,), key="question_button", width="stretch", 
+        st.button("New Question", on_click=new_question, args=(adap_gen_question,), key="question_button", width="stretch", 
                   disabled=True if len(declension) == 0 else False
                   )
 

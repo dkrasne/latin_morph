@@ -561,6 +561,8 @@ def import_verbs():
 #@st.cache_data
 def import_nouns():
     noun_vocab = {
+        ## Regular Nouns
+
         # 1st declension
         "puella": {"decl": 1,
                     "stem": "puell"},
@@ -568,6 +570,7 @@ def import_nouns():
                     "stem": "hōr"},
         "agricola": {"decl": 1,
                         "stem": "agricol"},
+
         # 2nd declension
         "servus": {"decl": "2_us",
                     "stem": "serv"},
@@ -587,6 +590,7 @@ def import_nouns():
                     "stem": "templ"},
         "verbum": {"decl": "2_neut",
                     "stem": "verb"},
+
         # 3rd declension
         "leo": {"decl": 3,
                 "stem": "leōn"},
@@ -594,28 +598,66 @@ def import_nouns():
                     "stem": "mīlit"},
         "sōl": {"decl": 3,
                 "stem": "sōl"},
+        "vōx": {"decl": 3,
+                 "stem": "vōc"},
         "cīvis": {"decl": "3_istem",
                     "stem": "cīv"},
+        "nāvis": {"decl": "3_istem",
+                  "stem": "nāv"},
         "urbs": {"decl": "3_istem",
                     "stem": "urb"},
+        "mōns": {"decl": "3_istem",
+                  "stem": "mont"},
         "nōmen": {"decl": "3_neut",
                     "stem": "nōmin"},
         "animal": {"decl": "3_istem_neut",
                     "stem": "animāl"},
+        "mare": {"decl": "3_istem_neut",
+                 "stem": "mar",
+                 "irreg": {
+                     "pl": {"gen": ["marium","marum"]}
+                 }},
+
         # 4th declension
         "manus": {"decl": 4,
                     "stem": "man"},
         "senātus": {"decl": 4,
                     "stem": "senāt"},
+        "cāsus": {"decl": 4,
+                  "stem": "cās"},
         "cornū": {"decl": "4_neut",
                     "stem": "corn"},
+                    
         # 5th declension
         "rēs": {"decl": "5_consonant",
                 "stem": "r"},
         "diēs": {"decl": "5_vowel",
                     "stem": "di"},
+        "faciēs": {"decl": "5_vowel",
+                    "stem": "faci"},
 
         ## Irregular nouns
+
+        # 2nd declension
+        "deus": {
+            "decl": "2_us",
+            "stem": "de",
+            "irreg": {
+                "irreg": True,
+                "sg": {
+                    "voc": ["deus", "dīve"]
+                },
+                "pl": {
+                    "nom": ["dī", "deī", "diī"],
+                    "gen": ["deum", "deōrum"],
+                    "dat": ["dīs", "deīs", "diīs"],
+                    "abl": ["dīs", "deīs", "diīs"],
+                    "voc": "dī"
+                }
+            }
+        },
+
+        # 3rd declension
         "vīs": {
             "decl": "3_istem",
             "stem": "vī(r)",
@@ -635,23 +677,6 @@ def import_nouns():
                     "acc": ["vīrēs","vīrīs"],
                     "abl": "vīribus",
                     "voc": None
-                }
-            }
-        },
-        "deus": {
-            "decl": "2_us",
-            "stem": "de",
-            "irreg": {
-                "irreg": True,
-                "sg": {
-                    "voc": ["deus", "dīve"]
-                },
-                "pl": {
-                    "nom": ["dī", "deī", "diī"],
-                    "gen": ["deum", "deōrum"],
-                    "dat": ["dīs", "deīs", "diīs"],
-                    "abl": ["dīs", "deīs", "diīs"],
-                    "voc": "dī"
                 }
             }
         },

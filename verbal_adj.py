@@ -418,6 +418,8 @@ else:
                             # st.write("conjugation:",conj)
 
                             curr_avail_verbs = {k:v for k,v in verb_vocab.items() if v["conj"] == conj}
+                            if "fīō" in irreg_selector and conj in [3,"3io"]:
+                                curr_avail_verbs["fīō"] = verb_vocab["fīō"]
                             # st.write(curr_avail_verbs.keys())
                             # assign random new verb in conjugation
                         else:

@@ -24,9 +24,14 @@ st.markdown("""
 
 # st.warning("The answer submission process has been streamlined: you now only need to press 'Check Answer' (or hit the Return key) in order to submit and check your answer.")
 
-st.markdown("""
+st.info("""
+           Adaptive learning has now been implemented across **all** parts of speech! 
+           For an explanation of what this means, visit the [about](./about) page.
+           """)
+
+st.warning("""
             :warning:
-            If you encounter any errors, please <a href="https://forms.gle/xT8hQ27sjposeXPc9" target="_BLANK">report them</a>. 
+            If you encounter any errors, please [report them](https://forms.gle/xT8hQ27sjposeXPc9). 
             (I also welcome feedback, using the same form!)
-            """, unsafe_allow_html=True)
+            """)
 
