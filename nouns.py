@@ -302,7 +302,7 @@ else:
                     .reindex(columns=["pos","word","answer","correct","id.case","id.num","id.decl","id.irreg"])
                     .replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
                     .drop("answer",axis=1)
-                    .assign(**{"id.decl": lambda df: df["id.decl"].replace({"5_consonant":5,"5_vowel":5}).astype(str)})
+                    .assign(**{"id.decl": lambda df: df["id.decl"].astype(str).replace({"5_consonant":"5","5_vowel":"5"})})
                     .assign(decl_mod = lambda df: df["id.decl"].apply(lambda x: x[0]))
                     .assign(decl_mod = lambda df: df["decl_mod"].where(~(df["id.irreg"] == "irreg"), df["word"]))
                     .drop("id.irreg",axis=1)
