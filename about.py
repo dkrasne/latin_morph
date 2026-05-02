@@ -52,3 +52,10 @@ st.markdown("""
             - Rauk, J. (1997) "The Vocative of Deus and Its Problems," *Classical Philology* 92: 138-149
 
             """, unsafe_allow_html=True)
+
+st.markdown("""
+            ### Acknowledgments
+
+            Thanks to Juan Coderch, Océane Zorea, John Tuckfield, and Mary Somerville for early helpful feedback!
+
+            """)

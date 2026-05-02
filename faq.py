@@ -76,6 +76,16 @@ with st.expander("What different options can I set to customize the information 
                 """)
 
 i+=1
+with st.expander("""I only know a couple of cases (or persons, etc) since my book doesn't teach them all at once, 
+                 but there's no option to limit which ones I'm asked for.""", 
+                 expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
+    st.markdown("""
+                While there is no option to limit which noun/adjective cases or verb persons one is asked for, 
+                it's possible just to skip a question by hitting 'Next Question' if you're asked for something you don't know yet.
+                If you skip a question, it won't affect your score, and it won't count as a question that you've been asked on the statistics page.
+                """)
+
+i+=1
 with st.expander("""Do I have to know my macrons (long-marks)?""", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
@@ -139,7 +149,8 @@ with st.expander("Did you use GenAI to build this?",
                 that unexpected invalid or non-existent forms wouldn't be requested or produced, 
                 or that particular types of error wouldn't occur 
                 (although even then, I still had to double-check *its* claims, 
-                and I still never let it write any code for me). 
+                and I still never let it write any code for me,
+                and there were also plenty of issues that it *didn't* catch). 
                 It also sometimes assisted me in isolating the cause of errors, 
                 as well as in understanding certain peculiarities of the Streamlit framework.
                 """, 

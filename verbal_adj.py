@@ -478,11 +478,15 @@ else:
             while roll_again is True:
                 while ptc_id is None:
                     ptc_id = gen_ptc_id()
+                    verb = ptc_id[0]
                 # st.write("recent words:", recent_words)
                 if set(recent_words) != set(avail_verbs) and not set(avail_verbs).issubset(set(recent_words)):
                     if verb not in recent_words:
                         # st.write("This is a new verb.")
                         roll_again = False
+                    else:
+                        # st.write("Resetting ID for next roll.")
+                        ptc_id = None
                 else:
                     roll_again = False
                     # st.write("This isn't a new word.")

@@ -288,6 +288,8 @@ else:
 
     def adap_gen_question():
         avail_nouns = dict(active_vocab)
+        if not avail_nouns:
+            return
         noun_qs_answered = [{k:(v.copy() if isinstance(v,dict) else v) for k,v in q.copy().items()} for q in questions_asked if (q["pos"] == "noun" and "correct" in q and q["word"] in avail_nouns)]
         for i,q in enumerate(noun_qs_answered):
             noun_qs_answered[i]["id"]["decl"] = noun_vocab[q["word"]]["decl"]

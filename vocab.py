@@ -570,6 +570,8 @@ def import_nouns():
                     "stem": "hōr"},
         "agricola": {"decl": 1,
                         "stem": "agricol"},
+        "mēnsa": {"decl": 1,
+                  "stem": "mēns"},
 
         # 2nd declension
         "servus": {"decl": "2_us",
@@ -578,6 +580,8 @@ def import_nouns():
                     "stem": "equ"},
         "fīlius": {"decl": "2_us",
                     "stem": "fīli"},
+        "lupus": {"decl": "2_us",
+                  "stem": "lup"},
         "puer": {"decl": "2_er",
                     "stem": "puer"},
         "vir": {"decl": "2_er",
@@ -590,6 +594,8 @@ def import_nouns():
                     "stem": "templ"},
         "verbum": {"decl": "2_neut",
                     "stem": "verb"},
+        "iugum": {"decl": "2_neut",
+                  "stem": "iug"},
 
         # 3rd declension
         "leo": {"decl": 3,
@@ -600,6 +606,9 @@ def import_nouns():
                 "stem": "sōl"},
         "vōx": {"decl": 3,
                  "stem": "vōc"},
+        "rēx": {"decl": 3,
+                "stem": "rēg"},
+        # eventually add turris but add possibility of excluding true i-stem nouns (or flag that they are)
         "cīvis": {"decl": "3_istem",
                     "stem": "cīv"},
         "nāvis": {"decl": "3_istem",
@@ -610,6 +619,8 @@ def import_nouns():
                   "stem": "mont"},
         "nōmen": {"decl": "3_neut",
                     "stem": "nōmin"},
+        "genus": {"decl": "3_neut",
+                  "stem": "gener"},
         "animal": {"decl": "3_istem_neut",
                     "stem": "animāl"},
         "mare": {"decl": "3_istem_neut",
@@ -617,6 +628,8 @@ def import_nouns():
                  "irreg": {
                      "pl": {"gen": ["marium","marum"]}
                  }},
+        "rēte": {"decl": "3_istem_neut",
+                 "stem": "rēt"},
 
         # 4th declension
         "manus": {"decl": 4,
@@ -627,6 +640,8 @@ def import_nouns():
                   "stem": "cās"},
         "cornū": {"decl": "4_neut",
                     "stem": "corn"},
+        "genū": {"decl": "4_neut",
+                 "stem": "gen"},
                     
         # 5th declension
         "rēs": {"decl": "5_consonant",

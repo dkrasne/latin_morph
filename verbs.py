@@ -364,7 +364,7 @@ if (set(tense_list) <= {"fut","fut_pf"} and "ind" not in mood_selector) or (("su
     else:
         if irreg_selector:
             for verb in irreg_selector:
-                if not any(complete_verb_vocab[verb]["irreg"]["forms"].get("fut", {}).get(voice, {}).get("impv") for voice in ["act","pass","dep"]) and not all("ppp" in complete_verb_vocab[verb] or complete_verb_vocab[verb].get("fap") is not None, "inf" in mood_selector):
+                if not any(complete_verb_vocab[verb]["irreg"]["forms"].get("fut", {}).get(voice, {}).get("impv") for voice in ["act","pass","dep"]) and not all(["ppp" in complete_verb_vocab[verb] or complete_verb_vocab[verb].get("fap") is not None, "inf" in mood_selector]):
                     if verb in verb_vocab:
                         verb_vocab.pop(verb)
 
@@ -448,9 +448,9 @@ else:
                 for tns in ["impf","plupf","fut_pf"]:
                     if tns in tense_list_copy:
                         tense_list_copy.remove(tns)
-                if not (verb_vocab[verb].get("ppp") or verb_vocab[verb].get("fap")) and "fut" in tense_list:
+                if not (verb_vocab[verb].get("ppp") or verb_vocab[verb].get("fap")) and "fut" in tense_list_copy:
                     tense_list_copy.remove("fut")
-            elif mood == "impv" and verb == "fīō":
+            elif mood == "impv" and verb == "fīō" and "fut" in tense_list_copy:
                 tense_list_copy.remove("fut")
             # st.write(i, verb,mood,tense_list_copy)
             if not tense_list_copy:

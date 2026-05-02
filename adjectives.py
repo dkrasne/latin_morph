@@ -321,6 +321,10 @@ adv_endings = {
 def gen_adj_adv_id():
     # choose adjective or adverb
     reduced_vocab = {k:v for k,v in select_vocab.items()}
+    if not reduced_vocab:
+        return
+    if not degree_list:
+        return
     pronominals = list({k:v for k,v in adj_vocab.items() if v.get("pronominal")})
 
     if cardinal_radio == "Yes":
@@ -376,12 +380,14 @@ def gen_adj_adv_id():
 
 def adap_gen_adj_adv_id():
     avail_adj_vocab = list(select_vocab.keys())
+    if not avail_adj_vocab:
+        return
     pronominals = list({k:v for k,v in adj_vocab.items() if v.get("pronominal") is True}.keys())
 
     adj = case = number = gender = pos = degree = None
 
     dfs = {}
-    adj_qs_answered = [item for item in questions_asked if item["pos"] in ["adj","adv"] and "correct" in item and item["word"] in avail_adj_vocab]
+    adj_qs_answered = [item for item in questions_asked if item["pos"] in ["adj","adv"] and "correct" in item and item["word"] in avail_adj_vocab and item["id"]["degree"] in degree_list]
 
     if not incl_adv:
         adj_qs_answered = [item for item in adj_qs_answered if item["pos"] == "adj"]
@@ -409,6 +415,7 @@ def adap_gen_adj_adv_id():
 
 
         if not adj_df.empty:
+            # st.write(adj_df)
 
             def adj_combo_logic(df_row):
                 if df_row["id.irreg"] == "stem":
@@ -516,7 +523,7 @@ def adap_gen_adj_adv_id():
                 decl = adj_vocab[adj]["decl"]
                 if pos == "adj":
                     # this is (probably) an irregular form, so check in individual errors table for specific form(s) that were repeatedly incorrect.
-                    df_slice = adj_df_wrong_indiv.query("weight > 1 and (adj_info == @adj or adj_combo == @adj) and `id.degree` == @degree and pos == @pos")
+                    df_slice = adj_df_wrong_indiv.query("weight > 1 and adj_info == @adj and `id.degree` == @degree and pos == @pos")
                     if not df_slice.empty:
                         # get weights, pick form
                         # st.write("Possible forms to choose:",df_slice)
@@ -661,17 +668,22 @@ def adap_gen_adj_adv_id():
             else:
                 last_q_id = [last_q["word"],last_q["id"]["case"],last_q["id"]["num"],last_q["id"]["gender"],"adj",last_q["id"]["degree"]]
             # st.write("last:",last_q_id)
-        adj_id = gen_adj_adv_id()
-
-        while adj_id == last_q_id:
-            # st.write("Rolling again...")
+        if avail_adj_vocab and degree_list:
             adj_id = gen_adj_adv_id()
+
+            while adj_id == last_q_id:
+                # st.write("Rolling again...")
+                adj_id = gen_adj_adv_id()
+        else:
+            return
         adj, case, number, gender, pos, degree = adj_id
     return [adj, case, number, gender, pos, degree]
 
 # adap_gen_adj_adv_id()
 
 def create_adj_adv(adj_id=None):
+    if not degree_list:
+        return
     if adj_id:
         adj_id = adj_id
     else:

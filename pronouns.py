@@ -95,13 +95,23 @@ pronoun_options = {"case": list(abbrevs["case"].keys()),
 
 def gen_question():
     avail_pronouns = list(selected_pronouns.keys())
+    if not avail_pronouns:
+        return
 
     dfs = {}
-    pronoun = case = number = gender = ""
+    pronoun = case = number = gender = None
     recent_words = []
+    pronoun_qs_answered = [item for item in questions_asked if item["pos"] == "pronoun" and "correct" in item]
+    last_q = pronoun_qs_answered[-1] if pronoun_qs_answered else []
+    # last_gen_type = ""
+    # last_case = last_q.get("id",{}).get("case")
+    # if isinstance(last_case, str) and len(last_case.split()) > 1:
+    #     last_gen_type = last_case.split()[1][1:-2]
+
+    # st.write(last_q)
     
-    if questions_asked and len([item for item in questions_asked if item["pos"] == "pronoun" and "correct" in item]) > 0:
-        pronoun_df = pd.json_normalize([item for item in questions_asked if item["pos"] == "pronoun" and "correct" in item]).replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
+    if questions_asked and len(pronoun_qs_answered) > 0:
+        pronoun_df = pd.json_normalize(pronoun_qs_answered).replace({None: "-", pd.NA: "-", "nan": "-", "None": "-"})
         #st.write(pronoun_df)
         dfs["pronoun_df"] = pronoun_df
         if len(pronoun_df) > 0:
@@ -134,8 +144,8 @@ def gen_question():
             # st.write("repeat!")
             pronoun = pronoun_df_wrong_agg.query("weight >= .58")["weight"].sample(n=1, weights=pronoun_df_wrong_agg.query("weight >= .58")["weight"]).index[0]
             # st.write(pronoun)
-            word_weight = pronoun_df_wrong_indiv.query("weight >= .58").xs(pronoun,level="word")["weight"] if not pronoun_df_wrong_indiv.query("weight >= .58").empty else None
-            if word_weight is not None:
+            word_weight = pronoun_df_wrong_indiv.xs(pronoun,level="word").query("weight >= .58")["weight"] if not pronoun_df_wrong_indiv.query("weight >= .58").empty else None
+            if word_weight is not None and not word_weight.empty:
                 pronoun_id = word_weight.sample(n=1, weights=word_weight).index[0]
                 # st.write(pronoun_id)
                 if pronoun_id is not None:
@@ -149,9 +159,9 @@ def gen_question():
                         #     part_gen = True
 
     if not pronoun or pronoun in recent_words:
-        pronoun = random.choice(list(selected_pronouns.keys()))
-        case = ""
-    if not case:
+        pronoun = random.choice(avail_pronouns)
+        case = None
+    while not case:
         number = random.choice(pronoun_options["number"]) if not pronoun_vocab[pronoun].get("pers_pron") else None
         gender = random.choice(pronoun_options["gender"]) if pronoun_vocab[pronoun].get("genders") else None
 
@@ -166,6 +176,10 @@ def gen_question():
                 form = pronoun_vocab[pronoun][number][case]
             else:
                 form = pronoun_vocab[pronoun]["forms"][case]
+        # st.write(last_q)
+        if last_q and pronoun == last_q["word"] and ((case == last_q["id"]["case"] or case == last_q["id"]["case"].split()[0]) and number == last_q["id"]["num"] and gender == last_q["id"]["gender"]):
+            # st.write("perfect match: reroll")
+            case = None
 
     return_val = [pronoun, case, number, gender]
         # if part_gen:
