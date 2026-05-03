@@ -493,6 +493,16 @@ def import_verbs():
                   "pres": "dēl",
                   "perf": "dēlēv",
                   "ppp": "dēlēt"},
+        "spondeō": {"voice": "act",
+                    "conj": 2,
+                    "pres": "spond",
+                    "perf": "spopond",
+                    "ppp": "spons"},
+        "moneō": {"voice": "act",
+                  "conj": 2,
+                  "pres": "mon",
+                  "perf": "monu",
+                  "ppp": "monit"},
         "regō": {"voice": "act",
                 "conj": 3,
                 "pres": "reg",
@@ -503,6 +513,11 @@ def import_verbs():
                   "pres": "fall",
                   "perf": "fefell",
                   "ppp": "fals"},
+        "legō": {"voice": "act",
+                 "conj": 3,
+                 "pres": "leg",
+                 "perf": "lēg",
+                 "ppp": "lect"},
         "capiō": {"voice": "act",
                 "conj": "3io",
                 "pres": "cap",
@@ -617,6 +632,9 @@ def import_nouns():
                     "stem": "urb"},
         "mōns": {"decl": "3_istem",
                   "stem": "mont"},
+        "turris": {"decl": "3_istem",
+                   "stem": "turr",
+                   "true_i_stem": True},
         "nōmen": {"decl": "3_neut",
                     "stem": "nōmin"},
         "genus": {"decl": "3_neut",
@@ -950,6 +968,10 @@ def import_adjectives():
             "stem": "vacu",
             "decl": (1,2)
         },
+        "longus": {
+            "stem": "long",
+            "decl": (1,2)
+        },
         "bonus": {
             "stem": "bon",
             "decl": (1,2),
@@ -977,6 +999,53 @@ def import_adjectives():
                         "comp": "magis"
                     }
                 }
+            }
+        },
+        "multus": {
+            "stem": "mult",
+            "decl": (1,2),
+            "irreg": {
+                "stems": {
+                    "super": "plūrim"
+                },
+                "forms": {
+                    "adv": {
+                        "pos": "multum",
+                        "comp": "plūs",
+                        "super": "plūrimum"
+                    },
+                    "comp": {
+                        "sg": {
+                            "nom": (None,"plūs"),
+                            # "acc": (None,"plūs"),
+                        },
+                        "pl": {
+                            "gen": ("plūrium",)
+                        },
+                        "stem_no_infix": "plūr"
+                    }
+                },
+            }
+        },
+        "parvus": {
+            "stem": "parv",
+            "decl": (1,2),
+            "irreg": {
+                "stems": {
+                    "super": "minim"
+                },
+                "forms": {
+                    "adv": {
+                        "pos": "parum",
+                        "comp": "minus",
+                    },
+                    "comp": {
+                        "sg": {
+                            "nom": ("minor","minus")
+                        },
+                        "stem_no_infix": "minōr"
+                    }
+                },
             }
         },
         "facilis": {

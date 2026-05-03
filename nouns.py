@@ -274,11 +274,16 @@ else:
         else:
             case_weights = [9,9,9,9,9,1]
         case = ""
-        if last_question:
-            if noun_vocab[noun]["decl"] == last_question["id"].get("decl") and number == last_question["id"].get("num"):
-                case = last_question["id"].get("case")
-        while case == "" or case == last_question.get("id", {}).get("case") or (case in noun_vocab[noun].get("irreg", {}).get(number, {}) and noun_vocab[noun]["irreg"][number][case] is None):
+        # if last_question:
+        #     if noun_vocab[noun]["decl"] == noun_vocab[last_question["word"]] and number == last_question["id"].get("num"):
+        #         case = last_question["id"].get("case")
+        while case == "":
             case = random.choices(list(noun_options["case"].keys()),case_weights)[0]
+            if case in noun_vocab[noun].get("irreg", {}).get(number, {}) and noun_vocab[noun]["irreg"][number][case] is None:
+                case = ""
+            elif number == last_question.get("id", {}).get("num") and noun_vocab[noun]["decl"] == noun_vocab.get(last_question.get("word"),{}).get("decl"):
+                if case == last_question.get("id", {}).get("case"):
+                    case = ""
         
         # st.write(noun, case, number)
         return [noun, case, number]
@@ -293,7 +298,8 @@ else:
         noun_qs_answered = [{k:(v.copy() if isinstance(v,dict) else v) for k,v in q.copy().items()} for q in questions_asked if (q["pos"] == "noun" and "correct" in q and q["word"] in avail_nouns)]
         for i,q in enumerate(noun_qs_answered):
             noun_qs_answered[i]["id"]["decl"] = noun_vocab[q["word"]]["decl"]
-        
+        last_q = noun_qs_answered[-1] if noun_qs_answered else {}
+
         dfs = {}
         noun = case = number = decl = None
         
@@ -443,9 +449,15 @@ else:
                     case = ""
                     while case == "" or (case in noun_vocab[noun].get("irreg", {}).get(number, {}) and noun_vocab[noun]["irreg"][number][case] is None):
                         case = random.choices(list(noun_options["case"].keys()),case_weights)[0]
+                        if (noun == last_q.get("word") or noun_vocab[noun]["decl"] == last_q.get("decl")) and case == last_q.get("id", {}).get("case") and number == last_q.get("id", {}).get("num"):
+                            case = ""
                 # st.write("Old question:", noun,case, number)
-        if not noun:
+        # if not noun:
+        #     noun, case, number = gen_question()
+        while not noun:
             noun, case, number = gen_question()
+            if (noun == last_q.get("word") or noun_vocab[noun]["decl"] == last_q.get("decl")) and case == last_q.get("id", {}).get("case") and number == last_q.get("id", {}).get("num"):
+                noun = None
             # st.write("New question:",noun,case,number)
         return [noun, case, number]
 
@@ -482,6 +494,11 @@ else:
                             correct_ending = "ī"
                         if case == "gen":
                             correct_ending = ["iī","ī"]
+                if noun_vocab[noun].get("true_i_stem") is True and number == "sg":
+                    if case == "acc":
+                        correct_ending = ["im", "em"]
+                    if case == "abl":
+                        correct_ending = ["ī", "e"]
                     
 
                 if correct_ending is None and number == "sg":   # deal with vocative singular other than 2nd decl. -us nouns

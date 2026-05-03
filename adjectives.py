@@ -372,6 +372,11 @@ def gen_adj_adv_id():
 #    st.write(list(reduced_vocab))
 
     adj = random.choice(list(reduced_vocab.keys()))
+    # adj = random.choice(["parvus","multus"])
+    # degree = random.choice(["comp","super"])
+    # The following is also in adap_gen_adj_adv_id(), but just as a backup:
+    if adj == "multus" and number == "sg" and degree == "comp" and gender != "n":
+        gender = "n"
     # adj = "pulcher"
     # adj = "alius"
     return [adj, case, number, gender, pos, degree]
@@ -677,6 +682,8 @@ def adap_gen_adj_adv_id():
         else:
             return
         adj, case, number, gender, pos, degree = adj_id
+    if adj == "multus" and number == "sg" and degree == "comp" and gender != "n":
+        gender = "n"
     return [adj, case, number, gender, pos, degree]
 
 # adap_gen_adj_adv_id()
@@ -698,6 +705,8 @@ def create_adj_adv(adj_id=None):
     correct_stem = ""
     correct_ending = ""
     st.session_state["irreg_alert_message"] = ""
+    infix = ""
+    comp_no_infix = False
     # if word has irregular forms, get the relevant form
     irreg_forms = adj_info.get("irreg", {}).get("forms", {})
     irreg_stems = adj_info.get("irreg", {}).get("stems", {})
@@ -717,16 +726,27 @@ def create_adj_adv(adj_id=None):
             else:
                 if degree == "pos":
                     irreg_form = irreg_forms.get(number, {}).get(case)
+                elif degree == "comp":
+                    irreg_form = irreg_forms.get("comp", {}).get(number, {}).get(case)
+                    if number == "sg" and ((case == "acc" and gender == "n") or (case == "voc")):
+                        irreg_form = irreg_forms.get("comp", {}).get("sg", {}).get("nom")
+                        # st.write("neut.acc. or any gender voc.",irreg_form)
+                    if irreg_form is None:
+                        correct_stem, comp_no_infix = irreg_forms.get("comp", {}).get("stem_no_infix"), True
+                        correct_stem, comp_no_infix = ("", False) if correct_stem is None else (correct_stem, comp_no_infix)
+                        irreg_form = ""
                 else:
                     pass
                     # update this later to pull a "comp" or "super" key from the irregular forms part of the dictionary, for words like "plus". Alternatively, these could possibly go under irregular stems with a "no_infix" T/F flag, in which case that part of the code will need updating.
             if irreg_form:
+                # st.write(irreg_form)
                 st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
 
         # deal with regular endings (reg. and irreg. stems)
-        if not correct_form:
+        if not correct_form and not irreg_form:
             if irreg_stems: # if the specified form has an irregular stem, get the stem
-                correct_stem = irreg_stems.get(degree)
+                if not correct_stem:
+                    correct_stem = irreg_stems.get(degree)
             if correct_stem:
                 st.session_state["irreg_alert_message"] = f"N.B. This form has an irregular stem (*{correct_stem}*-)."
 
@@ -738,7 +758,8 @@ def create_adj_adv(adj_id=None):
                 # assign infix for comparative and superlative
                 # infix = ""  # no infix for positive degree adj. and pos./comp. adverbs
             if degree == "comp" and pos == "adj":   # comp. adj. have -iōr- infix (deal later with -ior and -ius endings)
-                infix = "iōr"
+                if comp_no_infix is False:
+                    infix = "iōr"
             elif degree == "super": # superl. adj. and adv. all have an infix, except irregulars
                 if irreg_stems.get("super"):
                     pass
@@ -790,6 +811,7 @@ def create_adj_adv(adj_id=None):
                     if "noms" in adj_info and degree == "pos" and number == "sg" and (case == "nom" or (case == "acc" and gender == "n") or (case == "voc" and (gender != "m" or adj[-2:] != "us"))): # deal with nominatives/accusatives like 'aliud'
                         irreg_form = adj_info["noms"] # assign nom. sg. tuple; unpack later
                         #### ADD IRREGULAR ALERT?
+                        # st.write("Second alert:", irreg_form)
                         st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
                     if correct_ending and not correct_form: #DOUBLE CHECK THAT THIS DOESN'T CAUSE ISSUES
                         correct_form = correct_stem + infix + correct_ending
