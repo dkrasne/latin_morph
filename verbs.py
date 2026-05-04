@@ -76,6 +76,8 @@ with option_expander:
 
     # with conjugation_col:
     with verb_options_col:
+        # st.write("Important note: If you only want to practice irregular verbs, you must deselect all of the conjugations.")
+
         conjugation_selector = st.multiselect(
             "Choose which conjugations to practice (they are all selected by default):",
             conjugation_dict.keys(),
@@ -125,6 +127,8 @@ with option_expander:
                                         default=master_irregular_verbs_list,
                                         help="Selected irregular verbs will be available regardless of which conjugations are selected above. If you just want to practice irregular verbs, unselect all the conjugations.")
 
+        if irreg_selector:
+            irreg_only = st.checkbox("Practice *only* the selected irregular verbs?", help="Select this to practice *only* the selected irregular verbs; you can achieve the same effect by deselecting all of the conjugations above.")
 
         fut_impv = False
         if "fut" in tense_selector and "impv" in mood_selector:
@@ -346,6 +350,8 @@ verb_vocab = {key: val for key, val in complete_verb_vocab.items()}
 for vb in master_irregular_verbs_list:
     if vb not in irreg_selector:
         verb_vocab.pop(vb)
+if irreg_only:
+    verb_vocab = {key: val for key, val in verb_vocab.items() if key in irreg_selector}
 # for feature, feature_list in zip(["voice","conj"],[voice_selector,conjugation_selector + [None]]):
 #     verb_vocab = {key: val for key, val in verb_vocab.items() if (verb_vocab[key][feature] in feature_list) or (key in irreg_selector)}
 verb_vocab = {key: val for key,val in verb_vocab.items() if verb_vocab[key]["voice"] in voice_selector or ("pass" in voice_selector and verb_vocab[key]["voice"] == "act" and "no_pass" not in verb_vocab[key])}
