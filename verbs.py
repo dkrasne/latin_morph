@@ -127,6 +127,7 @@ with option_expander:
                                         default=master_irregular_verbs_list,
                                         help="Selected irregular verbs will be available regardless of which conjugations are selected above. If you just want to practice irregular verbs, unselect all the conjugations.")
 
+        irreg_only = False
         if irreg_selector:
             irreg_only = st.checkbox("Practice *only* the selected irregular verbs?", help="Select this to practice *only* the selected irregular verbs; you can achieve the same effect by deselecting all of the conjugations above.")
 
