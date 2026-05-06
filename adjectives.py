@@ -996,8 +996,10 @@ else:
 
     new_question_col, results_col, score_col = st.columns(3)
 
+    new_q_button_text = "New Question" if st.session_state.question_list else "Click here for your first question!"
+    new_q_button_type = "secondary" if st.session_state.question_list else "primary"
     with new_question_col:
-        st.button("New Question", on_click=new_question, args=(create_adj_adv,), key="question_button", width="stretch")
+        st.button(new_q_button_text, on_click=new_question, args=(create_adj_adv,), key="question_button", width="stretch", type=new_q_button_type)
 
     with results_col:
         st.markdown(st.session_state.result_message)    # just write the result message, rather than other things as well.

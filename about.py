@@ -59,3 +59,16 @@ st.markdown("""
             Thanks to Juan Coderch, Océane Zorea, John Tuckfield, and Mary Somerville for early helpful feedback!
 
             """)
+
+st.markdown("""
+            ### About the Developer
+
+            Darcy Krasne is a [Lecturer in the Classics and Ancient Studies Department at Barnard College](https://classics.barnard.edu/profiles/darcy-krasne).
+            She has been teaching Latin since 2004 and has taught out of numerous different textbooks:
+            Keller & Russell's *Learn to Read Latin*, 
+            Wheelock, 
+            the *Oxford Latin Course*, 
+            and Jones & Sidwell's *Learning Latin*
+            (and she originally learned Latin from the *Cambridge Latin Course*!).
+
+            """)

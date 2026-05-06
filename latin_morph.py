@@ -85,7 +85,7 @@ verbal_adj_page = st.Page("verbal_adj.py", title="Verbal Adjectives")
 # test_page = st.Page("button_test.py", title="Test page")
 data_page = st.Page("data.py", title="Session Stats & Data")
 
-st.markdown("*Use the navigation menu to choose a part of speech to practice. (Click on *>>* at the upper left to open the menu.)*")
+st.markdown("*Use the navigation menu to choose a part of speech to practice. (Click on* :material/keyboard_double_arrow_right: *at the upper left to open the menu.)*")
 
 ## currently disabled because it jumps the page to the top every time the balloons are triggered
 # st.sidebar.checkbox("I like balloons!", key="balloons", help="Select this if you want to see celebratory balloons every time you get an answer right!")
@@ -117,6 +117,36 @@ st.sidebar.checkbox("Use consonantal *u*?",
 choose_page.run()
 
 #st.markdown(":copyright: 2026 Darcy Krasne ([CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/))", text_alignment="right")
+st.html("<p></p>")
+menu = st.container(border=True,horizontal_alignment="center", gap="xsmall")
+
+# menu.markdown(":blue-badge[**Site Directory**]")
+
+menu_nav_row = menu.container(
+    horizontal=True, 
+    horizontal_alignment="center"
+    )
+menu_pos_row = menu.container(
+    horizontal=True, 
+    horizontal_alignment="center"
+    )
+
+menu_nav_row.markdown(":blue[**Information and Tools**]")
+menu_nav_row.page_link("main_page.py", label="Home")
+
+menu_pos_row.markdown(":blue[**Practice**]")
+menu_pos_row.page_link("nouns.py", label="Nouns")
+menu_pos_row.page_link("verbs.py", label="Verbs")
+menu_pos_row.page_link("adjectives.py", label="Adjectives & Adverbs")
+menu_pos_row.page_link("verbal_adj.py", label="Verbal Adjectives")
+menu_pos_row.page_link("pronouns.py", label="Pronouns")
+
+menu_nav_row.page_link("about.py", label="About")
+menu_nav_row.page_link("faq.py", label="FAQ")
+menu_nav_row.page_link("data.py", label="Stats & Data")
+
+
+
 st.markdown(
     body='''<div style="position:relative;height:5em;width:100%;">
         <p style="font-size:smaller;text-align:right;position:absolute;bottom:0;right:-3em;">
