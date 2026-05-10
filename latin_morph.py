@@ -1,5 +1,7 @@
 import streamlit as st
 from st_supabase_connection import SupabaseConnection
+import uuid
+import os
 
 st.set_page_config("Latin Morph!", 
                    menu_items={
@@ -74,6 +76,18 @@ if "gen_string" not in st.session_state:
 if "active_expander" not in st.session_state:
     st.session_state["active_expander"] = ""
 
+if "supabase_connection" not in st.session_state:
+    st.session_state["supabase_connection"] = st.connection(name="supabase", type=SupabaseConnection)
+
+## these are for testing Supabase; delete them after testing ##
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = uuid.uuid4()
+
+# if "user_history" not in st.session_state:
+#     st.session_state["user_history"] = st.session_state.supabase_connection.table("answer").select(f"* WHERE user_id == {st.session_state.user_id}").execute()
+###########
+
+#print(st.context.headers["host"])
 
 main_page = st.Page("main_page.py", title="Main Page")
 about_page = st.Page("about.py", title="About")
@@ -83,8 +97,8 @@ verbs_page = st.Page("verbs.py", title="Verbs")
 pronouns_page = st.Page("pronouns.py", title="Pronouns")
 adj_page = st.Page("adjectives.py", title="Adjectives and Adverbs")
 verbal_adj_page = st.Page("verbal_adj.py", title="Verbal Adjectives")
-# test_page = st.Page("button_test.py", title="Test page")
 data_page = st.Page("data.py", title="Session Stats & Data")
+test_page = st.Page("button_test.py", title="Test page")
 
 st.markdown("*Use the navigation menu to choose a part of speech to practice. (Click on* :material/keyboard_double_arrow_right: *at the upper left to open the menu.)*")
 
@@ -99,9 +113,11 @@ choose_page = st.navigation({"**Latin Morph!**": [main_page, about_page, faq_pag
                                 verbal_adj_page, 
                                 pronouns_page, 
                             ],
-                            #  "Test": [test_page],
                             "Tools": [data_page]
-                            })
+                            } |
+                            {"Test": [test_page],} if st.context.headers["host"].startswith("localhost") else {}
+
+                            )
 
 st.sidebar.select_slider("Auto-advance to next question?", 
                          options=[False] + list(range(5,61)), 

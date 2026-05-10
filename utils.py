@@ -1,11 +1,14 @@
 import streamlit as st
 # import random
 import unicodedata
-from st_supabase_connection import SupabaseConnection
+# from st_supabase_connection import SupabaseConnection
 from datetime import datetime as dt, timezone
 # import traceback
 # import time
 # import threading
+
+userid = st.session_state.user_id
+sb_conn = st.session_state.supabase_connection
 
 def clear_page(page_id):
     if page_id != st.session_state.curr_page_id:
@@ -151,6 +154,15 @@ def submit_and_check_answer():
             if st.session_state.append_answer is False:
                 st.session_state.question_list[-1]["answer"] = user_answer
                 st.session_state.question_list[-1]["correct"] = correct_flag  # write correctness to question_list
+
+                # if st.context.headers["host"].startswith("localhost"):
+                insert_dict = {
+                    "user_id": str(userid),
+                    "time_answered": dt.now(timezone.utc).isoformat(),
+                    "answer": st.session_state.question_list[-1]
+                    }
+                # print("This will be sent to the database:",insert_dict)
+                sb_conn.table("answer").insert(insert_dict).execute()
                     #st.session_state.append_answer = True
 #            st.write(st.session_state.question_list[-1])
 
