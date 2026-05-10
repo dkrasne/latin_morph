@@ -114,8 +114,8 @@ choose_page = st.navigation({"**Latin Morph!**": [main_page, about_page, faq_pag
                                 pronouns_page, 
                             ],
                             "Tools": [data_page]
-                            } |
-                            {"Test": [test_page],} if st.context.headers["host"].startswith("localhost") else {}
+                            } 
+                            # | {"Test": [test_page],} if st.context.headers["host"].startswith("localhost") else {}
 
                             )
 
