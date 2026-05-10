@@ -1,4 +1,5 @@
 import streamlit as st
+from st_supabase_connection import SupabaseConnection
 
 st.set_page_config("Latin Morph!", 
                    menu_items={
