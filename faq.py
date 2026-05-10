@@ -135,6 +135,10 @@ with st.expander("What data does Latin Morph! store about me?",
                 but not when it occurred or who was using the site at the time.
                 
                 If, in the future, there is an option to log in and save settings, then more data about you will be stored *if* you choose to log in.
+
+                Additionally, in preparation for instituting user logins, all answers are currently being collected in a database;
+                however, they are not tied to any sort of user identification.
+                Once user logins are instituted, answers will only be collected for users who choose to log in.
                 """)
     
 i+=1

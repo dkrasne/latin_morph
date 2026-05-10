@@ -105,7 +105,7 @@ st.markdown("*Use the navigation menu to choose a part of speech to practice. (C
 ## currently disabled because it jumps the page to the top every time the balloons are triggered
 # st.sidebar.checkbox("I like balloons!", key="balloons", help="Select this if you want to see celebratory balloons every time you get an answer right!")
 
-choose_page = st.navigation({"**Latin Morph!**": [main_page, about_page, faq_page], 
+nav_dict = {"**Latin Morph!**": [main_page, about_page, faq_page], 
                             "Parts of Speech": [
                                 nouns_page, 
                                 verbs_page, 
@@ -115,9 +115,11 @@ choose_page = st.navigation({"**Latin Morph!**": [main_page, about_page, faq_pag
                             ],
                             "Tools": [data_page]
                             } 
-                            # | {"Test": [test_page],} if st.context.headers["host"].startswith("localhost") else {}
 
-                            )
+if st.context.headers["host"].startswith("localhost"):
+    nav_dict["Test"] = [test_page]
+
+choose_page = st.navigation(nav_dict)
 
 st.sidebar.select_slider("Auto-advance to next question?", 
                          options=[False] + list(range(5,61)), 
