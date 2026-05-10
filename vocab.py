@@ -985,6 +985,21 @@ def import_adjectives():
                 }
             }
         },
+        "malus": {
+            "stem": "mal",
+            "decl": (1,2),
+            "irreg": {
+                "stems": {
+                    "comp": "pē",
+                    "super": "pessim"
+                },
+                "forms": {
+                    "adv": {
+                        "pos": "male"
+                    }
+                }
+            }
+        },
         "magnus": {
             "stem": "magn",
             "decl": (1,2),

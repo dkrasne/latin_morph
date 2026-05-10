@@ -62,24 +62,22 @@ st.markdown("""
             To automatically advance to the next question, set the auto-advance option in the navigation menu.
             """, unsafe_allow_html=True)
 
-# st.markdown("""            
-#             If you haven't learned all the forms of a given part of speech yet
-#             (e.g., if you only know present indicative verbs, or you only know first and second declension nouns),
-#             you can limit your practice to just the forms you know. 
-#             Similarly, if there are particular forms or irregular words that you specifically want to practice, you can choose to target those.
-
-#             To automatically advance to the next question, set the auto-advance option in the navigation menu.
-#             """)
-
-st.markdown("""##### Recent Major Updates and Announcements""")
-st.info("""
-           Adaptive learning has now been implemented across **all** parts of speech! 
-           For an explanation of what this means, visit the About page.
-           """)
-
 st.warning("""
             :warning:
             If you encounter any errors, please [report them](https://forms.gle/xT8hQ27sjposeXPc9). 
             (I also welcome feedback, using the same form!)
             """)
+
+announcements = [
+    """
+Adaptive learning has now been implemented across **all** parts of speech! 
+For an explanation of what this means, visit the About page.
+""",
+
+]
+
+if len(announcements) > 0:
+    st.markdown("""##### Recent Major Updates and Announcements""")
+    for announcement in announcements:
+        st.info(announcement)
 

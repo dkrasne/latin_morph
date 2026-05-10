@@ -2,3 +2,4 @@ __pycache__/
 addenda/
 *.pyc
 button_test.py
+.streamlit/
