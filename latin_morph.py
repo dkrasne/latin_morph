@@ -98,7 +98,8 @@ pronouns_page = st.Page("pronouns.py", title="Pronouns")
 adj_page = st.Page("adjectives.py", title="Adjectives and Adverbs")
 verbal_adj_page = st.Page("verbal_adj.py", title="Verbal Adjectives")
 data_page = st.Page("data.py", title="Session Stats & Data")
-test_page = st.Page("button_test.py", title="Test page")
+if st.context.headers["host"].startswith("localhost"):
+    test_page = st.Page("button_test.py", title="Test page")
 
 st.markdown("*Use the navigation menu to choose a part of speech to practice. (Click on* :material/keyboard_double_arrow_right: *at the upper left to open the menu.)*")
 
