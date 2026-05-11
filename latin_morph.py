@@ -77,7 +77,7 @@ if "active_expander" not in st.session_state:
     st.session_state["active_expander"] = ""
 
 if "supabase_connection" not in st.session_state:
-    st.session_state["supabase_connection"] = st.connection(name="supabase", type=SupabaseConnection)
+    st.session_state["supabase_connection"] = st.connection(name="supabase", type=SupabaseConnection, ttl="10m")
 
 ## these are for testing Supabase; delete them after testing ##
 if "user_id" not in st.session_state:

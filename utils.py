@@ -7,7 +7,6 @@ from datetime import datetime as dt, timezone
 # import time
 # import threading
 
-userid = st.session_state.user_id
 sb_conn = st.session_state.supabase_connection
 
 def clear_page(page_id):
@@ -74,6 +73,7 @@ def remove_macrons(text):
 
 
 def submit_and_check_answer():
+    userid = st.session_state.user_id
     user_answer = st.session_state.answer_input
     
     if not user_answer: # if an empty form is submitted, don't process the answer or disable the submit button.
