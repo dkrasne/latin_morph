@@ -7,7 +7,8 @@ st.set_page_config("Latin Morph!",
                    menu_items={
                        "About": "A pedagogical morphology tool for Latin students at any level to practice creating correct word forms."
                         },
-                    layout="centered"
+                    layout="centered",
+                    page_icon="./icons/latin_morph_icon_120px.png"
                     )
 
 # every page
@@ -121,6 +122,7 @@ if st.context.headers["host"].startswith("localhost"):
 
 choose_page = st.navigation(nav_dict)
 
+st.logo("./icons/latin_morph_icon.png", size="large")
 st.sidebar.select_slider("Auto-advance to next question?", 
                          options=[False] + list(range(5,61)), 
                          format_func=lambda x: "No" if x is False else str(x)+" sec", 
