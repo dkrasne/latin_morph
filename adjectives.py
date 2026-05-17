@@ -3,10 +3,12 @@ import random
 import time
 import pandas as pd
 import ast
-from utils import reset, new_question, submit_and_check_answer, clear_page, remove_macrons
+from utils import reset, new_question, submit_and_check_answer, clear_page, remove_macrons, send_setting
 from vocab import import_adjectives
 
 st.set_page_config("Latin Morph! Adjectives and Adverbs", layout="centered")
+
+st.session_state.adjectives_enforce_macrons = st.session_state.enforce_macrons["adjectives_enforce_macrons"]
 
 questions_asked = st.session_state.question_list
 
@@ -123,9 +125,19 @@ with option_expander:
         if not incl_adv:
             pos_list = ["adj"]
     with options_col:
+        def switch_adjective_macrons():
+            st.session_state.enforce_macrons["adjectives_enforce_macrons"] = st.session_state["adjectives_enforce_macrons"]
+            return
         st.markdown("Options:", help="You can adjust these options at any point.")
-        st.checkbox("Enforce macrons?", help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", key="enforce_macrons")
-        macrons = st.session_state.enforce_macrons
+        st.checkbox("Enforce macrons?", 
+                    help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
+                    key="adjectives_enforce_macrons",
+                    on_change=send_setting,
+                    args=(switch_adjective_macrons,),
+                    kwargs={"streamlit_page":"adjectives.py","setting_name":"adjectives_enforce_macrons"},
+                    # value=st.session_state.enforce_macrons["adjectives_enforce_macrons"]
+                    )
+        macrons = st.session_state.adjectives_enforce_macrons
         if macrons:
             st.markdown("You can copy and paste letters from here:")
             st.code("āēīōū", language=None)

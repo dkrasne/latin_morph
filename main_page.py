@@ -5,7 +5,7 @@ st.set_page_config("Latin Morph!", layout="centered")
 page_id = "main_page"
 st.session_state.curr_page_id = page_id
 
-
+# st.html("""<h1 style="margin-top:0em;"">Welcome to Latin Morph!</h1>""")
 st.markdown("""
             # Welcome to Latin Morph!
             
@@ -66,9 +66,12 @@ st.warning("""
             :warning:
             If you encounter any errors, please [report them](https://forms.gle/xT8hQ27sjposeXPc9). 
             (I also welcome feedback, using the same form!)
-            """)
+            """,)
 
 announcements = [
+    """
+:green-badge[New!] User accounts are now available!!! Save your question history across multiple session!
+""",
     """
 Adaptive learning has now been implemented across **all** parts of speech! 
 For an explanation of what this means, visit the About page.

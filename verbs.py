@@ -3,10 +3,12 @@ import random
 import time
 import pandas as pd
 import ast
-from utils import radio_change, reset, new_question, remove_macrons, submit_and_check_answer, clear_page
+from utils import radio_change, reset, new_question, remove_macrons, submit_and_check_answer, clear_page, send_setting
 from vocab import import_verbs
 
 st.set_page_config("Latin Morph! Verbs", layout="centered")
+
+st.session_state.verbs_enforce_macrons = st.session_state.enforce_macrons["verbs_enforce_macrons"]
 
 # if st.session_state.question_list:
 questions_asked = st.session_state.question_list
@@ -66,9 +68,19 @@ with option_expander:
     verb_options_col,options_col = st.columns([3,2])
 
     with options_col:
+        def switch_verb_macrons():
+            st.session_state.enforce_macrons["verbs_enforce_macrons"] = st.session_state["verbs_enforce_macrons"]
+            return
         st.markdown("Options:", help="You can adjust these options at any point.")
-        st.checkbox("Enforce macrons?", help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", key="enforce_macrons")
-        macrons = st.session_state.enforce_macrons
+        st.checkbox("Enforce macrons?", 
+                    help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
+                    key="verbs_enforce_macrons",
+                    on_change=send_setting,
+                    args=(switch_verb_macrons,),
+                    kwargs={"streamlit_page":"verbs.py","setting_name":"verbs_enforce_macrons"},
+                    # value=st.session_state.enforce_macrons["verbs_enforce_macrons"]
+                    )
+        macrons = st.session_state.verbs_enforce_macrons
         if macrons:
             st.markdown("You can copy and paste letters from here:")
             st.code("āēīōū", language=None)

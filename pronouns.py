@@ -2,13 +2,17 @@ import streamlit as st
 import random
 import time
 import pandas as pd
-from utils import radio_change, reset, new_question, submit_and_check_answer, clear_page
+from utils import radio_change, reset, new_question, submit_and_check_answer, clear_page, send_setting
 from vocab import import_pronouns
 
 st.set_page_config("Latin Morph! Pronouns", layout="centered")
                    
 # if st.session_state.question_list :
 questions_asked = st.session_state.question_list
+
+# if "pronouns_enforce_macrons" not in st.session_state:
+st.session_state.pronouns_enforce_macrons = st.session_state.enforce_macrons["pronouns_enforce_macrons"]
+
 
 page_id = "pronouns"
 clear_page(page_id)
@@ -49,8 +53,17 @@ with option_expander:
 
     with options_col:
         st.markdown("Options:", help="You can adjust these options at any point.")
-        st.checkbox("Enforce macrons?", help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", key="enforce_macrons")
-        macrons = st.session_state.enforce_macrons
+        def switch_pronoun_macrons():
+            st.session_state.enforce_macrons["pronouns_enforce_macrons"] = st.session_state.pronouns_enforce_macrons
+            return
+        st.checkbox("Enforce macrons?", 
+                    help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
+                    key="pronouns_enforce_macrons",
+                    on_change=send_setting,
+                    args=(switch_pronoun_macrons,),
+                    kwargs={"streamlit_page":"pronouns.py","setting_name":"pronouns_enforce_macrons"},
+                    )
+        macrons = st.session_state.pronouns_enforce_macrons
         if macrons:
             st.markdown("You can copy and paste letters from here:")
             st.code("āēīōū", language=None)

@@ -2,12 +2,11 @@ import streamlit as st
 # import random
 import unicodedata
 # from st_supabase_connection import SupabaseConnection
+from supabase import create_client, Client
 from datetime import datetime as dt, timezone
 # import traceback
 # import time
 # import threading
-
-sb_conn = st.session_state.supabase_connection
 
 def clear_page(page_id):
     if page_id != st.session_state.curr_page_id:
@@ -145,8 +144,6 @@ def submit_and_check_answer():
             if correct_flag is True:
                 st.session_state.current_score += 1
                 st.session_state.result_message = "**Good job!**"
-                if st.session_state.balloons is True:
-                    st.balloons()
             else:
                 st.session_state.result_message = "**Incorrect. Better luck next time!**"
 
@@ -156,18 +153,31 @@ def submit_and_check_answer():
                 st.session_state.question_list[-1]["correct"] = correct_flag  # write correctness to question_list
 
                 # if st.context.headers["host"].startswith("localhost"):
-                insert_dict = {
-                    "user_id": str(userid),
-                    "time_answered": dt.now(timezone.utc).isoformat(),
-                    "answer": st.session_state.question_list[-1]
-                    }
-                # print("This will be sent to the database:",insert_dict)
-                sb_conn.table("answer").insert(insert_dict).execute()
-                    #st.session_state.append_answer = True
-#            st.write(st.session_state.question_list[-1])
+                if st.user.is_logged_in is True:
+                    # pass
+                    insert_dict = {
+                        "user_id": str(userid),
+                        "time_answered": dt.now(timezone.utc).isoformat(),
+                        "answer": st.session_state.question_list[-1]
+                        }
+                    st.session_state.supabase_connection.table("answer").insert(insert_dict).execute()
 
     if st.session_state.auto_advance:
         st.session_state.auto_advance_trigger = True        
     else:
         st.session_state.auto_advance_trigger = False
     
+def send_setting(*args,**kwargs):
+    if args:
+        for func in args:
+            func()
+    if st.user.is_logged_in is False:
+        return
+    else:
+        value_dict = {}
+        for key, val in kwargs.items():
+            value_dict[key] = val
+        value_dict["user_id"] = st.session_state.user_id
+        value_dict["setting_value"] = st.session_state[kwargs["setting_name"]]
+        st.session_state.supabase_connection.table("user_setting").upsert(value_dict, on_conflict="user_id, streamlit_page, setting_name").execute()
+        # st.session_state.user_settings # update df

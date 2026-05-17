@@ -24,8 +24,8 @@ i+=1
 with st.expander("Why doesn't Latin Morph! store my settings?", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
-                This is a limitation of the framework used to build Latin Morph! In the future, there may be an option to log in, 
-                in which case your settings (and prior session histories) should be retained.
+                This is a limitation of the framework used to build Latin Morph! However, if you log in, 
+                the majority of your settings and prior session histories will be retained.
                 """)
 
 i+=1
@@ -129,16 +129,12 @@ i+=1
 with st.expander("What data does Latin Morph! store about me?", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
-                At the moment, nothing: I can see anonymized names (such as 'Climbing Pie' or 'Masked Dirigible') for the most recent 20 users 
+                If you are not logged in, nothing: I can see anonymized names (such as 'Climbing Pie' or 'Masked Dirigible') for the most recent 20 users 
                 and the approximate time that they accessed the site. 
                 If an error occurs while you're using the site, I can see technical information about the error, 
                 but not when it occurred or who was using the site at the time.
                 
-                If, in the future, there is an option to log in and save settings, then more data about you will be stored *if* you choose to log in.
-
-                Additionally, in preparation for instituting user logins, all answers are currently being collected in a database;
-                however, they are not tied to any sort of user identification.
-                Once user logins are instituted, answers will only be collected for users who choose to log in.
+                See the User Account page for information on what data is stored if you choose to log in.
                 """)
     
 i+=1
