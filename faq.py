@@ -16,7 +16,12 @@ with st.expander("""Why do I have to click "New Question" every single time?""",
     st.markdown("""
                 If you want to automatically advance to the next question after answering, 
                 you can change the auto-advance slider in the navigation menu.
-                By default, it's set to "off". However, you can change it to the number of seconds you want to wait before advancing (between 5 and 60 seconds). 
+                By default, it's set to "off". However, you can change it to the number of seconds you want to wait before advancing 
+                (between 5 and 60 seconds).
+                
+                The reason it doesn't advance instantly is pedagogical: 
+                I want you to have at least a moment to look at the correct answer 
+                (even if you got it correct, since there may be multiple correct answers).
                 You can still use "New Question" to advance faster, or skip a question if you want.
                 """)
 
@@ -39,6 +44,8 @@ with st.expander("How have you decided what vocabulary to include?",
                 or are words that I needed to add in order to test something.
                 Generally speaking, I initially only included sufficient words to test that all forms were being generated correctly 
                 and that irregular forms and other exceptions to rules were also being handled correctly.
+                I am now in the process of adding the example words used in various textbooks and grammars.
+
                 If there are specific words you would like me to add, please get in touch.
                 """, unsafe_allow_html=True)
 
@@ -114,6 +121,9 @@ with st.expander("Why can't I use Latin Morph! offline?",
     st.markdown("""
                 This is a limitation of the framework used to build Latin Morph! 
                 I truly hope to be able to produce an offline app version in the future.
+                
+                If you are logged in, Latin Morph! will not lose your session history during disconnects,
+                so although this isn't an actual solution, it can serve as a temporary bandaid to some of the issues.
                 """)
 
 i+=1
@@ -147,11 +157,12 @@ with st.expander("Did you use GenAI to build this?",
                 in particular to double-check &ndash; 
                 after I thought everything was operating correctly and had run numerous tests myself &ndash; 
                 that unexpected invalid or non-existent forms wouldn't be requested or produced, 
-                or that particular types of error wouldn't occur 
+                or that particular types of error that are difficult to test for wouldn't occur 
                 (although even then, I still had to double-check *its* claims, 
                 and I still never let it write any code for me,
                 and there were also plenty of issues that it *didn't* catch). 
                 It also sometimes assisted me in isolating the cause of errors, 
-                as well as in understanding certain peculiarities of the Streamlit framework.
+                as well as in understanding certain peculiarities of the Streamlit framework
+                and some problems related to the user login process.
                 """, 
                 unsafe_allow_html=True)

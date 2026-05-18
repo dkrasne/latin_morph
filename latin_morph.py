@@ -261,7 +261,7 @@ st.markdown("""
             """, unsafe_allow_html=True)
 
 # if st.context.headers.get("host","").startswith("localhost"):
-if st.user.is_logged_in and choose_page.title != "User Account":
+if st.user.is_logged_in and "User Account" not in choose_page.title:
     email = st.user.email.replace("@","<span>@</span>")
     # st.markdown(f"""
     #         <div><p style="margin-bottom:-.5em;padding-bottom:.5em;font-size:smaller;">

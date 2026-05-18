@@ -53,7 +53,7 @@ if st.user.is_logged_in:
     user_info = st.container(border=True)
     with user_info:
         st.write("You are logged in as", st.user.name, f"({st.user.email})")
-        logout_col,delete_col,_ = st.columns([1,2,2],gap=None)
+        logout_col,delete_col,_ = st.columns([1,2,2])
         with logout_col:
             logout_button = st.button(":material/logout: Log out", on_click=logout, 
                                     help="Use this button to log out of Latin Morph! You will be sent back to the main page after logging out.",
@@ -123,13 +123,16 @@ if st.user.is_logged_in:
                 
                 Select the part of speech that you wish to clear your answer history for. 
                 (This can be useful if you want to reset your progress, especially if you haven't used Latin Morph! in a while.)
-                """)
+                """,
+                help="""Clearing your history does not delete your answers from the database itself, 
+                but the adaptive learning algorithm will not take them into consideration, 
+                and you will no longer have access to them.""")
     noun_row = st.columns([2,1.5,1],vertical_alignment="center")
     verb_row = st.columns([2,1.5,1],vertical_alignment="center")
     adj_row = st.columns([2,1.5,1],vertical_alignment="center")
     adv_row = st.columns([2,1.5,1],vertical_alignment="center")
-    pron_row = st.columns([2,1.5,1],vertical_alignment="center")
     verbal_adj_row = st.columns([2,1.5,1],vertical_alignment="center")
+    pron_row = st.columns([2,1.5,1],vertical_alignment="center")
 
     noun_stats,noun_button = noun_row[0].container(), noun_row[1].container()
     verb_stats,verb_button = verb_row[0].container(), verb_row[1].container()

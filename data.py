@@ -55,10 +55,10 @@ st.markdown(
     (e.g., nouns grouped by declension; verbs grouped by conjugation, tense, voice, and mood; etc.).
     Once you have answered sufficient questions, you may find these aggregated results useful for knowing where to target your review.
 
-    As your answers are not preserved between sessions, you should download any table that you want to save, 
+    As your answers are not preserved between sessions (unless you are logged in), 
+    you should download any table that you want to save, 
     in order to have a record of your answers and overall results: 
-    to do so, hover over the table and select the first option 
-    ("Download as CSV," represented as a downward arrow) 
+    to do so, hover over the table and select :material/download: ("Download as CSV") 
     from the menu that appears in the upper right.
 
     Eventually, you will also be able to find other useful information about your session and progress on this page.
