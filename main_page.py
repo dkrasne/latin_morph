@@ -70,10 +70,10 @@ st.warning("""
 
 announcements = [
     """
-:green-badge[New!] User accounts are now available!!! Save your question history across multiple session!
+:green-badge[New!] :blue-badge[2026-May-17] User accounts are now available!!! Save your question history across multiple session!
 """,
     """
-Adaptive learning has now been implemented across **all** parts of speech! 
+:blue-badge[2026-Apr-30] Adaptive learning has now been implemented across **all** parts of speech! 
 For an explanation of what this means, visit the About page.
 """,
 

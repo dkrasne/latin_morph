@@ -125,7 +125,7 @@ if st.user.is_logged_in:
                 (This can be useful if you want to reset your progress, especially if you haven't used Latin Morph! in a while.)
                 """,
                 help="""Clearing your history does not delete your answers from the database itself, 
-                but the adaptive learning algorithm will not take them into consideration, 
+                but the adaptive learning algorithm and data page will not take them into consideration, 
                 and you will no longer have access to them.""")
     noun_row = st.columns([2,1.5,1],vertical_alignment="center")
     verb_row = st.columns([2,1.5,1],vertical_alignment="center")

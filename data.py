@@ -45,11 +45,11 @@ st.markdown(
     # Session Stats and Data
     
     {"Once you answer at least one question, this page will show" if not questions_answered else "This page shows"} 
-    the questions that you have answered during your current session, whether correctly or incorrectly, divided up by part of speech. 
+    the questions that you have answered{" during your current session" if not st.user.is_logged_in else ""}, whether correctly or incorrectly, divided up by part of speech. 
     (Any question that you have skipped does not appear.)
     You can sort the tables by any column; 
     by default, your incorrect answers appear first, 
-    and the words are listed in alphabetical order. 
+    and the words are listed in alphabetical order. {"(You can reset your stats by clearing your answer history on the User Account page.)" if st.user.is_logged_in else ""}
 
     Further down the page are aggregate results that show how well you have done in each category 
     (e.g., nouns grouped by declension; verbs grouped by conjugation, tense, voice, and mood; etc.).
