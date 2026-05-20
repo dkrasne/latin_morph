@@ -121,7 +121,7 @@ def submit_and_check_answer():
 
 
             # if 'enforce macrons' isn't checked, remove them from both the user answer and the correct answer
-            if not st.session_state.enforce_macrons:
+            if not st.session_state.enforce_macrons[f"{st.session_state.curr_page_id}_enforce_macrons"]:
 
                 if isinstance(correct_answer_check, list):
                     for i,answer_option in enumerate(correct_answer_check):

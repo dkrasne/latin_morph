@@ -36,16 +36,21 @@ with option_expander:
     with pronoun_type_col:
         # demonstratives
         demonstratives = st.multiselect("Choose which demonstrative pronouns to practice (they are all selected by default):", 
-                                        options=[k for k,v in pronoun_vocab.items() if v.get("demonstrative")],
-                                        default=[k for k,v in pronoun_vocab.items() if v.get("demonstrative")])
+                                        options=[k for k,v in pronoun_vocab.items() if v.get("type") == "demonstrative"],
+                                        default=[k for k,v in pronoun_vocab.items() if v.get("type") == "demonstrative"])
         # personal pronouns
         personal_pron = st.multiselect("Choose which personal pronouns to practice:", 
-                                        options=[k for k,v in pronoun_vocab.items() if v.get("pers_pron")],
-                                        default=[k for k,v in pronoun_vocab.items() if v.get("pers_pron")])
+                                        options=[k for k,v in pronoun_vocab.items() if v.get("type") == "pers_pron"],
+                                        default=[k for k,v in pronoun_vocab.items() if v.get("type") == "pers_pron"])
         # relative and interrogative pronouns
         rel_interr = st.multiselect("Choose which relative and interrogative pronouns to practice:", 
-                                        options=[k for k,v in pronoun_vocab.items() if v.get("rel_interrog")],
-                                        default=[k for k,v in pronoun_vocab.items() if v.get("rel_interrog")])
+                                        options=[k for k,v in pronoun_vocab.items() if v.get("type") == "rel_interrog"],
+                                        default=[k for k,v in pronoun_vocab.items() if v.get("type") == "rel_interrog"])
+        
+        # indefinite pronouns
+        indefinites = st.multiselect("Choose which indefinite pronouns to practice:",
+                                        options=[k for k,v in pronoun_vocab.items() if v.get("type") == "indefinite"],
+                                        default=[k for k,v in pronoun_vocab.items() if v.get("type") == "indefinite"])
 
         # if nos or vos selected: option to distinguish between partitive and non-partitive genitive forms of nōs and vōs
         if any(pn in personal_pron for pn in ["nōs","vōs"]):
@@ -68,7 +73,8 @@ with option_expander:
             st.markdown("You can copy and paste letters from here:")
             st.code("āēīōū", language=None)
 
-pron_list = demonstratives+personal_pron+rel_interr
+pron_list = demonstratives+personal_pron+rel_interr+indefinites
+#st.write(st.session_state.enforce_macrons)
 
 
 ## FILTER PRONOUNS ##
@@ -175,7 +181,7 @@ def gen_question():
         pronoun = random.choice(avail_pronouns)
         case = None
     while not case:
-        number = random.choice(pronoun_options["number"]) if not pronoun_vocab[pronoun].get("pers_pron") else None
+        number = random.choice(pronoun_options["number"]) if pronoun_vocab[pronoun].get("sg") and pronoun_vocab[pronoun].get("pl") else None
         gender = random.choice(pronoun_options["gender"]) if pronoun_vocab[pronoun].get("genders") else None
 
         # since sē has no nominative, ensure that nominative can't be chosen.

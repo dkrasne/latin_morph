@@ -502,12 +502,13 @@ else:
                     correct_answer = irreg_form
             if not correct_answer:
                 correct_ending = noun_endings[noun_decl][number][case]
-                if noun[-3:] == "ius" and noun_decl == "2_us" and number == "sg":
+                if ((noun[-3:] == "ius" and noun_decl == "2_us") or (noun[-3:] == "ium" and noun_decl == "2_neut")) and number == "sg":
                     if case in ["voc", "gen"]:
-                        noun_stem = noun_stem[:-1]
-                        if case == "voc":
+                        if case == "voc" and noun_decl == "2_us":
+                            noun_stem = noun_stem[:-1]
                             correct_ending = "ī"
                         if case == "gen":
+                            noun_stem = noun_stem[:-1]
                             correct_ending = ["iī","ī"]
                 if noun_vocab[noun].get("true_i_stem") is True and number == "sg":
                     if case == "acc":

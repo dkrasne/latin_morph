@@ -131,9 +131,9 @@ with option_expander:
 
     # with irreg_col:
         #master_irregular_verbs_list = ["sum", "possum", "eō", "ferō", "fīō", "volō", "nōlō", "mālō"]
-        master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if "irreg" in complete_verb_vocab[key]]
-        if "dō" in master_irregular_verbs_list:
-            master_irregular_verbs_list.remove("dō")
+        master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if complete_verb_vocab[key].get("irreg",{}).get("irreg") is True]
+        # if "dō" in master_irregular_verbs_list:
+        #     master_irregular_verbs_list.remove("dō")
         irreg_selector = st.multiselect("Choose which irregular verbs to practice:",
                                         master_irregular_verbs_list,
                                         default=master_irregular_verbs_list,

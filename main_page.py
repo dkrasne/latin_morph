@@ -15,15 +15,19 @@ st.markdown("""
             You can practice nouns, verbs, adjectives and adverbs, verbal adjectives (i.e., participles and gerundives), and pronouns.
             """)
 
-# new_user_info = st.expander(label="If this is your first visit, click here for some helpful information!")
-
-
-# with new_user_info:
+st.html("""
+        <style>
+        summary:hover {
+        text-decoration: underline 2px;
+        text-underline-position: under;
+        }
+        </style>
+        """)
 
 st.markdown("""
             <details>
             <summary>
-            <i>If this is your first visit, click here for some helpful information!</i>
+            <i>If this is your <b>first visit</b>, click here for some helpful information!</i>
             </summary>
 
             To get started, choose a part of speech that you want to practice. 
