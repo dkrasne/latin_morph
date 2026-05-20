@@ -1,14 +1,24 @@
 import streamlit as st
+from datetime import date, timedelta
 
 st.set_page_config("Latin Morph!", layout="centered")
 
 page_id = "main_page"
 st.session_state.curr_page_id = page_id
 
-# st.html("""<h1 style="margin-top:0em;"">Welcome to Latin Morph!</h1>""")
+st.title("Welcome to Latin Morph!")
+
+#### temporary announcements ####
+temp_announcements = [
+    {"date": date(2026, 5, 20),
+     "text": "Apologies if you got caught by the recent bug in macron-checking. This is now fixed!",
+    },
+    ]
+for announcement in [announce["text"] for announce in temp_announcements if announce["date"] >= date.today() - timedelta(days=3)]:
+    st.toast(announcement)
+##########
+
 st.markdown("""
-            # Welcome to Latin Morph!
-            
             **Latin Morph!** is a site for practicing your Latin word forms (morphology). 
             The goal is to create randomly-requested forms correctly, 
             allowing you to both reinforce your existing knowledge and discover from your incorrect answers where your knowledge of forms may be weak. 
@@ -74,7 +84,7 @@ st.warning("""
 
 announcements = [
     """
-:green-badge[New!] :blue-badge[2026-May-17] User accounts are now available!!! Save your question history across multiple session!
+:green-badge[New!] :blue-badge[2026-May-17] User accounts are now available!!! Save your question history across multiple sessions!
 """,
     """
 :blue-badge[2026-Apr-30] Adaptive learning has now been implemented across **all** parts of speech! 
