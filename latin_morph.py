@@ -20,6 +20,32 @@ st.set_page_config("Latin Morph!",
 # if st.user.is_logged_in:
 #     st.logout()
 
+def refresh_user_token():
+    sb_auth_apikey = st.secrets["connections"]["supabase"]["SUPABASE_SECRET_KEY"]
+    sb_conn_auth = create_client(sb_url, sb_auth_apikey)
+    response = sb_conn_auth.table("active_auth_users").select("id").eq("email", st.user.email).execute()
+    if not response.data:
+        # print("Rescue failed at sb_conn_auth: User email not found in database table.")
+        st.logout()
+    st.session_state.user_id = response.data[0]["id"]
+    user_id = st.session_state.user_id
+    expiry_time = int(time.time()) + 86400
+    payload = {
+        "role": "authenticated",
+        "aud": "authenticated",
+        "sub": user_id,
+        "exp": expiry_time
+    }
+    minted_token = jwt.encode(
+        payload=payload,
+        key=st.secrets["connections"]["supabase"]["SUPABASE_PRIVATE_KEY"],
+        algorithm="ES256",
+        headers={"kid": st.secrets["connections"]["supabase"]["SUPABASE_PRIVATE_KEY_ID"]}
+    )
+    st.session_state.user_token_expiry = expiry_time
+    options = ClientOptions(headers={"Authorization":f"Bearer {minted_token}"})
+    st.session_state.supabase_connection = create_client(sb_url, sb_apikey, options=options)
+
 
 ## SESSION STATE VARIABLES ##
 if "curr_page_id" not in st.session_state:
@@ -95,6 +121,8 @@ if "user_settings" not in st.session_state:
     st.session_state.user_settings = []
 if "current_user_consent" not in st.session_state:
     st.session_state.current_user_consent = None
+if "user_token_expiry" not in st.session_state:
+    st.session_state.user_token_expiry = None
 if "supabase_connection" not in st.session_state:
     st.session_state["supabase_connection"] = None
     if st.user.is_logged_in is True:
@@ -112,28 +140,31 @@ if "supabase_connection" not in st.session_state:
         except: #  except Exception as native_error
             # print(f"Native auth failed: {native_error}")
             try:
-                sb_auth_apikey = st.secrets["connections"]["supabase"]["SUPABASE_SECRET_KEY"]
-                sb_conn_auth = create_client(sb_url, sb_auth_apikey)
-                response = sb_conn_auth.table("active_auth_users").select("id").eq("email", st.user.email).execute()
-                if not response.data:
-                    # print("Rescue failed at sb_conn_auth: User email not found in database table.")
-                    st.logout()
-                st.session_state.user_id = response.data[0]["id"]
-                user_id = st.session_state.user_id
-                payload = {
-                    "role": "authenticated",
-                    "aud": "authenticated",
-                    "sub": user_id,
-                    "exp": int(time.time()) + 86400
-                }
-                minted_token = jwt.encode(
-                    payload=payload,
-                    key=st.secrets["connections"]["supabase"]["SUPABASE_PRIVATE_KEY"],
-                    algorithm="ES256",
-                    headers={"kid": st.secrets["connections"]["supabase"]["SUPABASE_PRIVATE_KEY_ID"]}
-                )
-                options = ClientOptions(headers={"Authorization":f"Bearer {minted_token}"})
-                st.session_state.supabase_connection = create_client(sb_url, sb_apikey, options=options)
+                refresh_user_token()
+                # sb_auth_apikey = st.secrets["connections"]["supabase"]["SUPABASE_SECRET_KEY"]
+                # sb_conn_auth = create_client(sb_url, sb_auth_apikey)
+                # response = sb_conn_auth.table("active_auth_users").select("id").eq("email", st.user.email).execute()
+                # if not response.data:
+                #     # print("Rescue failed at sb_conn_auth: User email not found in database table.")
+                #     st.logout()
+                # st.session_state.user_id = response.data[0]["id"]
+                # user_id = st.session_state.user_id
+                # expiry_time = int(time.time()) + 86400
+                # payload = {
+                #     "role": "authenticated",
+                #     "aud": "authenticated",
+                #     "sub": user_id,
+                #     "exp": expiry_time
+                # }
+                # minted_token = jwt.encode(
+                #     payload=payload,
+                #     key=st.secrets["connections"]["supabase"]["SUPABASE_PRIVATE_KEY"],
+                #     algorithm="ES256",
+                #     headers={"kid": st.secrets["connections"]["supabase"]["SUPABASE_PRIVATE_KEY_ID"]}
+                # )
+                # st.session_state.user_token_expiry = expiry_time
+                # options = ClientOptions(headers={"Authorization":f"Bearer {minted_token}"})
+                # st.session_state.supabase_connection = create_client(sb_url, sb_apikey, options=options)
             except: #  except Exception as rescue_error
                 # st.error(f"Rescue block crashed: {rescue_error}")
                 # st.stop()
@@ -184,6 +215,9 @@ if st.session_state.supabase_connection is not None and st.session_state.current
             st.rerun()
 
     show_consent_dialog()
+
+if st.user.is_logged_in and st.session_state.user_token_expiry is not None and time.time() > st.session_state.user_token_expiry - 60:
+    refresh_user_token()
 
 ## NAVIGATION MENU SIDE-BAR ##
 
