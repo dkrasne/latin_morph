@@ -181,3 +181,32 @@ def send_setting(*args,**kwargs):
         value_dict["setting_value"] = st.session_state[kwargs["setting_name"]]
         st.session_state.supabase_connection.table("user_setting").upsert(value_dict, on_conflict="user_id, streamlit_page, setting_name").execute()
         # st.session_state.user_settings # update df
+
+def save_defaults(page_id, defaults, **kwargs):
+    if st.user.is_logged_in is False:
+        return
+    values_list = []
+    for val_name,val in kwargs.items():
+        value_dict = {}
+        value_dict["user_id"] = st.session_state.user_id
+        value_dict["streamlit_page"] = f"{page_id}.py"
+        defaults[val_name] = val
+        value_dict["setting_name"] = val_name
+        value_dict["setting_value"] = val
+        values_list.append(value_dict)
+    st.session_state.supabase_connection.table("user_setting").upsert(values_list, on_conflict="user_id, streamlit_page, setting_name").execute()
+    st.session_state.default_settings[f"{page_id}.py"] = defaults
+    return
+
+def clear_defaults(page_id):
+    if not st.user.is_logged_in:
+        return
+    if st.session_state.default_settings.get(f"{page_id}.py") is not None:
+        defaults_to_clear = list(st.session_state.default_settings[f"{page_id}.py"])
+        # for key in defaults:
+        #     # st.session_state.default_settings[f"{page_id}.py"][key] = None
+        #     defaults_to_clear.append(key)
+            # defaults[key] = None
+        st.session_state.supabase_connection.table("user_setting").delete().eq("user_id", st.session_state.user_id).eq("streamlit_page",f"{page_id}.py").in_("setting_name",defaults_to_clear).execute()
+        st.session_state.default_settings.pop(f"{page_id}.py")
+    return

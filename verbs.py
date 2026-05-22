@@ -3,7 +3,7 @@ import random
 import time
 import pandas as pd
 import ast
-from utils import radio_change, reset, new_question, remove_macrons, submit_and_check_answer, clear_page, send_setting
+from utils import radio_change, reset, new_question, remove_macrons, submit_and_check_answer, clear_page, send_setting, save_defaults, clear_defaults
 from vocab import import_verbs
 
 st.set_page_config("Latin Morph! Verbs", layout="centered")
@@ -15,6 +15,8 @@ questions_asked = st.session_state.question_list
 
 page_id = "verbs"
 clear_page(page_id)
+
+defaults = st.session_state.default_settings.get(f"{page_id}.py", {})
 
 complete_verb_vocab = import_verbs()
 pres_sys = ["pres","fut","impf"]
@@ -67,87 +69,128 @@ option_expander = st.expander("Settings", expanded=True)
 with option_expander:
     verb_options_col,options_col = st.columns([3,2])
 
-    with options_col:
-        def switch_verb_macrons():
-            st.session_state.enforce_macrons["verbs_enforce_macrons"] = st.session_state["verbs_enforce_macrons"]
-            return
-        st.markdown("Options:", help="You can adjust these options at any point.")
-        st.checkbox("Enforce macrons?", 
-                    help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
-                    key="verbs_enforce_macrons",
-                    on_change=send_setting,
-                    args=(switch_verb_macrons,),
-                    kwargs={"streamlit_page":"verbs.py","setting_name":"verbs_enforce_macrons"},
-                    # value=st.session_state.enforce_macrons["verbs_enforce_macrons"]
-                    )
-        macrons = st.session_state.verbs_enforce_macrons
-        if macrons:
-            st.markdown("You can copy and paste letters from here:")
-            st.code("āēīōū", language=None)
-        show_principal_parts = st.checkbox("Show principal parts?", help="Select this box to show the verb's principal parts.")
+with options_col:
+    def switch_verb_macrons():
+        st.session_state.enforce_macrons["verbs_enforce_macrons"] = st.session_state["verbs_enforce_macrons"]
+        return
+    st.markdown("Options:", help="You can adjust these options at any point.")
+    st.checkbox("Enforce macrons?", 
+                help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
+                key="verbs_enforce_macrons",
+                on_change=send_setting,
+                args=(switch_verb_macrons,),
+                kwargs={"streamlit_page":"verbs.py","setting_name":"verbs_enforce_macrons"},
+                # value=st.session_state.enforce_macrons["verbs_enforce_macrons"]
+                )
+    macrons = st.session_state.verbs_enforce_macrons
+    if macrons:
+        st.markdown("You can copy and paste letters from here:")
+        st.code("āēīōū", language=None)
 
-    # with conjugation_col:
-    with verb_options_col:
-        # st.write("Important note: If you only want to practice irregular verbs, you must deselect all of the conjugations.")
+    st.html('<hr style="border-top: 1px dotted; border-bottom: none;">')
 
-        conjugation_selector = st.multiselect(
-            "Choose which conjugations to practice (they are all selected by default):",
-            conjugation_dict.keys(),
-            format_func = lambda x: conjugation_dict.get(x),
-            default = conjugation_dict.keys(),
-            help = "If no conjugations are chosen, only irregular verbs will be available. If you just want to practice irregular verbs, unselect all the conjugations."
-            )
+    show_principal_parts = st.checkbox("Show principal parts?", 
+                                        help="Select this box to show the verb's principal parts.",
+                                        value=defaults.get("show_principal_parts") if defaults.get("show_principal_parts") is not None else False)
 
-    # with tense_col:
-        master_tense_list = ["pres","impf","fut","perf","plupf","fut_pf"]
-        tense_dict = {abbrev: name for abbrev, name in zip(master_tense_list,[verb_abbrevs[tns] for tns in master_tense_list])}
+# with conjugation_col:
+with verb_options_col:
+    # st.write("Important note: If you only want to practice irregular verbs, you must deselect all of the conjugations.")
 
-        tense_selector = st.multiselect(
-            "Choose which tenses to practice:",
-            master_tense_list,
-            format_func = lambda x: tense_dict[x],
-            default=master_tense_list
+    conjugation_selector = st.multiselect(
+        "Choose which conjugations to practice (they are all selected by default):",
+        conjugation_dict.keys(),
+        format_func = lambda x: conjugation_dict.get(x),
+        default = defaults.get("conjugation_selector") if defaults.get("conjugation_selector") is not None else conjugation_dict.keys(),
+        help = "If no conjugations are chosen, only irregular verbs will be available."
         )
 
-    # with voice_col:
-        master_voice_list = ["act", "pass", "dep", "semidep"]
-        voice_dict = {abbrev: name for abbrev, name in zip(master_voice_list,[verb_abbrevs[vc] for vc in master_voice_list])}
+# with tense_col:
+    master_tense_list = ["pres","impf","fut","perf","plupf","fut_pf"]
+    tense_dict = {abbrev: name for abbrev, name in zip(master_tense_list,[verb_abbrevs[tns] for tns in master_tense_list])}
 
-        voice_selector = st.multiselect("Choose which voices and types of verb to practice:",
-                                        master_voice_list,
-                                        format_func=lambda x: voice_dict[x],
-                                        default = master_voice_list,
-                                        help = "If semi-deponent is selected, those verbs' active and deponent forms will be available, regardless of other voice selections.")
+    tense_selector = st.multiselect(
+        "Choose which tenses to practice:",
+        master_tense_list,
+        format_func = lambda x: tense_dict[x],
+        default=defaults.get("tense_selector") if defaults.get("tense_selector") is not None else master_tense_list
+    )
 
-    # with mood_col:
-        master_mood_list = ["ind", "subj", "inf", "impv"]
-        mood_dict = {abbrev: name for abbrev, name in zip(master_mood_list,[verb_abbrevs[md] for md in master_mood_list])}
+# with voice_col:
+    master_voice_list = ["act", "pass", "dep", "semidep"]
+    voice_dict = {abbrev: name for abbrev, name in zip(master_voice_list,[verb_abbrevs[vc] for vc in master_voice_list])}
 
-        mood_selector = st.multiselect("Choose which moods to practice:",
-                                    master_mood_list,
-                                    format_func=lambda x: mood_dict[x],
-                                    default=master_mood_list)
+    voice_selector = st.multiselect("Choose which voices and types of verb to practice:",
+                                    master_voice_list,
+                                    format_func=lambda x: voice_dict[x],
+                                    default = defaults.get("voice_selector") if defaults.get("voice_selector") is not None else master_voice_list,
+                                    help = "If semi-deponent is selected, those verbs' active and deponent forms will be available, regardless of other voice selections.")
+
+# with mood_col:
+    master_mood_list = ["ind", "subj", "inf", "impv"]
+    mood_dict = {abbrev: name for abbrev, name in zip(master_mood_list,[verb_abbrevs[md] for md in master_mood_list])}
+
+    mood_selector = st.multiselect("Choose which moods to practice:",
+                                master_mood_list,
+                                format_func=lambda x: mood_dict[x],
+                                default=defaults.get("mood_selector") if defaults.get("mood_selector") is not None else master_mood_list)
 
 
-    # with irreg_col:
-        #master_irregular_verbs_list = ["sum", "possum", "eō", "ferō", "fīō", "volō", "nōlō", "mālō"]
-        master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if complete_verb_vocab[key].get("irreg",{}).get("irreg") is True]
-        # if "dō" in master_irregular_verbs_list:
-        #     master_irregular_verbs_list.remove("dō")
-        irreg_selector = st.multiselect("Choose which irregular verbs to practice:",
-                                        master_irregular_verbs_list,
-                                        default=master_irregular_verbs_list,
-                                        help="Selected irregular verbs will be available regardless of which conjugations are selected above. If you just want to practice irregular verbs, unselect all the conjugations.")
+# with irreg_col:
+    #master_irregular_verbs_list = ["sum", "possum", "eō", "ferō", "fīō", "volō", "nōlō", "mālō"]
+    master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if complete_verb_vocab[key].get("irreg",{}).get("irreg") is True]
+    # if "dō" in master_irregular_verbs_list:
+    #     master_irregular_verbs_list.remove("dō")
+    irreg_selector = st.multiselect("Choose which irregular verbs to practice:",
+                                    master_irregular_verbs_list,
+                                    default=defaults.get("irreg_selector") if defaults.get("irreg_selector") is not None else master_irregular_verbs_list,
+                                    help="Selected irregular verbs will be available regardless of which conjugations are selected above. If you just want to practice irregular verbs, unselect all the conjugations.")
 
-        irreg_only = False
-        if irreg_selector:
-            irreg_only = st.checkbox("Practice *only* the selected irregular verbs?", help="Select this to practice *only* the selected irregular verbs; you can achieve the same effect by deselecting all of the conjugations above.")
+    irreg_only = False
+    if irreg_selector:
+        irreg_only = st.checkbox("Practice *only* the selected irregular verbs?", 
+                                    value=defaults.get("irreg_only") if defaults.get("irreg_only") is not None else False,
+                                    help="Select this to practice *only* the selected irregular verbs; you can achieve the same effect by deselecting all of the conjugations above.")
 
-        fut_impv = False
-        if "fut" in tense_selector and "impv" in mood_selector:
-            fut_impv = st.checkbox("Include future imperatives?", help="Future imperatives are very rare and not usually taught in introductory or intermediate courses, but you can include them if you want to!")
-        if st.session_state.question_generation_error_message:
-            st.write(st.session_state.question_generation_error_message)
+    fut_impv = False
+    if "fut" in tense_selector and "impv" in mood_selector:
+        fut_impv = st.checkbox("Include future imperatives?", 
+                                value=defaults.get("fut_impv") if defaults.get("fut_impv") is not None else False,
+                                help="Future imperatives are very rare and not usually taught in introductory or intermediate courses, but you can include them if you want to!")
+    if st.session_state.question_generation_error_message:
+        st.write(st.session_state.question_generation_error_message)
+
+with options_col:
+    if st.user.is_logged_in:
+        set_defaults_col, clear_defaults_col = st.container(vertical_alignment="bottom", height="stretch").columns(2, vertical_alignment="center")
+        with set_defaults_col:
+            st.button("Save settings", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Save your current verb settings (except macron enforcement) as your default.",
+                        on_click=save_defaults,
+                        args=(page_id, defaults,),
+                        kwargs={
+                            "show_principal_parts": show_principal_parts,
+                            "conjugation_selector": conjugation_selector,
+                            "tense_selector": tense_selector,
+                            "voice_selector": voice_selector,
+                            "mood_selector": mood_selector,
+                            "irreg_selector": irreg_selector,
+                            "irreg_only": irreg_only,
+                            "fut_impv": fut_impv
+                        },
+                        )
+        with clear_defaults_col:
+            st.button("Reset defaults", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Restore the generic Latin Morph! default settings for verbs.",
+                        on_click=clear_defaults,
+                        args=(page_id,),
+                        disabled=True if not defaults else False
+                        )
+
 
 ## DEFINE AVAILABLE VERBS AND VERB ENDINGS ##
 

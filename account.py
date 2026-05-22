@@ -105,19 +105,36 @@ else:
 
 
 if st.user.is_logged_in:
-    st.markdown(f"""
-                ### Current Settings
-                
-                - Consonantal *u*: {"**off**" if st.session_state.cons_u_normalize is False else "**on**"}
-                - Auto-advance: {"**off**" if st.session_state.auto_advance is False else "**"+str(st.session_state.auto_advance)+" seconds**"}
-                - Macrons
-                    - Nouns: {"**off**" if st.session_state.enforce_macrons["nouns_enforce_macrons"] is False else "**on**"}
-                    - Verbs: {"**off**" if st.session_state.enforce_macrons["verbs_enforce_macrons"] is False else "**on**"}
-                    - Adjectives and Adverbs: {"**off**" if st.session_state.enforce_macrons["adjectives_enforce_macrons"] is False else "**on**"}
-                    - Verbal Adjectives: {"**off**" if st.session_state.enforce_macrons["verbal_adj_enforce_macrons"] is False else "**on**"}
-                    - Pronouns: {"**off**" if st.session_state.enforce_macrons["pronouns_enforce_macrons"] is False else "**on**"}
+    st.markdown("### Current Settings")
+    global_col, pos_col = st.columns(2)
+    with global_col:
+        st.markdown(f"""
+                    - Consonantal *u*: {"**off**" if st.session_state.cons_u_normalize is False else "**on**"}
+                    - Auto-advance: {"**off**" if st.session_state.auto_advance is False else "**"+str(st.session_state.auto_advance)+" seconds**"}
+                    - Macrons
+                        - Nouns: {"**off**" if st.session_state.enforce_macrons["nouns_enforce_macrons"] is False else "**on**"}
+                        - Verbs: {"**off**" if st.session_state.enforce_macrons["verbs_enforce_macrons"] is False else "**on**"}
+                        - Adjectives and Adverbs: {"**off**" if st.session_state.enforce_macrons["adjectives_enforce_macrons"] is False else "**on**"}
+                        - Verbal Adjectives: {"**off**" if st.session_state.enforce_macrons["verbal_adj_enforce_macrons"] is False else "**on**"}
+                        - Pronouns: {"**off**" if st.session_state.enforce_macrons["pronouns_enforce_macrons"] is False else "**on**"}
+                    """)
+    with pos_col:
+        st.markdown(f"""
+            - Part of Speech settings
+                - Nouns: {"**default**" if not st.session_state.default_settings.get("nouns.py") else "**custom**"}
+                - Verbs: {"**default**" if not st.session_state.default_settings.get("verbs.py") else "**custom**"}
+                - Adjectives and Adverbs: {"**default**" if not st.session_state.default_settings.get("adjectives.py") else "**custom**"}
+                - Verbal Adjectives: {"**default**" if not st.session_state.default_settings.get("verbal_adj.py") else "**custom**"}
+                - Pronouns: {"**default**" if not st.session_state.default_settings.get("pronouns.py") else "**custom**"}
+            """)
 
-                """)
+    
+    #     for page in st.session_state.default_settings:
+    #         seg = st.expander(page.split(".")[0].title())
+    #         with seg:
+    #             for key, val in st.session_state.default_settings[page].items():
+    #                 st.markdown(f"{key}: {val}")
+
     st.markdown("""
                 ### Clear Answer History
                 

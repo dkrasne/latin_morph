@@ -2,7 +2,8 @@ import streamlit as st
 import random
 import time
 import pandas as pd
-from utils import radio_change, reset, new_question, submit_and_check_answer, clear_page, send_setting
+import ast
+from utils import radio_change, reset, new_question, submit_and_check_answer, clear_page, send_setting, save_defaults, clear_defaults
 from vocab import import_pronouns
 
 st.set_page_config("Latin Morph! Pronouns", layout="centered")
@@ -16,6 +17,12 @@ st.session_state.pronouns_enforce_macrons = st.session_state.enforce_macrons["pr
 
 page_id = "pronouns"
 clear_page(page_id)
+# print(st.session_state.supabase_connection.table("setting_type").select("*").execute().data)
+
+
+defaults = st.session_state.default_settings.get(f"{page_id}.py", {})
+# defaults["demonstratives"] = ["ipse"]
+# defaults["gen_forms_diff"] = True
 
 st.markdown("# Pronouns")
 
@@ -33,49 +40,79 @@ option_expander = st.expander("Settings", expanded=True)
 gen_forms_diff = None
 with option_expander:
     pronoun_type_col, options_col = st.columns([2,1], gap="medium")
-    with pronoun_type_col:
-        # demonstratives
-        demonstratives = st.multiselect("Choose which demonstrative pronouns to practice (they are all selected by default):", 
-                                        options=[k for k,v in pronoun_vocab.items() if v.get("type") == "demonstrative"],
-                                        default=[k for k,v in pronoun_vocab.items() if v.get("type") == "demonstrative"])
-        # personal pronouns
-        personal_pron = st.multiselect("Choose which personal pronouns to practice:", 
-                                        options=[k for k,v in pronoun_vocab.items() if v.get("type") == "pers_pron"],
-                                        default=[k for k,v in pronoun_vocab.items() if v.get("type") == "pers_pron"])
-        # relative and interrogative pronouns
-        rel_interr = st.multiselect("Choose which relative and interrogative pronouns to practice:", 
-                                        options=[k for k,v in pronoun_vocab.items() if v.get("type") == "rel_interrog"],
-                                        default=[k for k,v in pronoun_vocab.items() if v.get("type") == "rel_interrog"])
-        
-        # indefinite pronouns
-        indefinites = st.multiselect("Choose which indefinite pronouns to practice:",
-                                        options=[k for k,v in pronoun_vocab.items() if v.get("type") == "indefinite"],
-                                        default=[k for k,v in pronoun_vocab.items() if v.get("type") == "indefinite"])
 
-        # if nos or vos selected: option to distinguish between partitive and non-partitive genitive forms of nōs and vōs
-        if any(pn in personal_pron for pn in ["nōs","vōs"]):
-            gen_forms_diff = st.checkbox("Distinguish between partitive and non-partitive genitive?", help="If this box is selected, you will be asked to provide either the partitive or non-partitive genitive for *nōs* and *vōs*. If not selected, both forms will count as correct.")
+with pronoun_type_col:
+    # demonstratives
+    demonstratives = st.multiselect("Choose which demonstrative pronouns to practice (they are all selected by default):", 
+                                    options=[k for k,v in pronoun_vocab.items() if v.get("type") == "demonstrative"],
+                                    default=defaults.get("demonstratives") if defaults.get("demonstratives") is not None else [k for k,v in pronoun_vocab.items() if v.get("type") == "demonstrative"])
+    # personal pronouns
+    personal_pron = st.multiselect("Choose which personal pronouns to practice:", 
+                                    options=[k for k,v in pronoun_vocab.items() if v.get("type") == "pers_pron"],
+                                    default=defaults.get("personal_pron") if defaults.get("personal_pron") is not None else [k for k,v in pronoun_vocab.items() if v.get("type") == "pers_pron"])
+    # relative and interrogative pronouns
+    rel_interr = st.multiselect("Choose which relative and interrogative pronouns to practice:", 
+                                    options=[k for k,v in pronoun_vocab.items() if v.get("type") == "rel_interrog"],
+                                    default=defaults.get("rel_interr") if defaults.get("rel_interr") is not None else [k for k,v in pronoun_vocab.items() if v.get("type") == "rel_interrog"])
+    
+    # indefinite pronouns
+    indefinites = st.multiselect("Choose which indefinite pronouns to practice:",
+                                    options=[k for k,v in pronoun_vocab.items() if v.get("type") == "indefinite"],
+                                    default=defaults.get("indefinites") if defaults.get("indefinites") is not None else [k for k,v in pronoun_vocab.items() if v.get("type") == "indefinite"])
 
-    with options_col:
-        st.markdown("Options:", help="You can adjust these options at any point.")
-        def switch_pronoun_macrons():
-            st.session_state.enforce_macrons["pronouns_enforce_macrons"] = st.session_state.pronouns_enforce_macrons
-            return
-        st.checkbox("Enforce macrons?", 
-                    help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
-                    key="pronouns_enforce_macrons",
-                    on_change=send_setting,
-                    args=(switch_pronoun_macrons,),
-                    kwargs={"streamlit_page":"pronouns.py","setting_name":"pronouns_enforce_macrons"},
-                    )
-        macrons = st.session_state.pronouns_enforce_macrons
-        if macrons:
-            st.markdown("You can copy and paste letters from here:")
-            st.code("āēīōū", language=None)
+    # if nos or vos selected: option to distinguish between partitive and non-partitive genitive forms of nōs and vōs
+    if any(pn in personal_pron for pn in ["nōs","vōs"]):
+        gen_forms_diff = st.checkbox("Distinguish between partitive and non-partitive genitive?", 
+                                        help="If this box is selected, you will be asked to provide either the partitive or non-partitive genitive for *nōs* and *vōs*. If not selected, both forms will count as correct.", 
+                                        value=defaults.get("gen_forms_diff") if defaults.get("gen_forms_diff") is not None else False)
+
+with options_col:
+    st.markdown("Options:", help="You can adjust these options at any point.")
+    def switch_pronoun_macrons():
+        st.session_state.enforce_macrons["pronouns_enforce_macrons"] = st.session_state.pronouns_enforce_macrons
+        return
+    st.checkbox("Enforce macrons?", 
+                help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
+                key="pronouns_enforce_macrons",
+                on_change=send_setting,
+                args=(switch_pronoun_macrons,),
+                kwargs={"streamlit_page":"pronouns.py","setting_name":"pronouns_enforce_macrons"},
+                )
+    macrons = st.session_state.pronouns_enforce_macrons
+    if macrons:
+        st.markdown("You can copy and paste letters from here:")
+        st.code("āēīōū", language=None)
+
+    st.html('<hr style="border-top: 1px dotted; border-bottom: none;">')
+
+    if st.user.is_logged_in:
+        set_defaults_col, clear_defaults_col = st.container(vertical_alignment="bottom", height="stretch").columns(2, vertical_alignment="center")
+        with set_defaults_col:
+            st.button("Save settings", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Save your current pronoun settings (except macron enforcement) as your default.",
+                        on_click=save_defaults,
+                        args=(page_id, defaults,),
+                        kwargs={
+                            "demonstratives": demonstratives,
+                            "personal_pron": personal_pron,
+                            "rel_interr": rel_interr,
+                            "indefinites": indefinites,
+                            "gen_forms_diff": gen_forms_diff
+                        },
+                        )
+        with clear_defaults_col:
+            st.button("Reset defaults", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Restore the generic Latin Morph! default settings for pronouns.",
+                        on_click=clear_defaults,
+                        args=(page_id,),
+                        disabled=True if not defaults else False
+                        )
 
 pron_list = demonstratives+personal_pron+rel_interr+indefinites
-#st.write(st.session_state.enforce_macrons)
-
 
 ## FILTER PRONOUNS ##
 

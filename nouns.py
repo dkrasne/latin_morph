@@ -3,7 +3,7 @@ import random
 import time
 import pandas as pd
 import ast
-from utils import radio_change, reset, new_question, submit_and_check_answer, clear_page, send_setting
+from utils import radio_change, reset, new_question, submit_and_check_answer, clear_page, send_setting, save_defaults, clear_defaults
 from vocab import import_nouns
 
 
@@ -18,6 +18,8 @@ st.session_state.nouns_enforce_macrons = st.session_state.enforce_macrons["nouns
 
 page_id = "nouns"
 clear_page(page_id)
+
+defaults = st.session_state.default_settings.get(f"{page_id}.py", {})
 
 st.markdown("# Nouns")
 
@@ -57,13 +59,23 @@ with col_options:
     if macrons:
         st.markdown("You can copy and paste letters from here:")
         st.code("āēīōū", language=None)
-    show_declension = st.checkbox("Show declension?", help="Select this box to show the noun's declension.")
-    show_stem = st.checkbox("Show noun stem/base?", help="Select this box to show the noun base. (The base is the stem without any of the trailing vowels that sometimes combine with endings.)")
+
+    st.html('<hr style="border-top: 1px dotted; border-bottom: none;">')
+
+    show_declension = st.checkbox("Show declension?", 
+                                  help="Select this box to show the noun's declension.", 
+                                  value=defaults.get("show_declension") if defaults.get("show_declension") is not None else False)
+    show_stem = st.checkbox("Show noun stem/base?", 
+                            help="Select this box to show the noun base. (The base is the stem without any of the trailing vowels that sometimes combine with endings.)",
+                            value=defaults.get("show_stem") if defaults.get("show_stem") is not None else False)
 
 with col_declension:
     # radio_change() is defined in utils.py
     # declension = st.radio("Choose a declension to practice:",{"random":"random"} | declension_dict, on_change=radio_change)
-    declension = st.multiselect("Choose which declensions to practice (they are all selected by default):", options=list(declension_dict.keys()), default=list(declension_dict.keys()), help="If the selected declension(s) include irregular nouns, an option will be shown to include or exclude them.")
+    declension = st.multiselect("Choose which declensions to practice (they are all selected by default):", 
+                                options=list(declension_dict.keys()), 
+                                default=defaults.get("declension") if defaults.get("declension") is not None else list(declension_dict.keys()), 
+                                help="If the selected declension(s) include irregular nouns, an option will be shown to include or exclude them.")
 
 
 ## DEFINE AVAILABLE NOUNS AND NOUN ENDINGS ##
@@ -95,9 +107,44 @@ irregs_only = "No"
 
 with col_declension:
     if len(irreg_nouns) > 0:
-        irregs_include = st.multiselect("Choose which irregular nouns to include:", options=irreg_nouns, default=irreg_nouns, help="Only irregular nouns for the selected declension(s) are shown.")
+        irregs_include = st.multiselect("Choose which irregular nouns to include:", 
+                                        options=irreg_nouns, 
+                                        default=defaults.get("irregs_include") if defaults.get("irregs_include") is not None else irreg_nouns, 
+                                        help="Only irregular nouns for the selected declension(s) are shown.")
         if len(irregs_include) > 0:
-            irregs_only = st.radio("Include *only* the selected irregular nouns?", options=["No", "Yes"], horizontal=True)
+            irregs_only = st.radio("Include *only* the selected irregular nouns?", 
+                                   options=["No", "Yes"], 
+                                   index=["No", "Yes"].index(defaults.get("irregs_only")) if defaults.get("irregs_only") is not None else 0,                                   
+                                   horizontal=True)
+
+with col_options:
+    if st.user.is_logged_in:
+        set_defaults_col, clear_defaults_col = st.container(vertical_alignment="bottom", height="stretch").columns(2, vertical_alignment="center")
+        with set_defaults_col:
+            st.button("Save settings", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Save your current noun settings (except macron enforcement) as your default.",
+                        on_click=save_defaults,
+                        args=(page_id, defaults,),
+                        kwargs={
+                            "show_declension": show_declension,
+                            "show_stem": show_stem,
+                            "irregs_include": irregs_include,
+                            "irregs_only": irregs_only,
+                            "declension": declension
+                            }
+                        )
+        with clear_defaults_col:
+            st.button("Reset defaults", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Restore the generic Latin Morph! default settings for nouns.",
+                        on_click=clear_defaults,
+                        args=(page_id,),
+                        disabled=True if not defaults else False
+                        )
+
 
 for noun in irreg_nouns:
     if noun not in irregs_include:

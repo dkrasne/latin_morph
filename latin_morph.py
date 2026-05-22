@@ -14,7 +14,7 @@ st.set_page_config("Latin Morph!",
                        "About": "A pedagogical morphology tool for Latin students at any level to practice creating correct word forms."
                         },
                     layout="centered",
-                    page_icon="./icons/latin_morph_icon_120px.png"
+                    page_icon="https://darcykrasne.com/digital_humanities/latin_morph/latin_morph_icon_120px.png"
                     )
 
 # if st.user.is_logged_in:
@@ -45,7 +45,6 @@ def refresh_user_token():
     st.session_state.user_token_expiry = expiry_time
     options = ClientOptions(headers={"Authorization":f"Bearer {minted_token}"})
     st.session_state.supabase_connection = create_client(sb_url, sb_apikey, options=options)
-
 
 ## SESSION STATE VARIABLES ##
 if "curr_page_id" not in st.session_state:
@@ -88,19 +87,14 @@ if "answer_display_message" not in st.session_state:
     st.session_state["answer_display_message"] = ""
 if not "irreg_alert_message" in st.session_state:
     st.session_state["irreg_alert_message"] = ""
-
 if "auto_advance" not in st.session_state:
     st.session_state.auto_advance = False
 if "auto_advance_trigger" not in st.session_state:
     st.session_state.auto_advance_trigger = False
 if "gen_func" not in st.session_state:
     st.session_state.gen_func = ""
-# if "verb_expander" not in st.session_state:
-#     st.session_state["verb_expander"] = True
 if "question_list" not in st.session_state:
     st.session_state["question_list"] = []
-# if "store_questions" not in st.session_state:
-#     st.session_state["store_questions"] = [item for item in st.session_state.question_list]
 if "adap_learning_frequency" not in st.session_state:
     st.session_state["adap_learning_frequency"] = 2
 if "cons_u_normalize" not in st.session_state:
@@ -119,6 +113,8 @@ if "user_history" not in st.session_state:
     st.session_state.user_history = []
 if "user_settings" not in st.session_state:
     st.session_state.user_settings = []
+if "default_settings" not in st.session_state:
+    st.session_state.default_settings = {}
 if "current_user_consent" not in st.session_state:
     st.session_state.current_user_consent = None
 if "user_token_expiry" not in st.session_state:
@@ -185,10 +181,22 @@ if "supabase_connection" not in st.session_state:
                     # .assign(setting_value = lambda df: df.setting_value.apply(lambda x: json.loads(x) if isinstance(x, str) else x))
             )
             for idx, row in st.session_state.user_settings.iterrows():
-                if "macrons" not in row["setting_name"]:
+                if row["streamlit_page"] == "latin_morph.py":
                     st.session_state[row["setting_name"]] = row["setting_value"]
-                else:
+                elif "macrons" in row["setting_name"]:
                     st.session_state.enforce_macrons[row["setting_name"]] = row["setting_value"]
+                # else:
+                #     if row["streamlit_page"] not in st.session_state.default_settings:
+                #         st.session_state.default_settings
+                #     pass
+            default_dict = st.session_state.default_settings
+            for page in list(st.session_state.user_settings.streamlit_page.unique()):
+                # default_dict[page] = {}
+                # for idx, row in st.session_state.user_settings.query(f"streamlit_page == '{page}'").iterrows():
+                #     default_dict[page][row["setting_name"]] = default_dict[page][row["setting_value"]]
+                df = st.session_state.user_settings.query(f"streamlit_page == '{page}'")
+                default_dict[page] = dict(zip(df["setting_name"],df["setting_value"]))
+
 
 if st.session_state.supabase_connection is not None and st.session_state.current_user_consent is None:
     @st.dialog("User Consent",dismissible=False)
@@ -253,7 +261,7 @@ if st.context.headers.get("host","").startswith("localhost"):
 choose_page = st.navigation(nav_dict)
 
 
-st.logo("./icons/latin_morph_icon.png", size="large")
+st.logo("https://darcykrasne.com/digital_humanities/latin_morph/latin_morph_icon_120px.png", size="large")
 st.sidebar.select_slider("Auto-advance to next question?", 
                          options=[False] + list(range(5,61)), 
                          format_func=lambda x: "No" if x is False else str(x)+" sec", 

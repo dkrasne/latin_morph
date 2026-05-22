@@ -3,7 +3,7 @@ import random
 import time
 import pandas as pd
 import ast
-from utils import reset, new_question, submit_and_check_answer, clear_page, remove_macrons, send_setting
+from utils import reset, new_question, submit_and_check_answer, clear_page, remove_macrons, send_setting, save_defaults, clear_defaults
 from vocab import import_verbs
 
 st.set_page_config("Latin Morph! Verbal Adjectives", layout="centered")
@@ -15,6 +15,8 @@ questions_asked = st.session_state.question_list
 
 page_id = "verbal_adj"
 clear_page(page_id)
+
+defaults = st.session_state.default_settings.get(f"{page_id}.py", {})
 
 complete_verb_vocab = import_verbs()
 
@@ -199,66 +201,96 @@ option_expander = st.expander("Settings", expanded=True)
 with option_expander:
     ptc_options_col,options_col = st.columns([3,2])
 
-    with options_col:
-        def switch_verbal_adj_macrons():
-            st.session_state.enforce_macrons["verbal_adj_enforce_macrons"] = st.session_state["verbal_adj_enforce_macrons"]
-            return
-        st.markdown("Options:", help="You can adjust these options at any point.")
-        st.checkbox("Enforce macrons?", 
-                    help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
-                    key="verbal_adj_enforce_macrons",
-                    on_change=send_setting,
-                    kwargs={"streamlit_page":"verbal_adj.py","setting_name":"verbal_adj_enforce_macrons"},
-                    args=(switch_verbal_adj_macrons,),
-                    # value=st.session_state.enforce_macrons["verbal_adj_enforce_macrons"]
-                    )
-        macrons = st.session_state.verbal_adj_enforce_macrons
-        if macrons:
-            st.markdown("You can copy and paste letters from here:")
-            st.code("āēīōū", language=None)
-        show_principal_parts = st.checkbox("Show principal parts?", help="Select this box to show the verb's principal parts.")
+with options_col:
+    def switch_verbal_adj_macrons():
+        st.session_state.enforce_macrons["verbal_adj_enforce_macrons"] = st.session_state["verbal_adj_enforce_macrons"]
+        return
+    st.markdown("Options:", help="You can adjust these options at any point.")
+    st.checkbox("Enforce macrons?", 
+                help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
+                key="verbal_adj_enforce_macrons",
+                on_change=send_setting,
+                kwargs={"streamlit_page":"verbal_adj.py","setting_name":"verbal_adj_enforce_macrons"},
+                args=(switch_verbal_adj_macrons,),
+                # value=st.session_state.enforce_macrons["verbal_adj_enforce_macrons"]
+                )
+    macrons = st.session_state.verbal_adj_enforce_macrons
+    if macrons:
+        st.markdown("You can copy and paste letters from here:")
+        st.code("āēīōū", language=None)
 
-    # with conjugation_col:
-    with ptc_options_col:
-        conjugation_selector = st.multiselect(
-            "Choose which conjugations to practice (they are all selected by default):",
-            conjugation_dict.keys(),
-            format_func = lambda x: conjugation_dict.get(x),
-            default = conjugation_dict.keys(),
-            help = "If no conjugations are chosen, only irregular verbs will be available. If you just want to practice irregular verbs, unselect all the conjugations."
-            )
+    st.html('<hr style="border-top: 1px dotted; border-bottom: none;">')
 
-        master_ptc_list = ["pap", "ppp", "fap", "gdv"]
-        ptc_dict = {abbrev: name for abbrev, name in zip(master_ptc_list, [abbrevs[ptc] for ptc in master_ptc_list])}
-        ptc_selector = st.multiselect(
-            "Choose which types of verbal adjective to practice:",
-            master_ptc_list,
-            format_func=lambda x: ptc_dict[x],
-            default=master_ptc_list,
-            help='The term "gerundive" covers what some books refer to as the "future passive participle," so "future participle" refers only to active/deponent forms.'
+    show_principal_parts = st.checkbox("Show principal parts?", 
+                                       value=defaults.get("show_principal_parts") if defaults.get("show_principal_parts") is not None else False,
+                                       help="Select this box to show the verb's principal parts.")
+
+# with conjugation_col:
+with ptc_options_col:
+    conjugation_selector = st.multiselect(
+        "Choose which conjugations to practice (they are all selected by default):",
+        conjugation_dict.keys(),
+        format_func = lambda x: conjugation_dict.get(x),
+        default = defaults.get("conjugation_selector") if defaults.get("conjugation_selector") is not None else conjugation_dict.keys(),
+        help = "If no conjugations are chosen, only irregular verbs will be available. If you just want to practice irregular verbs, unselect all the conjugations."
         )
 
-    # with voice_col:
-        master_voice_list = ["act", "dep", "semidep"]
-        voice_dict = {abbrev: name for abbrev, name in zip(master_voice_list,[abbrevs[vc] for vc in master_voice_list])}
+    master_ptc_list = ["pap", "ppp", "fap", "gdv"]
+    ptc_dict = {abbrev: name for abbrev, name in zip(master_ptc_list, [abbrevs[ptc] for ptc in master_ptc_list])}
+    ptc_selector = st.multiselect(
+        "Choose which types of verbal adjective to practice:",
+        master_ptc_list,
+        format_func=lambda x: ptc_dict[x],
+        default=defaults.get("ptc_selector") if defaults.get("ptc_selector") is not None else master_ptc_list,
+        help='The term "gerundive" covers what some books refer to as the "future passive participle," so "future participle" refers only to active/deponent forms.'
+    )
 
-        voice_selector = st.multiselect("Choose which types of verb to practice:",
-                                        master_voice_list,
-                                        format_func=lambda x: voice_dict[x],
-                                        default = master_voice_list,
-                                        help = '"Active" here refers to all non-deponent verbs; whether an active or passive form is requested will depend on the type of verbal adjective selected.')
+# with voice_col:
+    master_voice_list = ["act", "dep", "semidep"]
+    voice_dict = {abbrev: name for abbrev, name in zip(master_voice_list,[abbrevs[vc] for vc in master_voice_list])}
 
-    # with irreg_col:
-        #master_irregular_verbs_list = ["sum", "possum", "eō", "ferō", "fīō", "volō", "nōlō", "mālō"]
-        master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if "irreg" in complete_verb_vocab[key]]
-        master_irregular_verbs_list.remove("mālō")
-        if "dō" in master_irregular_verbs_list:
-            master_irregular_verbs_list.remove("dō")
-        irreg_selector = st.multiselect("Choose which irregular verbs to practice:",
-                                        master_irregular_verbs_list,
-                                        default=master_irregular_verbs_list,
-                                        help="Selected irregular verbs will be available regardless of which conjugations are selected above. If you just want to practice irregular verbs, unselect all the conjugations.")
+    voice_selector = st.multiselect("Choose which types of verb to practice:",
+                                    master_voice_list,
+                                    format_func=lambda x: voice_dict[x],
+                                    default = defaults.get("voice_selector") if defaults.get("voice_selector") is not None else master_voice_list,
+                                    help = '"Active" here refers to all non-deponent verbs; whether an active or passive form is requested will depend on the type of verbal adjective selected.')
 
+    master_irregular_verbs_list = [key for key in complete_verb_vocab.keys() if complete_verb_vocab[key].get("irreg",{}).get("irreg") is True]
+    master_irregular_verbs_list.remove("mālō")
+    # if "dō" in master_irregular_verbs_list:
+    #     master_irregular_verbs_list.remove("dō")
+    irreg_selector = st.multiselect("Choose which irregular verbs to practice:",
+                                    master_irregular_verbs_list,
+                                    default=defaults.get("irreg_selector") if defaults.get("irreg_selector") is not None else master_irregular_verbs_list,
+                                    help="Selected irregular verbs will be available regardless of which conjugations are selected above. If you just want to practice irregular verbs, unselect all the conjugations.")
+
+with options_col:
+    if st.user.is_logged_in:
+        set_defaults_col, clear_defaults_col = st.container(vertical_alignment="bottom", height="stretch").columns(2, vertical_alignment="center")
+        with set_defaults_col:
+            st.button("Save settings", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Save your current verbal adjective settings (except macron enforcement) as your default.",
+                        on_click=save_defaults,
+                        args=(page_id, defaults,),
+                        kwargs={
+                            "show_principal_parts": show_principal_parts,
+                            "conjugation_selector": conjugation_selector,
+                            "ptc_selector": ptc_selector,
+                            "voice_selector": voice_selector,
+                            "irreg_selector": irreg_selector
+                            },
+                        )
+        with clear_defaults_col:
+            st.button("Reset defaults", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Restore the generic Latin Morph! default settings for verbal adjectives.",
+                        on_click=clear_defaults,
+                        args=(page_id,),
+                        disabled=True if not defaults else False
+                        )
 
 verb_vocab = {key: val for key, val in complete_verb_vocab.items() if not (all(val.get(ptc) is None for ptc in ["pap","ppp","fap","gdv"]) and all(ptc in val for ptc in ["pap","gdv"]))}
 for vb in master_irregular_verbs_list:

@@ -3,7 +3,7 @@ import random
 import time
 import pandas as pd
 import ast
-from utils import reset, new_question, submit_and_check_answer, clear_page, remove_macrons, send_setting
+from utils import reset, new_question, submit_and_check_answer, clear_page, remove_macrons, send_setting, save_defaults, clear_defaults
 from vocab import import_adjectives
 
 st.set_page_config("Latin Morph! Adjectives and Adverbs", layout="centered")
@@ -15,6 +15,7 @@ questions_asked = st.session_state.question_list
 page_id = "adjectives"
 clear_page(page_id)
 
+defaults = st.session_state.default_settings.get(f"{page_id}.py", {})
 
 adj_vocab = import_adjectives()
 cons_stems = ["vetus","compos", "dīves", "particeps", "pauper", "prīnceps", "sōspes", "superstes"]
@@ -66,84 +67,127 @@ adj_abbrevs = {
 option_expander = st.expander("Settings", expanded=True)
 
 with option_expander:
-
     adj_options_col,options_col = st.columns([3,2])
 
-    with adj_options_col:
-        # declensions
-        master_decl_list = [(1,2), 3]
-        declension = st.radio("Choose a declension to practice:",
-                            options=["random"]+[decl for decl in master_decl_list], 
-                            format_func=lambda x: ({"random": "Random"} | adj_abbrevs["decl"]).get(x))
-        # degree
-        master_degree_list = list(adj_abbrevs["degree"].keys())
-        degree_list = st.multiselect(
-            "Choose which degrees to include (they are all selected by default):", 
-            [deg for deg in master_degree_list],
-            default=[deg for deg in master_degree_list],
-            format_func=lambda x: adj_abbrevs["degree"].get(x),
-            help='Positive degree refers to "regular" adjectives and adverbs that are neither comparative nor superlative.'
-            )
-        # numerals
-        cardinal_select = []
-        cardinal_radio = "No"
-        incl_cardinals = False
-        incl_pronominals = False
+with adj_options_col:
+    # declensions
+    master_decl_list = [(1,2), 3]
+    declension = st.radio("Choose a declension to practice:",
+                        options=["random"]+[decl for decl in master_decl_list], 
+                        index=(["random"]+[decl for decl in master_decl_list]).index(defaults.get("declension")) if defaults.get("declension") is not None else 0,
+                        format_func=lambda x: ({"random": "Random"} | adj_abbrevs["decl"]).get(x))
+    # degree
+    master_degree_list = list(adj_abbrevs["degree"].keys())
+    degree_list = st.multiselect(
+        "Choose which degrees to include (they are all selected by default):", 
+        [deg for deg in master_degree_list],
+        default=defaults.get("degree_list") if defaults.get("degree_list") is not None else [deg for deg in master_degree_list],
+        format_func=lambda x: adj_abbrevs["degree"].get(x),
+        help='Positive degree refers to "regular" adjectives and adverbs that are neither comparative nor superlative.'
+        )
+    # numerals
+    cardinal_select = []
+    cardinal_radio = "No"
+    incl_cardinals = False
+    incl_pronominals = False
 
-        if "pos" in degree_list:
-            incl_cardinals = st.checkbox("Include cardinal numbers?", 
-                                        value=True, 
-                                        key="incl_cardinals", 
-                                        help="Select this box to include declinable cardinal numbers (one, two, and three).")
-            if incl_cardinals:
-                cardinal_radio = st.radio("Include *only* cardinal numbers?",
-                                        options = ["No","Yes"], horizontal=True,
-                                        help="If 'Yes' is selected, then degree is ignored since numbers have no comparative or superlative forms.")
-                cardinal_select = st.multiselect("Choose which numbers to include:", 
-                                                options={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
-                                                default={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
-                                                help="All cardinal numbers selected here will be included if the 'random declension' option is chosen above; otherwise only the numbers belonging to the specified declension will be included. (*ūnus* can be selected here *or* as part of pronominal adjectives to be included.)")
-            # unus nauta adjectives - T/F flag
-            if declension in ["random", (1,2)]:
-                incl_pronominals = st.checkbox("Include pronominal (UNUS NAUTA) adjectives?", 
-                            value=True, 
-                            key="incl_pronominals", 
-                            help="Select this box to include the nine pronominal (so-called UNUS NAUTA) adjectives: *ūnus*, *nūllus*, *ūllus*, *sōlus*, *neuter*, *alter*, *uter*, *tōtus*, *alius*. (*ūnus* can be selected here *or* under cardinal numbers to be included.)")
-        # non-i-stem 3rd decl. adjectives - T/F flag
-        incl_cons_stems = False
-        if declension in ["random", 3]:
-            incl_cons_stems = st.checkbox("Include non-i-stem 3rd declension adjectives?",
-                                        value=True, key="incl_cons_stems",
-                                        help="Select this box to include 3rd declension adjectives such as *vetus* that do not follow the i-stem pattern for endings.")
-        
-        # adverbs
-        ## MAY NEED TO CHANGE THIS TO ACCOMMODATE ADVERB-ONLY OPTION
-        pos_list = ["adj","adv"]
-        incl_adv = st.checkbox("Include adverbs?", 
-                            value=True, key="incl_adv", 
-                            help="Select this box to include adverbial forms of adjectives; if not selected, you will only be tested on adjectival forms.")
-        if not incl_adv:
-            pos_list = ["adj"]
-    with options_col:
-        def switch_adjective_macrons():
-            st.session_state.enforce_macrons["adjectives_enforce_macrons"] = st.session_state["adjectives_enforce_macrons"]
-            return
-        st.markdown("Options:", help="You can adjust these options at any point.")
-        st.checkbox("Enforce macrons?", 
-                    help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
-                    key="adjectives_enforce_macrons",
-                    on_change=send_setting,
-                    args=(switch_adjective_macrons,),
-                    kwargs={"streamlit_page":"adjectives.py","setting_name":"adjectives_enforce_macrons"},
-                    # value=st.session_state.enforce_macrons["adjectives_enforce_macrons"]
-                    )
-        macrons = st.session_state.adjectives_enforce_macrons
-        if macrons:
-            st.markdown("You can copy and paste letters from here:")
-            st.code("āēīōū", language=None)
-        dictionary_entry = st.checkbox("Show the dictionary entry?", key="dictionary_entry", help="Select this box to see the adjective's nominative singular forms.")
-        irreg_alert = st.checkbox("Show a message if the form or stem is irregular?", key="irreg_alert", help="Select this box to be alerted if a form is irregular or uses an irregular stem.")
+    if "pos" in degree_list:
+        incl_cardinals = st.checkbox("Include cardinal numbers?", 
+                                    value=defaults.get("incl_cardinals") if defaults.get("incl_cardinals") is not None else True, 
+                                    # key="incl_cardinals", 
+                                    help="Select this box to include declinable cardinal numbers (one, two, and three).")
+        if incl_cardinals:
+            cardinal_radio = st.radio("Include *only* cardinal numbers?",
+                                    options = ["No","Yes"], horizontal=True,
+                                    index=["No","Yes"].index(defaults.get("cardinal_radio")) if defaults.get("cardinal_radio") is not None else 0,
+                                    help="If 'Yes' is selected, then degree is ignored since numbers have no comparative or superlative forms.")
+            cardinal_select = st.multiselect("Choose which numbers to include:", 
+                                            options={k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
+                                            default=defaults.get("cardinal_select") if defaults.get("cardinal_select") is not None else {k:v for k,v in adj_vocab.items() if v.get("cardinal")}.keys(),
+                                            help="All cardinal numbers selected here will be included if the 'random declension' option is chosen above; otherwise only the numbers belonging to the specified declension will be included. (*ūnus* can be selected here *or* as part of pronominal adjectives to be included.)")
+        # unus nauta adjectives - T/F flag
+        if declension in ["random", (1,2)]:
+            incl_pronominals = st.checkbox("Include pronominal (UNUS NAUTA) adjectives?", 
+                        value=defaults.get("incl_pronominals") if defaults.get("incl_pronominals") is not None else True, 
+                        # key="incl_pronominals", 
+                        help="Select this box to include the nine pronominal (so-called UNUS NAUTA) adjectives: *ūnus*, *nūllus*, *ūllus*, *sōlus*, *neuter*, *alter*, *uter*, *tōtus*, *alius*. (*ūnus* can be selected here *or* under cardinal numbers to be included.)")
+    # non-i-stem 3rd decl. adjectives - T/F flag
+    incl_cons_stems = False
+    if declension in ["random", 3]:
+        incl_cons_stems = st.checkbox("Include non-i-stem 3rd declension adjectives?",
+                                    value=defaults.get("incl_cons_stems") if defaults.get("incl_cons_stems") is not None else True, 
+                                    # key="incl_cons_stems",
+                                    help="Select this box to include 3rd declension adjectives such as *vetus* that do not follow the i-stem pattern for endings.")
+    
+    # adverbs
+    ## MAY NEED TO CHANGE THIS TO ACCOMMODATE ADVERB-ONLY OPTION
+    pos_list = ["adj","adv"]
+    incl_adv = st.checkbox("Include adverbs?", 
+                        value=defaults.get("incl_adv") if defaults.get("incl_adv") is not None else True, 
+                        # key="incl_adv", 
+                        help="Select this box to include adverbial forms of adjectives; if not selected, you will only be tested on adjectival forms.")
+    if not incl_adv:
+        pos_list = ["adj"]
+with options_col:
+    def switch_adjective_macrons():
+        st.session_state.enforce_macrons["adjectives_enforce_macrons"] = st.session_state["adjectives_enforce_macrons"]
+        return
+    st.markdown("Options:", help="You can adjust these options at any point.")
+    st.checkbox("Enforce macrons?", 
+                help="If this box is selected, macron mistakes will be considered incorrect. If not selected, macrons can be used but will not be evaluated.", 
+                key="adjectives_enforce_macrons",
+                on_change=send_setting,
+                args=(switch_adjective_macrons,),
+                kwargs={"streamlit_page":"adjectives.py","setting_name":"adjectives_enforce_macrons"},
+                # value=st.session_state.enforce_macrons["adjectives_enforce_macrons"]
+                )
+    macrons = st.session_state.adjectives_enforce_macrons
+    if macrons:
+        st.markdown("You can copy and paste letters from here:")
+        st.code("āēīōū", language=None)
 
+    st.html('<hr style="border-top: 1px dotted; border-bottom: none;">')
+
+    dictionary_entry = st.checkbox("Show the dictionary entry?", 
+                                    value=defaults.get("dictionary_entry") if defaults.get("dictionary_entry") is not None else False,
+                                #    key="dictionary_entry", 
+                                    help="Select this box to see the adjective's nominative singular forms.")
+    irreg_alert = st.checkbox("Show a message if the form or stem is irregular?", 
+                                value=defaults.get("irreg_alert") if defaults.get("irreg_alert") is not None else False,
+                            #   key="irreg_alert", 
+                                help="Select this box to be alerted if a form is irregular or uses an irregular stem.")
+
+    if st.user.is_logged_in:
+        set_defaults_col, clear_defaults_col = st.container(vertical_alignment="bottom", height="stretch").columns(2, vertical_alignment="center")
+        with set_defaults_col:
+            st.button("Save settings", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Save your current adjective settings (except macron enforcement) as your default.",
+                        on_click=save_defaults,
+                        args=(page_id, defaults,),
+                        kwargs={
+                            "declension": declension,
+                            "degree_list": degree_list,
+                            "incl_cardinals": incl_cardinals,
+                            "cardinal_radio": cardinal_radio,
+                            "cardinal_select": cardinal_select,
+                            "incl_pronominals": incl_pronominals,
+                            "incl_cons_stems": incl_cons_stems,
+                            "incl_adv": incl_adv,
+                            "dictionary_entry": dictionary_entry,
+                            "irreg_alert": irreg_alert,
+                            }
+                        )
+        with clear_defaults_col:
+            st.button("Reset defaults", 
+                        type="primary", 
+                        width="stretch", 
+                        help="Restore the generic Latin Morph! default settings for adjectives.",
+                        on_click=clear_defaults,
+                        args=(page_id,),
+                        disabled=True if not defaults else False
+                        )
 
 
 ## DEFINE AVAILABLE ADJECTIVES AND ADJ/ADV ENDINGS ##
