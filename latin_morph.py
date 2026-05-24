@@ -348,7 +348,7 @@ menu_nav_row.page_link("data.py", label="Stats & Data")
 st.markdown(
     body='''<div style="position:relative;height:5em;width:100%;">
         <p style="font-size:smaller;text-align:right;position:absolute;bottom:0;right:-3em;">
-            &copy; 2026 Darcy Krasne (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_BLANK">CC BY-NC 4.0</a>)
+            &copy; 2026 Darcy Krasne (<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_BLANK">CC BY-NC-SA 4.0</a>)
         </p>
         </div>''',
     width="stretch", unsafe_allow_html=True
