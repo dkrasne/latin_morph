@@ -208,5 +208,5 @@ if st.user.is_logged_in:
                 You can {"give" if st.session_state.current_user_consent in [False, None] else "withdraw"} your consent by 
                 {"ticking" if st.session_state.current_user_consent in [False,None] else "unticking"} this box.""",
                 on_change=switch_consent,
-                # value=st.session_state.current_user_consent
+                value=st.session_state.current_user_consent
                 )

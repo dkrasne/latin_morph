@@ -129,7 +129,8 @@ if "supabase_connection" not in st.session_state:
             sb_conn.auth.sign_in_with_id_token(
                 {
                     "provider":"google",
-                    "token":st.user.tokens.id
+                    "token":st.user.tokens.id,
+                    "access_token": st.user.tokens.access
                 }
             )
             st.session_state.user_id = sb_conn.auth.get_user().user.id
@@ -199,9 +200,9 @@ if st.session_state.supabase_connection is not None and st.session_state.current
             st.rerun()
 
     show_consent_dialog()
-elif st.session_state.supabase_connection and st.session_state.current_user_consent is not None:
-    if "user_consent_box" not in st.session_state:
-        st.session_state["user_consent_box"] = st.session_state.current_user_consent
+# elif st.session_state.supabase_connection and st.session_state.current_user_consent is not None:
+#     if "user_consent_box" not in st.session_state:
+#         st.session_state["user_consent_box"] = st.session_state.current_user_consent
 
 
 if st.user.is_logged_in and st.session_state.user_token_expiry is not None and time.time() > st.session_state.user_token_expiry - 60:
