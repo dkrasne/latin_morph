@@ -137,30 +137,6 @@ if "supabase_connection" not in st.session_state:
             # print(f"Native auth failed: {native_error}")
             try:
                 refresh_user_token()
-                # sb_auth_apikey = st.secrets["connections"]["supabase"]["SUPABASE_SECRET_KEY"]
-                # sb_conn_auth = create_client(sb_url, sb_auth_apikey)
-                # response = sb_conn_auth.table("active_auth_users").select("id").eq("email", st.user.email).execute()
-                # if not response.data:
-                #     # print("Rescue failed at sb_conn_auth: User email not found in database table.")
-                #     st.logout()
-                # st.session_state.user_id = response.data[0]["id"]
-                # user_id = st.session_state.user_id
-                # expiry_time = int(time.time()) + 86400
-                # payload = {
-                #     "role": "authenticated",
-                #     "aud": "authenticated",
-                #     "sub": user_id,
-                #     "exp": expiry_time
-                # }
-                # minted_token = jwt.encode(
-                #     payload=payload,
-                #     key=st.secrets["connections"]["supabase"]["SUPABASE_PRIVATE_KEY"],
-                #     algorithm="ES256",
-                #     headers={"kid": st.secrets["connections"]["supabase"]["SUPABASE_PRIVATE_KEY_ID"]}
-                # )
-                # st.session_state.user_token_expiry = expiry_time
-                # options = ClientOptions(headers={"Authorization":f"Bearer {minted_token}"})
-                # st.session_state.supabase_connection = create_client(sb_url, sb_apikey, options=options)
             except: #  except Exception as rescue_error
                 # st.error(f"Rescue block crashed: {rescue_error}")
                 # st.stop()
@@ -219,10 +195,14 @@ if st.session_state.supabase_connection is not None and st.session_state.current
             insert_dict = {"user_id": st.session_state.user_id, "consent":st.session_state.current_user_consent}
             # print(insert_dict)
             sb_conn.table("user_consent").insert(insert_dict).execute()
-        if st.button("Submit", on_click=log_consent, disabled=True if st.session_state.consent_radio is None else False):
+        if st.button("Submit", on_click=log_consent, disabled=True if st.session_state.get("consent_radio") is None else False):
             st.rerun()
 
     show_consent_dialog()
+elif st.session_state.supabase_connection and st.session_state.current_user_consent is not None:
+    if "user_consent_box" not in st.session_state:
+        st.session_state["user_consent_box"] = st.session_state.current_user_consent
+
 
 if st.user.is_logged_in and st.session_state.user_token_expiry is not None and time.time() > st.session_state.user_token_expiry - 60:
     refresh_user_token()

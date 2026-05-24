@@ -8,8 +8,8 @@ import jwt
 
 st.set_page_config("Latin Morph! Account Management", layout="centered")
 
-if "user_consent_box" not in st.session_state:
-    st.session_state.user_consent_box = st.session_state.current_user_consent
+# if "user_consent_box" not in st.session_state:
+#     st.session_state.user_consent_box = st.session_state.current_user_consent
 
 
 # this page handles logging in and logging out of Streamlit (and, by extension, Supabase)
@@ -144,81 +144,31 @@ if st.user.is_logged_in:
                 help="""Clearing your history does not delete your answers from the database itself, 
                 but the adaptive learning algorithm and data page will not take them into consideration, 
                 and you will no longer have access to them.""")
-    noun_row = st.columns([2,1.5,1],vertical_alignment="center")
-    verb_row = st.columns([2,1.5,1],vertical_alignment="center")
-    adj_row = st.columns([2,1.5,1],vertical_alignment="center")
-    adv_row = st.columns([2,1.5,1],vertical_alignment="center")
-    verbal_adj_row = st.columns([2,1.5,1],vertical_alignment="center")
-    pron_row = st.columns([2,1.5,1],vertical_alignment="center")
 
-    noun_stats,noun_button = noun_row[0].container(), noun_row[1].container()
-    verb_stats,verb_button = verb_row[0].container(), verb_row[1].container()
-    adj_stats,adj_button = adj_row[0].container(), adj_row[1].container()
-    adv_stats,adv_button = adv_row[0].container(), adv_row[1].container()
-    pron_stats,pron_button = pron_row[0].container(), pron_row[1].container()
-    verbal_adj_stats,verbal_adj_button = verbal_adj_row[0].container(), verbal_adj_row[1].container()
+    pos_dict = {
+        "noun": "nouns",
+        "verb": "verbs",
+        "adj": "adjectives",
+        "adv": "adverbs",
+        "verbal adj.": "verbal adjectives",
+        "pronoun": "pronouns"
+    }
 
-    with noun_stats:
-        st.markdown(f"""
-                    Number of correct nouns: {len([question for question in st.session_state.question_list if question["pos"] == "noun" and question.get("correct") is True])}  
-                    Number of incorrect nouns: {len([question for question in st.session_state.question_list if question["pos"] == "noun" and question.get("correct") is False])}
-                    """)
-    with noun_button:
-        if st.button("Clear Nouns",disabled=not any(q["pos"] == "noun" for q in st.session_state.question_list)):
-            sb_conn.table("answer").update({"deleted":True}).eq("user_id",st.session_state.user_id).eq("answer->>pos","noun").execute()
-            st.session_state.question_list = [question for question in st.session_state.question_list if question["pos"] != "noun"]
-            st.rerun()
-    with verb_stats:
-        st.markdown(f"""
-                    Number of correct verbs: {len([question for question in st.session_state.question_list if question["pos"] == "verb" and question.get("correct") is True])}  
-                    Number of incorrect verbs: {len([question for question in st.session_state.question_list if question["pos"] == "verb" and question.get("correct") is False])}
-                    """)
-    with verb_button:
-        if st.button("Clear Verbs",disabled=not any(q["pos"] == "verb" for q in st.session_state.question_list)):
-            sb_conn.table("answer").update({"deleted":True}).eq("user_id",st.session_state.user_id).eq("answer->>pos","verb").execute()
-            st.session_state.question_list = [question for question in st.session_state.question_list if question["pos"] != "verb"]
-            st.rerun()
-    with adj_stats:
-        st.markdown(f"""
-                    Number of correct adjectives: {len([question for question in st.session_state.question_list if question["pos"] == "adj" and question.get("correct") is True])}  
-                    Number of incorrect adjectives: {len([question for question in st.session_state.question_list if question["pos"] == "adj" and question.get("correct") is False])}
-                    """)
-    with adj_button:
-        if st.button("Clear Adjectives",disabled=not any(q["pos"] == "adj" for q in st.session_state.question_list)):
-            sb_conn.table("answer").update({"deleted":True}).eq("user_id",st.session_state.user_id).eq("answer->>pos","adj").execute()
-            st.session_state.question_list = [question for question in st.session_state.question_list if question["pos"] != "adj"]
-            st.rerun()
-    with adv_stats:
-        st.markdown(f"""
-                    Number of correct adverbs: {len([question for question in st.session_state.question_list if question["pos"] == "adv" and question.get("correct") is True])}  
-                    Number of incorrect adverbs: {len([question for question in st.session_state.question_list if question["pos"] == "adv" and question.get("correct") is False])}
-                    """)
-    with adv_button:
-        if st.button("Clear Adverbs", disabled=not any(q["pos"] == "adv" for q in st.session_state.question_list)):
-            sb_conn.table("answer").update({"deleted":True}).eq("user_id",st.session_state.user_id).eq("answer->>pos","adv").execute()
-            st.session_state.question_list = [question for question in st.session_state.question_list if question["pos"] != "adv"]
-            st.rerun()
-    with pron_stats:
-        st.markdown(f"""
-                    Number of correct pronouns: {len([question for question in st.session_state.question_list if question["pos"] == "pronoun" and question.get("correct") is True])}  
-                    Number of incorrect pronouns: {len([question for question in st.session_state.question_list if question["pos"] == "pronoun" and question.get("correct") is False])}
-                    """)
-    with pron_button:
-        if st.button("Clear Pronouns",disabled=not any(q["pos"] == "pronoun" for q in st.session_state.question_list)):
-            sb_conn.table("answer").update({"deleted":True}).eq("user_id",st.session_state.user_id).eq("answer->>pos","pronoun").execute()
-            st.session_state.question_list = [question for question in st.session_state.question_list if question["pos"] != "pronoun"]
-            st.rerun()
-    with verbal_adj_stats:
-        st.markdown(f"""
-                    Number of correct verbal adjectives: {len([question for question in st.session_state.question_list if question["pos"] == "verbal adj." and question.get("correct") is True])}  
-                    Number of incorrect verbal adjectives: {len([question for question in st.session_state.question_list if question["pos"] == "verbal adj." and question.get("correct") is False])}
-                    """)
-    with verbal_adj_button:
-        if st.button("Clear Verbal Adjectives", disabled=not any(q["pos"] == "verbal adj." for q in st.session_state.question_list)):
-            sb_conn.table("answer").update({"deleted":True}).eq("user_id",st.session_state.user_id).eq("answer->>pos","verbal adj.").execute()
-            st.session_state.question_list = [question for question in st.session_state.question_list if question["pos"] != "verbal adj."]
-            st.rerun()
-    
+    for pos in pos_dict:
+        pos_row = st.columns([2,1.5,1],vertical_alignment="center")
+        pos_stats, pos_button = pos_row[0].container(), pos_row[1].container()
+        
+        with pos_stats:
+            st.markdown(f"""
+                        Number of correct {pos_dict[pos]}: {len([question for question in st.session_state.question_list if question["pos"] == pos and question.get("correct") is True])}  
+                        Number of incorrect {pos_dict[pos]}: {len([question for question in st.session_state.question_list if question["pos"] == pos and question.get("correct") is False])}
+                        """)
+        with pos_button:
+            if st.button(f"Clear {pos_dict[pos].title()}",disabled=not any(q["pos"] == pos for q in st.session_state.question_list)):
+                sb_conn.table("answer").update({"deleted":True}).eq("user_id",st.session_state.user_id).eq("answer->>pos",pos).execute()
+                st.session_state.question_list = [question for question in st.session_state.question_list if question["pos"] != pos]
+                st.rerun()
+
     if st.button("Clear Entire Answer History",disabled=not any("correct" in q for q in st.session_state.question_list)):
             sb_conn.table("answer").update({"deleted":True}).eq("user_id",st.session_state.user_id).execute()
             st.session_state.question_list = []
@@ -258,4 +208,5 @@ if st.user.is_logged_in:
                 You can {"give" if st.session_state.current_user_consent in [False, None] else "withdraw"} your consent by 
                 {"ticking" if st.session_state.current_user_consent in [False,None] else "unticking"} this box.""",
                 on_change=switch_consent,
+                # value=st.session_state.current_user_consent
                 )
