@@ -427,6 +427,9 @@ def gen_adj_adv_id():
     reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (degree == "pos" and case in v.get("irreg",{}).get("forms",{}).get(number, {}) and v.get("irreg",{}).get("forms",{}).get(number,{})[case] is None)}
 #    st.write(list(reduced_vocab))
 
+    if pos == "adv":
+        reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (degree in v.get("irreg", {}).get("forms",{}).get("adv", {}) and v["irreg"]["forms"]["adv"][degree] is None)}
+
     adj = random.choice(list(reduced_vocab.keys()))
     # adj = random.choice(["parvus","multus"])
     # degree = random.choice(["comp","super"])
@@ -686,7 +689,8 @@ def adap_gen_adj_adv_id():
                 decl = ast.literal_eval(decl) if isinstance(decl,str) else decl
                 if adj is None:
                     reduced_vocab = {k:v for k,v in reduced_vocab.items() if v["decl"] == decl and (not (v.get("no_adv") or v.get("cardinal")))}
-                    
+                    reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (degree in v.get("irreg", {}).get("forms",{}).get("adv", {}) and v["irreg"]["forms"]["adv"][degree] is None)}
+
                     # st.write(list(reduced_vocab))
                     adj = random.choice(list(reduced_vocab))
                     # st.write("New pick for adverb:",adj)

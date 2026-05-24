@@ -462,8 +462,8 @@ else:
                             # st.write("conjugation:",conj)
 
                             curr_avail_verbs = {k:v for k,v in verb_vocab.items() if v["conj"] == conj}
-                            if "fīō" in irreg_selector and conj in [3,"3io"]:
-                                curr_avail_verbs["fīō"] = verb_vocab["fīō"]
+                            if "fīō" in irreg_selector and "semidep" in voice_selector and conj in [3,"3io"] and any(ptc in ptc_selector for ptc in ["gdv","ppp"]):
+                                curr_avail_verbs["fīō"] = complete_verb_vocab["fīō"]
                             # st.write(curr_avail_verbs.keys())
                             # assign random new verb in conjugation
                         else:
@@ -522,7 +522,7 @@ else:
             while roll_again is True:
                 while ptc_id is None:
                     ptc_id = gen_ptc_id()
-                    verb = ptc_id[0]
+                verb = ptc_id[0]
                 # st.write("recent words:", recent_words)
                 if set(recent_words) != set(avail_verbs) and not set(avail_verbs).issubset(set(recent_words)):
                     if verb not in recent_words:

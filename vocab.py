@@ -490,6 +490,11 @@ def import_verbs():
                   "pres": "par",
                   "perf": "parāv",
                   "ppp": "parāt"},
+        "optō": {"voice": "act",
+                  "conj": 1,
+                  "pres": "opt",
+                  "perf": "optāv",
+                  "ppp": "optāt"},
 
         ### 2nd conj
         "habeō": {"voice": "act",
@@ -512,6 +517,12 @@ def import_verbs():
                   "pres": "mon",
                   "perf": "monu",
                   "ppp": "monit"},
+        "impleō": {"voice": "act",
+                  "conj": 2,
+                  "pres": "impl",
+                  "perf": "implēv",
+                  "ppp": "implēt"},
+
         ### 3rd conj
         "regō": {"voice": "act",
                 "conj": 3,
@@ -546,6 +557,25 @@ def import_verbs():
                          }
                      }
                  }},
+        "dūcō": {"voice": "act",
+                 "conj": 3,
+                 "pres": "dūc",
+                 "perf": "dūx",
+                 "ppp": "duct",
+                 "irreg": {
+                     "forms": {
+                         "pres": {
+                             "act": {
+                                 "impv": {
+                                     "sg": {
+                                         2: "dūc"
+                                     }
+                                 }
+                             }
+                         }
+                     }
+                 }},
+
         ### 3rd io conj
         "capiō": {"voice": "act",
                 "conj": "3io",
@@ -562,18 +592,30 @@ def import_verbs():
                   "pres": "cup",
                   "perf": "cupīv",
                   "ppp": "cupīt"},
+        "incipiō": {"voice": "act",
+                "conj": "3io",
+                "pres": "incip",
+                "perf": "incēp",
+                "ppp": "incept"},
+
         ### 4th conj
         "audiō": {"voice": "act",
                 "conj": 4,
                 "pres": "aud",
                 "perf": "audīv",
                 "ppp": "audīt"},
+        "sentiō": {"voice": "act",
+                "conj": 4,
+                "pres": "sent",
+                "perf": "sēns",
+                "ppp": "sēns"},
         "veniō": {"voice": "act",
                   "impers_pass_only": True,
                   "conj": 4,
                   "pres": "ven",
                   "perf": "vēn",
                   "ppp": "vent"},
+
         ## DEPONENT
         ### 1st conj
         "cōnor": {"voice": "dep",
@@ -644,6 +686,10 @@ def import_verbs():
                 "conj": "3io",
                 "pres": "progred",
                 "ppp": "progress"},
+        "ingredior": {"voice": "dep",
+                "conj": "3io",
+                "pres": "ingred",
+                "ppp": "ingress"},
         ### 4th conj
         "experior": {"voice": "dep",
                 "conj": 4,
@@ -711,6 +757,8 @@ def import_nouns():
                   "stem": "pecūn"},
         "stēlla": {"decl": 1,
                   "stem": "stēll"},
+        "fēmina": {"decl": 1,
+                  "stem": "fēmin"},
 
         # 2nd declension
         "servus": {"decl": "2_us",
@@ -733,6 +781,8 @@ def import_nouns():
                   "stem": "colōn"},
         "dominus": {"decl": "2_us",
                   "stem": "domin"},
+        "nātus": {"decl": "2_us",
+                  "stem": "nāt"},
         ## -er
         "puer": {"decl": "2_er",
                     "stem": "puer"},
@@ -780,6 +830,12 @@ def import_nouns():
                 "stem": "flōr"},
         "fūr": {"decl": 3,
                 "stem": "fūr"},
+        "rūmor": {"decl": 3,
+                "stem": "rūmōr"},
+        "homō": {"decl": 3,
+                "stem": "homin"},
+        "servitūs": {"decl": 3,
+                "stem": "servitūt"},
         ## i-stem
         "cīvis": {"decl": "3_istem",
                     "stem": "cīv"},
@@ -791,6 +847,10 @@ def import_nouns():
                   "stem": "mont"},
         "aedis": {"decl": "3_istem",
                   "stem": "aed"},
+        "ignis": {"decl": "3_istem",
+                  "stem": "ign"},
+        "nox": {"decl": "3_istem",
+                  "stem": "noct"},
         ## true i-stem (maybe add possibility of excluding these?)
         "turris": {"decl": "3_istem",
                    "stem": "turr",
@@ -806,6 +866,8 @@ def import_nouns():
                   "stem": "lītor"},
         "onus": {"decl": "3_neut",
                   "stem": "oner"},
+        "sīdus": {"decl": "3_neut",
+                  "stem": "sīder"},
         ## i-stem neuter
         "animal": {"decl": "3_istem_neut",
                     "stem": "animāl"},
@@ -816,6 +878,8 @@ def import_nouns():
                  }},
         "rēte": {"decl": "3_istem_neut",
                  "stem": "rēt"},
+        "exemplar": {"decl": "3_istem_neut",
+                 "stem": "exemplār"},
 
         # 4th declension
         "manus": {"decl": 4,
@@ -842,6 +906,8 @@ def import_nouns():
              "stem": "met"},
         "portus": {"decl": 4,
              "stem": "port"},
+        "frūctus": {"decl": 4,
+             "stem": "frūct"},
         ## neuter
         "cornū": {"decl": "4_neut",
                     "stem": "corn"},
@@ -1131,6 +1197,24 @@ def import_pronouns():
                 "acc": "nēminem",
                 "abl": "nūllō"
             }
+        },
+        "quīdam": {
+            "genders": True,
+            "type": "indefinite",
+            "sg": {
+                "nom": ("quīdam", "quaedam", "quiddam"),
+                "gen": ("cuiusdam",),
+                "dat": ("cuidam",),
+                "acc": ("quendam", "quandam", "quiddam"),
+                "abl": ("quōdam", "quādam", "quōdam")
+            },
+            "pl": {
+                "nom": ("quīdam", "quaedam", "quaedam"),
+                "gen": ("quōrundam", "quārundam", "quōrundam"),
+                "dat": ("quibusdam",),
+                "acc": ("quōsdam", "quāsdam", "quaedam"),
+                "abl": ("quibusdam",)
+            }
         }
 
     }
@@ -1172,6 +1256,23 @@ def import_adjectives():
             "irreg": {
                 "forms": {
                     "adv": {"pos": ["miserē", "miseriter"]}
+                }
+            }
+        },
+        "dexter": {
+            "stem": "dextr",
+            "decl": (1,2),
+            "irreg": {
+                "stems": {
+                    "comp": "dexter",
+                    "super": "dextim"
+                },
+                "forms": {
+                    "adv": {
+                        "pos": "dexterē",
+                        "comp": None,
+                        "super": None
+                    }
                 }
             }
         },
