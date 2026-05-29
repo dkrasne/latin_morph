@@ -87,8 +87,10 @@ else:
         st.markdown("""
                     If you log in, your answer history will be saved across sessions. 
                     Note that any answers from the current session will be lost when you log in.
-                    (Currently, signing in with a Google account is the only possibility. 
-                    There may be more options offered in the future.)
+                    """, help="""Currently, signing in with a Google account is the only possibility. 
+                    There may be more options offered in the future; 
+                    if you can't make a Google account and there's a social login you'd prefer to use,
+                    [let me know](https://forms.gle/xT8hQ27sjposeXPc9)!
                     """)
 
         login_button = (
@@ -190,8 +192,13 @@ st.markdown(f"""
 
             - Only the name and e-mail associated with your Google account are shared with Latin Morph!, 
             which is necessary in order to create your account. 
+            (Be aware that Google also gives me access to your profile picture, 
+            which I don't ask for and don't make any use of.)
             I will never share these without your explicit permission.
             - I will only ever use your e-mail address to contact you in direct reference to your Latin Morph! account.
+            - When logged in, your answers and preferred settings are stored in a database. 
+            You have the opportunity to consent to allowing your answers to be used in academic research on Latin pedagogy; 
+            this consent can be given or withdrawn at any point.
             """)
 
 def switch_consent():

@@ -40,7 +40,7 @@ st.markdown("""
             <i>If this is your <b>first visit</b>, click here for some helpful information!</i>
             </summary>
 
-            To get started, choose a part of speech that you want to practice. 
+            To get started, choose a **part of speech** that you want to practice. 
             You can find the parts of speech either in the sidebar navigation menu 
             (if it's not currently open, click on the :material/keyboard_double_arrow_right: at the top left of your screen)
             or in the menu at the bottom of each page.
@@ -64,10 +64,26 @@ st.markdown("""
             If you're unsure about what exactly a particular option will do, 
             you can get more information by hovering over the relevant :material/help: symbol.
 
-            Once you've selected your options, generate your first question by clicking on the red button that says :color[Click here for your first question!]{foreground="white" background="red"}. 
+            Once you've selected your options, generate your first question by clicking on the red button that says 
+            :color[Click here for your first question!]{foreground="white" background="red"}. 
             After you've clicked on it once, the button will just be labeled 'New Question' for the remainder of your session, across all parts of speech.
 
-            If you still have questions, you may find some helpful answers on the FAQ page; 
+            After you've answered some questions, visit the **Stats & Data page**, 
+            which gives you a downloadable record of your answers 
+            *and also* suggested categories to review within a given part of speech, 
+            based on your correct and incorrect answers.
+
+            You can freely use all of Latin Morph! without an account. 
+            However, you may find that having a **free account** improves your user experience. 
+            In particular, your answer history will be saved across sessions, 
+            meaning that the adaptive learning algorithm will be more functional, 
+            the Stats & Data page will have a more accurate assessment of your weak spots, 
+            and you won't lose your progress if you lose your internet connection. 
+            (Latin Morph! can't be used offline, but your answers will be restored when your connection is restored.)
+            An account also allows you to save your preferred settings (such as which declensions you want to practice) 
+            so that you don't have to reset them each time you change between parts of speech.
+
+            If you still have questions, you may find some helpful answers on the **FAQ page**; 
             and if you still have questions after that, please feel free to [contact me](https://forms.gle/xT8hQ27sjposeXPc9).
             </details>
 

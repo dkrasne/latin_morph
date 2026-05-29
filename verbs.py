@@ -49,11 +49,11 @@ verb_abbrevs = {"ind": "indicative",
                 2: "2nd", 
                 3: "3rd",}
 
-conjugation_dict = {1: "1st", 
-                    2: "2nd", 
-                    3: "3rd", 
-                    "3io": '3rd "io"', 
-                    4: "4th"}
+conjugation_dict = {1: "1st (-āre)", 
+                    2: "2nd (-ēre)", 
+                    3: "3rd (-ere)", 
+                    "3io": '3rd "io" (-ere)', 
+                    4: "4th (-īre)"}
 
 #col_options, col_verb_options = st.columns(2)
 
@@ -444,6 +444,8 @@ elif len(mood_selector) == 0:
 #    st.session_state.question_generation_error_message = ""
 elif len(verb_vocab) == 0:
     st.write("Based on your selections, there are no available verbs to generate forms for.")
+# elif all([tense_list == ["fut"], mood_selector == ["subj"]]):
+#     st.write("No forms exist that meet your selected criteria.")
 # elif len(mood_list) == 0:
 #     st.write("Based on your selections, it is not possible to generate any valid verb forms.")
 

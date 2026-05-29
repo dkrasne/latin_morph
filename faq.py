@@ -30,7 +30,9 @@ with st.expander("Why doesn't Latin Morph! store my settings?",
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
                 This is a limitation of the framework used to build Latin Morph! However, if you log in, 
-                the majority of your settings and prior session histories will be retained.
+                your settings and prior session histories will be retained. 
+                (Macron preferences, the auto-advance setting, and the use of consonantal *u* are all automatically saved across sessions if you're logged in;
+                for other settings, you can save your preferred defaults for each part of speech.)
                 """)
 
 i+=1
@@ -44,7 +46,7 @@ with st.expander("How have you decided what vocabulary to include?",
                 or are words that I needed to add in order to test something.
                 Generally speaking, I initially only included sufficient words to test that all forms were being generated correctly 
                 and that irregular forms and other exceptions to rules were also being handled correctly.
-                I am now in the process of adding the example words used in various textbooks and grammars.
+                I am now in the process of adding the example paradigm words used in various textbooks and grammars.
 
                 If there are specific words you would like me to add, please get in touch.
                 """, unsafe_allow_html=True)
@@ -80,6 +82,8 @@ with st.expander("What different options can I set to customize the information 
                 (in which case, the irregular stem will also be displayed) or if the form is entirely irregular.
 
                 **Pronouns** have no special display options: you should only practice pronouns that you've already encountered.
+
+                If you're logged in, you can save your preferred settings for these display options.
                 """)
 
 i+=1
@@ -159,7 +163,7 @@ with st.expander("Did you use GenAI to build this?",
                 that unexpected invalid or non-existent forms wouldn't be requested or produced, 
                 or that particular types of error that are difficult to test for wouldn't occur 
                 (although even then, I still had to double-check *its* claims, 
-                and I still never let it write any code for me,
+                and I still never let it write any code for me;
                 and there were also plenty of issues that it *didn't* catch). 
                 It also sometimes assisted me in isolating the cause of errors, 
                 as well as in understanding certain peculiarities of the Streamlit framework

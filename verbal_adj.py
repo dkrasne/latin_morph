@@ -189,11 +189,11 @@ adj_endings = {
     },
 }
 
-conjugation_dict = {1: "1st", 
-                    2: "2nd", 
-                    3: "3rd", 
-                    "3io": '3rd "io"', 
-                    4: "4th"}
+conjugation_dict = {1: "1st (-āre)", 
+                    2: "2nd (-ēre)", 
+                    3: "3rd (-ere)", 
+                    "3io": '3rd "io" (-ere)', 
+                    4: "4th (-īre)"}
 
 
 option_expander = st.expander("Settings", expanded=True)
