@@ -495,6 +495,11 @@ def import_verbs():
                   "pres": "opt",
                   "perf": "optāv",
                   "ppp": "optāt"},
+        "vocō": {"voice": "act",
+                 "conj": 1,
+                 "pres": "voc",
+                 "perf": "vocāv",
+                 "ppp": "vocāt"},
 
         ### 2nd conj
         "habeō": {"voice": "act",
@@ -522,6 +527,11 @@ def import_verbs():
                   "pres": "impl",
                   "perf": "implēv",
                   "ppp": "implēt"},
+        "teneō": {"voice": "act",
+                  "conj": 2,
+                  "pres": "ten",
+                  "perf": "tenu",
+                  "ppp": "tent"},
 
         ### 3rd conj
         "regō": {"voice": "act",
@@ -539,6 +549,11 @@ def import_verbs():
                  "pres": "leg",
                  "perf": "lēg",
                  "ppp": "lect"},
+        "mittō": {"voice": "act",
+                 "conj": 3,
+                 "pres": "mitt",
+                 "perf": "mīs",
+                 "ppp": "miss"},
         "dīcō": {"voice": "act",
                  "conj": 3,
                  "pres": "dīc",
@@ -754,11 +769,27 @@ def import_nouns():
         "anima": {"decl": 1,
                   "stem": "anim"},
         "pecūnia": {"decl": 1,
-                  "stem": "pecūn"},
+                  "stem": "pecūni"},
         "stēlla": {"decl": 1,
                   "stem": "stēll"},
         "fēmina": {"decl": 1,
                   "stem": "fēmin"},
+        "fīlia": {"decl": 1,
+                    "stem": "fīli",
+                    "irreg": {
+                        "pl": {
+                            "dat": ["fīliīs", "fīliābus"],
+                            "abl": ["fīliīs", "fīliābus"]
+                        }
+                    }},
+        "dea": {"decl": 1,
+                    "stem": "de",
+                    "irreg": {
+                        "pl": {
+                            "dat": ["deīs", "deābus"],
+                            "abl": ["deīs", "deābus"]
+                        }
+                    }},
 
         # 2nd declension
         "servus": {"decl": "2_us",
@@ -783,11 +814,16 @@ def import_nouns():
                   "stem": "domin"},
         "nātus": {"decl": "2_us",
                   "stem": "nāt"},
+        "amīcus": {"decl": "2_us",
+                  "stem": "amīc"},
         ## -er
         "puer": {"decl": "2_er",
                     "stem": "puer"},
         "vir": {"decl": "2_er",
-                "stem": "vir"},
+                "stem": "vir",
+                "irreg": {
+                    "pl": {"gen": ["virōrum", "virum"]}
+                }},
         "ager": {"decl": "2_er",
                     "stem": "agr"},
         "liber": {"decl": "2_er",
@@ -815,6 +851,8 @@ def import_nouns():
                   "stem": "sax"},
         "somnium": {"decl": "2_neut",
                   "stem": "somni"},
+        "dōnum": {"decl": "2_neut",
+                  "stem": "dōn"},
         # 3rd declension
         "leo": {"decl": 3,
                 "stem": "leōn"},
@@ -868,6 +906,8 @@ def import_nouns():
                   "stem": "oner"},
         "sīdus": {"decl": "3_neut",
                   "stem": "sīder"},
+        "caput": {"decl": "3_neut",
+                  "stem": "capit"},
         ## i-stem neuter
         "animal": {"decl": "3_istem_neut",
                     "stem": "animāl"},
@@ -918,9 +958,9 @@ def import_nouns():
         "rēs": {"decl": "5_consonant",
                 "stem": "r"},
         "diēs": {"decl": "5_vowel",
-                    "stem": "di"},
+                "stem": "di"},
         "faciēs": {"decl": "5_vowel",
-                    "stem": "faci"},
+                "stem": "faci"},
         "fidēs": {"decl": "5_consonant",
              "stem": "fid"},
         "spēs": {"decl": "5_consonant",
@@ -1281,6 +1321,10 @@ def import_adjectives():
             "stem": "laet",
             "decl": (1,2)
         },
+        "cautus": {
+            "stem": "caut",
+            "decl": (1,2)
+        },
         "sānus": {
             "stem": "sān",
             "decl": (1,2)
@@ -1420,13 +1464,13 @@ def import_adjectives():
             "stem": "dulc",
             "decl": 3,
         },
-        "tristis": {
-            "noms": ("tristis", "triste"),
-            "stem": "trist",
+        "trīstis": {
+            "noms": ("trīstis", "trīste"),
+            "stem": "trīst",
             "decl": 3,
             "irreg": {
                 "forms":{
-                    "adv": {"pos": "triste"}
+                    "adv": {"pos": "trīste"}
                 }
             }
         },
@@ -1541,6 +1585,8 @@ def import_adjectives():
             "stem": "tr",
             "noms": ("trēs", "tria")
         },
+
+        ## 3rd decl. consonant stems
         "vetus": {
             "cons_stem": True,
             "decl": 3,
@@ -1552,7 +1598,23 @@ def import_adjectives():
                     "comp": "vetust"
                 }
             }
-        }
+        },
+        ## need to account for None forms in adjectives.py code
+        # "dīves": {
+        #     "cons_stem": True,
+        #     "decl": 3,
+        #     "stem": "dīvit",
+        #     "noms": ("dīves",),
+        #     "no_adv": True,
+        #     "irreg": {
+        #         "forms": {
+        #             "pl": {
+        #                 "nom": ("dīvitēs", None),
+        #                 "acc": ("dīvitēs", None),
+        #             }
+        #         }
+        #     }
+        # }
     }
 
     for word in adjective_vocab.keys():
