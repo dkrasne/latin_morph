@@ -99,13 +99,16 @@ st.warning("""
             """,)
 
 announcements = [
-    """
-:green-badge[New!] :blue-badge[2026-May-17] User accounts are now available!!! Save your question history across multiple sessions!
-""",
-    """
-:blue-badge[2026-Apr-30] Adaptive learning has now been implemented across **all** parts of speech! 
-For an explanation of what this means, visit the About page.
-""",
+#     """
+# :green-badge[New!] :blue-badge[] 
+# """,
+#     """
+# :blue-badge[2026-May-17] User accounts are now available!!! Save your question history across multiple sessions!
+# """,
+#     """
+# :blue-badge[2026-Apr-30] Adaptive learning has now been implemented across **all** parts of speech! 
+# For an explanation of what this means, visit the About page.
+# """,
 
 ]
 

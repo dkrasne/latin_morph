@@ -1292,10 +1292,43 @@ else:
 
     with results_col:
         st.markdown(st.session_state.result_message)    # just write the result message, rather than other things as well.
+        
+        if st.session_state.current_question and st.session_state.answer_checked and "Incorrect" in st.session_state.result_message:
+            chart_popover = st.popover("View chart",type="primary")
+            with chart_popover:
+                starting_form = dict(st.session_state.current_question[1])
+                if starting_form["mood"] not in ["inf"]:
+                    st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy.*")
+                    conj_table = {}
+                    table_index = []
+                    for num in ["sg","pl"]:
+                        conj_table[num] = []
+                        for pers in [1,2,3]:
+                            if pers not in table_index:
+                                table_index.append(pers)
+                            starting_form["num"] = num
+                            starting_form["pers"] = pers
+
+                            try:
+                               form = build_verb(starting_form)[0]
+                            except:
+                                form = None
+                            finally:
+                                if starting_form["mood"] == "impv":
+                                    if starting_form["tense"] == "pres" and pers != 2:
+                                        form = None
+                                    if starting_form["voice"] in ["pass","dep"] and starting_form["tense"] == "fut" and num == "pl" and pers != 3:
+                                        form = None
+                                    
+                            conj_table[num].append(form if isinstance(form, str) else form[0] if isinstance(form, list) else "--")
+
+                    conjugation_table = pd.DataFrame(conj_table,index=table_index)
+                    st.table(conjugation_table)
 
     with score_col:
         st.button("Reset Score", "reset", on_click=reset, width="stretch")
         st.markdown(f"Current score: **{st.session_state.current_score}** out of **{st.session_state.total_questions}**")
+
 
 if st.session_state.auto_advance_trigger and st.session_state.answer_checked:
     time.sleep(st.session_state.auto_advance)

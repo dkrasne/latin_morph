@@ -430,7 +430,9 @@ def gen_adj_adv_id():
     if pos == "adv":
         reduced_vocab = {k:v for k,v in reduced_vocab.items() if not (degree in v.get("irreg", {}).get("forms",{}).get("adv", {}) and v["irreg"]["forms"]["adv"][degree] is None)}
 
+    ## need to add a while loop here once I add 'dives' so that if there's a None for a particular form, a different word gets chosen.
     adj = random.choice(list(reduced_vocab.keys()))
+
     # adj = random.choice(["parvus","multus"])
     # degree = random.choice(["comp","super"])
     # The following is also in adap_gen_adj_adv_id(), but just as a backup:
