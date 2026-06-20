@@ -1297,8 +1297,9 @@ else:
             chart_popover = st.popover("View chart",type="primary")
             with chart_popover:
                 starting_form = dict(st.session_state.current_question[1])
-                if starting_form["mood"] not in ["inf"]:
-                    st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy.*")
+                next_form = dict(starting_form)
+                if next_form["mood"] not in ["inf"]:
+                    st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy or if you would find other information helpful.*")
                     conj_table = {}
                     table_index = []
                     for num in ["sg","pl"]:
@@ -1306,11 +1307,15 @@ else:
                         for pers in [1,2,3]:
                             if pers not in table_index:
                                 table_index.append(pers)
-                            starting_form["num"] = num
-                            starting_form["pers"] = pers
+                            next_form["num"] = num
+                            next_form["pers"] = pers
 
                             try:
-                               form = build_verb(starting_form)[0]
+                               form = build_verb(next_form)[0]
+                               if isinstance(form, list):
+                                   form = form[0]
+                               if next_form == starting_form:
+                                   form = f":green-background[{form}]"
                             except:
                                 form = None
                             finally:
@@ -1320,7 +1325,7 @@ else:
                                     if starting_form["voice"] in ["pass","dep"] and starting_form["tense"] == "fut" and num == "pl" and pers != 3:
                                         form = None
                                     
-                            conj_table[num].append(form if isinstance(form, str) else form[0] if isinstance(form, list) else "--")
+                            conj_table[num].append(form if isinstance(form, str) else "--")
 
                     conjugation_table = pd.DataFrame(conj_table,index=table_index)
                     st.table(conjugation_table)
