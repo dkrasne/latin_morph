@@ -1313,7 +1313,8 @@ else:
                             try:
                                form = build_verb(next_form)[0]
                                if isinstance(form, list):
-                                   form = form[0]
+                                #    form = form[0]
+                                   form = "/".join(form)
                                if next_form == starting_form:
                                    form = f":green-background[{form}]"
                             except:
