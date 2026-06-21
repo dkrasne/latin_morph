@@ -1298,7 +1298,7 @@ else:
             with chart_popover:
                 starting_form = dict(st.session_state.current_question[1])
                 next_form = dict(starting_form)
-                if next_form["mood"] not in ["inf"]:
+                if starting_form["mood"] not in ["inf"]:
                     st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy or if you would find other information helpful.*")
                     conj_table = {}
                     table_index = []

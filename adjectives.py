@@ -752,9 +752,11 @@ def adap_gen_adj_adv_id():
 
 def create_adj_adv(adj_id=None):
     if not degree_list:
-        return
+        if st.session_state.append_answer is True:
+            return
     if adj_id:
-        adj_id = adj_id
+        # adj_id = adj_id
+        pass
     else:
         adj_id = adap_gen_adj_adv_id()
     adj, case, number, gender, pos, degree = adj_id
@@ -766,7 +768,8 @@ def create_adj_adv(adj_id=None):
     correct_form = ""
     correct_stem = ""
     correct_ending = ""
-    st.session_state["irreg_alert_message"] = ""
+    if st.session_state.append_answer is True:
+        st.session_state["irreg_alert_message"] = ""
     infix = ""
     comp_no_infix = False
     # if word has irregular forms, get the relevant form
@@ -801,8 +804,9 @@ def create_adj_adv(adj_id=None):
                     pass
                     # update this later to pull a "comp" or "super" key from the irregular forms part of the dictionary, for words like "plus". Alternatively, these could possibly go under irregular stems with a "no_infix" T/F flag, in which case that part of the code will need updating.
             if irreg_form:
+                if st.session_state.append_answer is True:
                 # st.write(irreg_form)
-                st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
+                    st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
 
         # deal with regular endings (reg. and irreg. stems)
         if not correct_form and not irreg_form:
@@ -810,7 +814,8 @@ def create_adj_adv(adj_id=None):
                 if not correct_stem:
                     correct_stem = irreg_stems.get(degree)
             if correct_stem:
-                st.session_state["irreg_alert_message"] = f"N.B. This form has an irregular stem (*{correct_stem}*-)."
+                if st.session_state.append_answer is True:
+                    st.session_state["irreg_alert_message"] = f"N.B. This form has an irregular stem (*{correct_stem}*-)."
 
             else: # otherwise, get the regular stem
                 correct_stem = str(adj_info.get("stem"))
@@ -874,7 +879,8 @@ def create_adj_adv(adj_id=None):
                         irreg_form = adj_info["noms"] # assign nom. sg. tuple; unpack later
                         #### ADD IRREGULAR ALERT?
                         # st.write("Second alert:", irreg_form)
-                        st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
+                        if st.session_state.append_answer is True:
+                            st.session_state["irreg_alert_message"] = "N.B. This form is irregular."
                     if correct_ending and not correct_form: #DOUBLE CHECK THAT THIS DOESN'T CAUSE ISSUES
                         correct_form = correct_stem + infix + correct_ending
                 else: # deal with 3rd decl. adjectives and comparatives
@@ -954,7 +960,8 @@ def create_adj_adv(adj_id=None):
             if irreg_form != correct_form:
                 correct_form = irreg_form
             else:
-                st.session_state.irreg_alert_message = ""
+                if st.session_state.append_answer is True:
+                    st.session_state.irreg_alert_message = ""
 
     # get/construct nom. sg. forms for dictionary entry
     irreg_noms = False
@@ -1065,6 +1072,44 @@ else:
 
     with results_col:
         st.markdown(st.session_state.result_message)    # just write the result message, rather than other things as well.
+
+        if st.session_state.current_question and st.session_state.answer_checked and "Incorrect" in st.session_state.result_message:
+            chart_popover = st.popover("View chart",type="primary")
+            with chart_popover:
+                st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy or if you would find other information helpful.*")
+                st.caption("You can change your preferred case order in the navigation menu.")
+                starting_form = list(st.session_state.current_question[1])
+                next_form = list(starting_form)
+
+                if starting_form[-2] == "adj":
+
+                    adj_table = {}
+                    table_index = []
+                    cs_order = list(st.session_state.case_order)
+
+                    num_list = ["sg"] if adj_vocab[adj].get("no_pl") else ["pl"] if adj_vocab[adj].get("no_sg") else ["sg","pl"]
+                    for num in num_list:
+                        for gd in ["m","f","n"]:
+                            adj_table[(num, gd)] = []
+                            for cs in cs_order:
+                                if cs not in table_index:
+                                    table_index.append(cs)
+                                next_form[1] = cs
+                                next_form[2] = num
+                                next_form[3] = gd
+
+                                try:
+                                    form = create_adj_adv(next_form)[0]
+                                    if isinstance(form, list):
+                                        form = "/".join(form)
+                                    if next_form == starting_form:
+                                        form = f":green-background[{form}]"
+                                except:
+                                    form = None
+                                adj_table[(num, gd)].append(form if form is not None else "--")
+
+                    display_table = pd.DataFrame(adj_table, table_index)
+                    st.table(display_table)
 
     with score_col:
         st.button("Reset Score", "reset", on_click=reset, width="stretch")

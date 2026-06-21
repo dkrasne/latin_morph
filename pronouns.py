@@ -14,6 +14,16 @@ questions_asked = st.session_state.question_list
 # if "pronouns_enforce_macrons" not in st.session_state:
 st.session_state.pronouns_enforce_macrons = st.session_state.enforce_macrons["pronouns_enforce_macrons"]
 
+if "part_gen" not in st.session_state:
+    st.session_state.part_gen = None
+def choose_genitive(pronoun,case,gen_diff=None):
+    # if gen_diff and pronoun in ["nōs","vōs"] and case == "gen":
+    if pronoun in ["nōs","vōs"] and case == "gen":
+        part_gen = random.choice([True,False])
+    else:
+        part_gen = None
+    st.session_state.part_gen = part_gen
+
 
 page_id = "pronouns"
 clear_page(page_id)
@@ -240,19 +250,19 @@ def gen_question():
     return_val = [pronoun, case, number, gender]
         # if part_gen:
         #     return_val += [part_gen]
+
+    choose_genitive(pronoun,case,gen_forms_diff)
+    # st.write(st.session_state.part_gen)
+
     return return_val
 
-
-## CREATE THE QUIZ ##
-
-st.session_state.gen_func = gen_question
-
-if st.session_state.current_question:
-    pronoun, case, number, gender = st.session_state.current_question
-
-    # st.write(st.session_state.current_question)
-
-    # st.write(pronoun, "-", ", ".join([val for val in [case, number, gender] if val is not None]))
+def build_pronoun(pronoun_id=None, temp_gen_diff=None):
+    if pronoun_id:
+        pass
+    else:
+        pronoun_id = gen_question()
+    
+    pronoun, case, number, gender = pronoun_id
 
     if not pronoun_vocab[pronoun].get("genders"):
         if number is None:
@@ -273,38 +283,101 @@ if st.session_state.current_question:
                 correct_form = correct_num_case[0]
             elif gender == "f":
                 correct_form = correct_num_case[1]
-    
-    if not st.session_state.gen_string:
-        part_gen = False
-        if gen_forms_diff:
-            part_gen = random.choice([True,False])
-    elif "non" in st.session_state.gen_string:
-        part_gen = False
-    else:
-        part_gen = True
 
-    #gen_string = st.session_state.gen_string
     if isinstance(correct_form,dict):
-        if not gen_forms_diff:
+        if st.session_state.part_gen is None or temp_gen_diff is False:
             correct_form = list(correct_form.values())
         else:
-            if part_gen:
+            if st.session_state.part_gen:
                 correct_form = correct_form["partitive"]
-                st.session_state.gen_string = "genitive (partitive form)"
+                # st.session_state.gen_string = "genitive (partitive form)"
             else:
                 correct_form = correct_form["non_part"]
-                st.session_state.gen_string = "genitive (non-partitive form)"
+                # st.session_state.gen_string = "genitive (non-partitive form)"
+
+
+    return correct_form
+
+## CREATE THE QUIZ ##
+
+st.session_state.gen_func = gen_question
+
+if st.session_state.current_question:
+    pronoun, case, number, gender = st.session_state.current_question
+    if gen_forms_diff is not None:
+        if gen_forms_diff is False:
+            temp_gen_diff = False
+        else:
+            temp_gen_diff = True
+    correct_form = build_pronoun(st.session_state.current_question, temp_gen_diff)
+    # st.write(correct_form)
+    st.session_state.correct_answer = correct_form
+
+
+    # if not pronoun_vocab[pronoun].get("genders"):
+    #     if number is None:
+    #         correct_form = pronoun_vocab[pronoun]["forms"][case]
+    #     else:
+    #         correct_form = pronoun_vocab[pronoun][number][case]
+    # else:
+    #     correct_num_case = pronoun_vocab[pronoun][number][case]
+    #     # neuter is always the last form in the tuple
+    #     if gender == "n":
+    #         correct_form = correct_num_case[-1]
+    #     # if one- or two-termination, M/F are both the first form
+    #     elif len(correct_num_case) in [1,2]:
+    #         correct_form = correct_num_case[0]
+    #     # otherwise, M is the first form, F is the second form
+    #     else:
+    #         if gender == "m":
+    #             correct_form = correct_num_case[0]
+    #         elif gender == "f":
+    #             correct_form = correct_num_case[1]
+    
+
+    # if not st.session_state.gen_string:
+    #     part_gen = False
+    #     if gen_forms_diff:
+    #         part_gen = random.choice([True,False])
+    # elif "non" in st.session_state.gen_string:
+    #     part_gen = False
+    # else:
+    #     part_gen = True
+    # #gen_string = st.session_state.gen_string
+
+    # if gen_forms_diff and pronoun in ["nōs","vōs"] and case == "gen":
+    if st.session_state.part_gen is not None:
+        if st.session_state.part_gen:
+            # correct_form = correct_form["partitive"]
+            st.session_state.gen_string = "genitive (partitive form)"
+        else:
+            # correct_form = correct_form["non_part"]
+            st.session_state.gen_string = "genitive (non-partitive form)"
+    
+
+    # if isinstance(correct_form,dict):
+    #     if not gen_forms_diff:
+    #         correct_form = list(correct_form.values())
+    #     else:
+    #         if part_gen:
+    #             correct_form = correct_form["partitive"]
+    #             st.session_state.gen_string = "genitive (partitive form)"
+    #         else:
+    #             correct_form = correct_form["non_part"]
+    #             st.session_state.gen_string = "genitive (non-partitive form)"
 
 
     gen_string = st.session_state.gen_string
-    # st.write("correct form:",correct_form)
-    st.session_state.correct_answer = correct_form
+    # st.write(gen_string)
+    # # st.write("correct form:",correct_form)
+    # st.session_state.correct_answer = correct_form
 
     curr_question = {
             "pos": "pronoun",
             "word": pronoun, 
             "id": {
-                "case": case + " (part.)" if part_gen and gen_string and gen_forms_diff else case + " (non-part.)" if gen_string and gen_forms_diff else case,
+                # "case": case + " (part.)" if st.session_state.part_gen and gen_string and gen_forms_diff else case + " (non-part.)" if gen_string and gen_forms_diff else case,
+                "case": case,
                 "num": number,
                 "gender": gender
             },
@@ -316,6 +389,20 @@ if st.session_state.current_question:
             curr_question
         )
         st.session_state.append_answer = False    
+
+    if st.session_state.append_answer is False and "answer" not in questions_asked[-1] and questions_asked[-1]["pos"] == "pronoun":
+        if questions_asked[-1]["word"] in ["nōs","vōs"] and "gen" in questions_asked[-1]["id"]["case"]:
+            if gen_forms_diff:
+                # if st.session_state and temp_gen_diff is not False:
+                if st.session_state.part_gen:
+                    # st.write("setting to partitive genitive")
+                    questions_asked[-1]["id"]["case"] = "gen (part.)"
+                elif st.session_state.part_gen is False:
+                    # st.write("setting to non-partitive")
+                    questions_asked[-1]["id"]["case"] = "gen (non-part.)"
+            else:
+                # st.write("setting to regular genitive")
+                questions_asked[-1]["id"]["case"] = "gen"
 
 ## CREATE QUESTION PHRASE ##
     question = f"For *{pronoun}*, give the **{", ".join([item for item in [abbrevs["gender"].get(gender), abbrevs["number"].get(number), gen_string if gen_string and gen_forms_diff else abbrevs["case"].get(case)] if item is not None])}**."
@@ -356,6 +443,61 @@ else:
 
     with results_col:
         st.markdown(st.session_state.result_message)    # just write the result message, rather than other things as well.
+
+        if st.session_state.current_question and st.session_state.answer_checked and "Incorrect" in st.session_state.result_message:
+            chart_popover = st.popover("View chart",type="primary")
+            with chart_popover:
+                st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy or if you would find other information helpful.*")
+                st.caption("You can change your preferred case order in the navigation menu.")
+                starting_form = list(st.session_state.current_question)
+                next_form = list(starting_form)
+
+                pronoun_table = {}
+                table_index = []
+                cs_order = list(st.session_state.case_order)
+                cs_order = [cs for cs in cs_order if cs != "voc"]
+                
+                if "forms" not in pronoun_vocab[pronoun]:
+                    for num in ["sg","pl"]:
+                        for gd in ["m","f","n"]:
+                            pronoun_table[(num,gd)] = []
+                else:
+                    pronoun_table[pronoun] = []
+                for cs in cs_order:
+                    if cs not in table_index:
+                        table_index.append(cs)
+                    for item in pronoun_table:
+                        if isinstance(item, tuple):
+                            num = item[0]
+                            gd = item[1]
+
+                            next_form[1] = cs
+                            next_form[2] = num
+                            next_form[3] = gd
+
+                        else:
+                            num = None
+                            gd = None
+
+                            next_form[1] = cs
+
+                        try:
+                            form = build_pronoun(next_form, temp_gen_diff)
+                            if isinstance(form, list):
+                                form = "/".join(form)
+                            if next_form == starting_form:
+                                form = f":green-background[{form}]"
+                                if pronoun in ["nōs","vōs"] and starting_form[1] == "gen" and "/" not in form:
+                                    form_append = pronoun_vocab[pronoun]["forms"]["gen"]["partitive"] if st.session_state.part_gen is False else pronoun_vocab[pronoun]["forms"]["gen"]["non_part"]
+                                    form += f"/{form_append}"
+                        except:
+                            form = None
+                        pronoun_table[item if isinstance(item, tuple) else pronoun].append(form if form is not None else "--")
+
+
+                display_table = pd.DataFrame(pronoun_table, table_index)
+                st.table(display_table, hide_header=True if "forms" in pronoun_vocab[pronoun] else False)
+
 
     with score_col:
         st.button("Reset Score", "reset", on_click=reset, width="stretch")

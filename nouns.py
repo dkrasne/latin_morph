@@ -525,14 +525,14 @@ else:
 
     # adap_gen_question()
 
-    st.session_state.gen_func = adap_gen_question
+    def build_noun(noun_id=None):
 
-    if st.session_state.current_question:
-        noun, case, number = st.session_state.current_question
-
-        # # Uncomment for testing purposes.
-        # st.write(st.session_state.current_question)
-        # st.write(f"Give the {noun_options["case"][case]} {noun_options["number"][number]} of *{noun}*.")
+        if noun_id:
+            pass
+        else:
+            noun_id = adap_gen_question()
+        
+        noun, case, number = noun_id
 
         noun_decl = noun_vocab.get(noun, {}).get("decl")
         noun_stem = noun_vocab.get(noun, {}).get("stem")
@@ -544,9 +544,11 @@ else:
         else:
             if "irreg" in noun_vocab[noun]:
                 # pass
-                irreg_form = noun_vocab[noun]["irreg"].get(number, {}).get(case)
+                irreg_form = noun_vocab[noun]["irreg"].get(number, {}).get(case, "")
                 if irreg_form:
                     correct_answer = irreg_form
+                elif irreg_form is None:
+                    return None
             if not correct_answer:
                 correct_ending = noun_endings[noun_decl][number][case]
                 if ((noun[-3:] == "ius" and noun_decl == "2_us") or (noun[-3:] == "ium" and noun_decl == "2_neut")) and number == "sg":
@@ -579,7 +581,13 @@ else:
                     else:
                         correct_answer = noun_stem + correct_ending
 
-        st.session_state["correct_answer"] = correct_answer
+        return correct_answer
+
+    st.session_state.gen_func = adap_gen_question
+
+    if st.session_state.current_question:
+        noun, case, number = st.session_state.current_question
+        st.session_state["correct_answer"] = correct_answer = build_noun(st.session_state.current_question)
 
         question = f'For *{noun}*, give the **{noun_options["case"][case]} {noun_options["number"][number]}**.'
 
@@ -665,6 +673,41 @@ else:
 
     with results_col:
         st.markdown(st.session_state.result_message)    # just write the result message, rather than other things as well.
+
+        if st.session_state.current_question and st.session_state.answer_checked and "Incorrect" in st.session_state.result_message:
+            chart_popover = st.popover("View chart",type="primary")
+            with chart_popover:
+                st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy or if you would find other information helpful.*")
+                st.caption("You can change your preferred case order in the navigation menu.")
+                starting_form = list(st.session_state.current_question)
+                next_form = list(starting_form)
+
+                noun_table = {}
+                table_index = []
+                cs_order = st.session_state.case_order
+                # st.write(cs_order)
+                for num in ["sg","pl"]:
+                    noun_table[num] = []
+                    for cs in cs_order:
+                        if cs not in table_index:
+                            table_index.append(cs)
+                        next_form[2] = num
+                        next_form[1] = cs
+
+                        try:
+                            form = build_noun(next_form)
+                            if isinstance(form, list):
+                                form = "/".join(form)
+                            if next_form == starting_form:
+                                form = f":green-background[{form}]"
+                        except:
+                            form = None
+                        noun_table[num].append(form if form is not None else "--")
+                
+                declension_table = pd.DataFrame(noun_table, index=table_index)
+                st.table(declension_table, 
+                        #  width="content"
+                         )
 
     with score_col:
         st.button("Reset Score", "reset", on_click=reset, width="stretch")

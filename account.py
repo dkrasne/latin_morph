@@ -128,6 +128,7 @@ if st.user.is_logged_in:
                 - Adjectives and Adverbs: {"**default**" if not st.session_state.default_settings.get("adjectives.py") else "**custom**"}
                 - Verbal Adjectives: {"**default**" if not st.session_state.default_settings.get("verbal_adj.py") else "**custom**"}
                 - Pronouns: {"**default**" if not st.session_state.default_settings.get("pronouns.py") else "**custom**"}
+            - Case order: {', '.join(st.session_state.case_order)}
             """)
 
     

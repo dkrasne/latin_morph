@@ -8,6 +8,7 @@ import json
 from utils import send_setting
 import jwt
 import time
+from streamlit_sortables import sort_items
 
 st.set_page_config("Latin Morph!", 
                    menu_items={
@@ -99,6 +100,10 @@ if "adap_learning_frequency" not in st.session_state:
     st.session_state["adap_learning_frequency"] = 2
 if "cons_u_normalize" not in st.session_state:
     st.session_state["cons_u_normalize"] = False
+if "case_drag_widget" not in st.session_state:
+    st.session_state["case_drag_widget"] = None
+if "case_order" not in st.session_state:
+    st.session_state["case_order"] = None
 if "gen_string" not in st.session_state:
     st.session_state["gen_string"] = None
 if "active_expander" not in st.session_state:
@@ -254,6 +259,7 @@ st.sidebar.select_slider("Auto-advance to next question?",
                          )
 
 st.sidebar.divider()
+# st.sidebar.space("xxsmall")
 
 st.sidebar.checkbox("Use consonantal *u*?", 
                     help="Only select this if you are learning from a book that does not use the letter *v* but consistently uses *u* instead, such as Jones & Sidwell's *Learning Latin*. If selected, you will still see forms with *v*, but you can safely use *u* in your answers.", 
@@ -262,7 +268,29 @@ st.sidebar.checkbox("Use consonantal *u*?",
                     kwargs={"streamlit_page":"latin_morph.py","setting_name":"cons_u_normalize"}
                     )
 
+st.sidebar.space("xxsmall")
 
+case_order_selector = st.sidebar.expander("Choose your preferred case order", expanded=False)
+
+def change_case_order():
+    default_case_order = ["nom","gen","dat","acc","abl","voc"]
+    if not st.session_state.case_order:
+        st.session_state.case_order = default_case_order
+    custom_case_order = sort_items(default_case_order if not st.session_state.case_order else st.session_state.case_order, 
+                                   direction="vertical",
+                                   key="case_drag_widget"
+                                   )
+    if st.session_state.case_order != custom_case_order:
+        st.session_state.case_order = custom_case_order
+        send_setting(streamlit_page = "latin_morph.py",setting_name = "case_order")
+        # st.rerun()
+
+with case_order_selector:
+    st.caption("Drag the cases into your preferred order.", help="This only affects the charts that are shown for incorrect answers.")
+    change_case_order()
+    # if st.user.is_logged_in:
+    #     st.button("Save", help="Click this to save your custom order across sessions; it's automatically saved for the current session.", on_click=send_setting, kwargs={"streamlit_page": "latin_morph.py","setting_name": "case_order"})
+    
 ####### PAGE FRAME #######
 
 ## PAGE HEADER ##

@@ -73,8 +73,8 @@ st.markdown("""
             *and also* suggested categories to review within a given part of speech, 
             based on your correct and incorrect answers.
 
-            You can freely use all of Latin Morph! without an account. 
-            However, you may find that having a **free account** improves your user experience. 
+            You can use all the features of Latin Morph! without an account. 
+            However, creating a **free account** will improve your user experience. 
             In particular, your answer history will be saved across sessions, 
             meaning that the adaptive learning algorithm will be more functional, 
             the Stats & Data page will have a more accurate assessment of your weak spots, 
@@ -98,22 +98,24 @@ st.warning("""
             (I also welcome feedback, using the same form!)
             """,)
 
-announcements = [
-#     """
-# :green-badge[New!] :blue-badge[] 
-# """,
-#     """
-# :blue-badge[2026-May-17] User accounts are now available!!! Save your question history across multiple sessions!
-# """,
-#     """
-# :blue-badge[2026-Apr-30] Adaptive learning has now been implemented across **all** parts of speech! 
-# For an explanation of what this means, visit the About page.
-# """,
-
+announcements_all = [
+    {"date": date(2026, 6, 21),
+    "text": """
+    After an incorrect answer, you can now view a **complete chart** for that set of forms. 
+    (Preferred case order can be set in the side navigation menu.)
+    """,
+    },
+    {"date": date(2026, 5, 17),
+    "text": """
+    User accounts are now available!!! Save your question history across multiple sessions!
+    """,
+    },
 ]
+
+announcements = [announcement for announcement in announcements_all if announcement["date"] >= date.today() - timedelta(days=65)]
 
 if len(announcements) > 0:
     st.markdown("""##### Recent Major Updates and Announcements""")
     for announcement in announcements:
-        st.info(announcement)
+        st.info(f"{':green-badge[New!] ' if announcement['date'] >= date.today() - timedelta(days=31) else ''}:blue-badge[{announcement['date'].strftime("%Y-%b-%d")}] {announcement['text']}")
 
