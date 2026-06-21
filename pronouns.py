@@ -309,6 +309,8 @@ if st.session_state.current_question:
             temp_gen_diff = False
         else:
             temp_gen_diff = True
+    else:
+        temp_gen_diff = None
     correct_form = build_pronoun(st.session_state.current_question, temp_gen_diff)
     # st.write(correct_form)
     st.session_state.correct_answer = correct_form
