@@ -39,14 +39,13 @@ i+=1
 with st.expander("How have you decided what vocabulary to include?", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
-                As the site grows, the answer to this will change since the site is meant to be textbook agnostic, 
-                but at the moment, most of the words are either those taught in Keller & Russell's *Learn to Read Latin* 
-                (since that's what I currently teach out of) 
-                or are words in <a href="https://dcc.dickinson.edu/latin-core-list1" target="_BLANK">the DCC's Latin Core list</a> 
-                or are words that I needed to add in order to test something.
-                Generally speaking, I initially only included sufficient words to test that all forms were being generated correctly 
-                and that irregular forms and other exceptions to rules were also being handled correctly.
-                I am now in the process of adding the example paradigm words used in various textbooks and grammars.
+                Most of the words are those included in 
+                <a href="https://dcc.dickinson.edu/latin-core-list1" target="_BLANK">the DCC's Latin Core list</a>, 
+                although there are many words in the list that are *not* included, 
+                especially those that are not irregular but also do not behave according to expected rules 
+                (such as *locus*, which changes its gender in the plural). 
+                Additionally, I have included in the vocab list all the example paradigm words used in various textbooks and grammars. 
+                You can see the complete list of currently-included words on the **Vocabulary page**.
 
                 If there are specific words you would like me to add, please get in touch.
                 """, unsafe_allow_html=True)

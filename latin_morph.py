@@ -226,6 +226,7 @@ verbal_adj_page = st.Page("verbal_adj.py", title="Verbal Adjectives")
 data_page = st.Page("data.py", title="Session Stats & Data")
 test_page = st.Page("button_test.py", title="Test page") if st.context.headers.get("host","").startswith("localhost") else ""
 account_page = st.Page("account.py", title=("User Account" if st.user.is_logged_in else "User Account (login)")) #if st.context.headers.get("host","").startswith("localhost") else ""
+vocab_page = st.Page("vocab_list.py", title="Vocabulary List")
 
 nav_dict = {"**Latin Morph!**": [main_page, account_page, about_page, faq_page], 
                             "Parts of Speech": [
@@ -235,7 +236,8 @@ nav_dict = {"**Latin Morph!**": [main_page, account_page, about_page, faq_page],
                                 verbal_adj_page, 
                                 pronouns_page, 
                             ],
-                            "Tools": [data_page]
+                            "Tools": [data_page,
+                                      vocab_page]
                             } 
 
 if st.context.headers.get("host","").startswith("localhost"):
@@ -368,6 +370,7 @@ menu_pos_row.page_link("pronouns.py", label="Pronouns")
 menu_nav_row.page_link("about.py", label="About")
 menu_nav_row.page_link("faq.py", label="FAQ")
 menu_nav_row.page_link("data.py", label="Stats & Data")
+menu_nav_row.page_link("vocab_list.py", label="Vocab")
 
 
 # st.multiselect("test_select", options=["a","b","c"], default=["a","b","c"], key="test_select", on_change=)
