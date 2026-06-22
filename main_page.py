@@ -21,13 +21,35 @@ for announcement in [announce["text"] for announce in temp_announcements if anno
 st.markdown("""
             **Latin Morph!** is a site for practicing your Latin word forms (morphology). 
             The goal is to create randomly-requested forms correctly, 
-            allowing you to both reinforce your existing knowledge and discover from your incorrect answers where your knowledge of forms may be weak. 
+            allowing you to both reinforce your existing knowledge 
+            and discover from your incorrect answers where your knowledge of forms may be weak. 
             You can practice nouns, verbs, adjectives and adverbs, verbal adjectives (i.e., participles and gerundives), and pronouns.
+            """)
+
+st.markdown("""
+            Latin Morph! is **data driven**, drawing on your response history 
+            to test you more frequently on forms you struggle with, 
+            based on a fine-grained analysis of sub-categories within each part of speech. 
+            You can also see on the Session Stats & Data page which larger categories you may most need to review.
+            """)
+
+st.markdown("""
+            Latin Morph! is also highly **customizable**: 
+            you can specify exactly what you want to practice within a given part of speech,
+            and you can set your personal preferences for things like macrons (long-marks), case order, 
+            and what information you're given about a word.
+            """)
+
+st.markdown("""
+            All of these features work best with a **free account**, 
+            which saves your data (answer history and preferred settings) across sessions; 
+            otherwise, everything resets on each visit (or even after a temporary network disconnect). 
+            You can sign in on the User Account page using any Google account.
             """)
 
 st.html("""
         <style>
-        summary:hover {
+        summary.highlight:hover {
         text-decoration: underline 2px;
         text-underline-position: under;
         }
@@ -36,7 +58,7 @@ st.html("""
 
 st.markdown("""
             <details>
-            <summary>
+            <summary class="highlight">
             <i>If this is your <b>first visit</b>, click here for some helpful information!</i>
             </summary>
 
@@ -74,12 +96,12 @@ st.markdown("""
             based on your correct and incorrect answers.
 
             You can use all the features of Latin Morph! without an account. 
-            However, creating a **free account** will improve your user experience. 
+            However, creating an account (by simply logging in with Google) will improve your user experience. 
             In particular, your answer history will be saved across sessions, 
             meaning that the adaptive learning algorithm will be more functional, 
             the Stats & Data page will have a more accurate assessment of your weak spots, 
             and you won't lose your progress if you lose your internet connection. 
-            (Latin Morph! can't be used offline, but your answers will be restored when your connection is restored.)
+            (Latin Morph! can't be used offline, but if you're signed in, your answers will be restored when your connection is restored.)
             An account also allows you to save your preferred settings (such as which declensions you want to practice) 
             so that you don't have to reset them each time you change between parts of speech.
 
@@ -101,8 +123,8 @@ st.warning("""
 announcements_all = [
     {"date": date(2026, 6, 21),
     "text": """
-    After an incorrect answer, you can now view a **complete chart** for that set of forms. 
-    (Preferred case order can be set in the side navigation menu.)
+    After an incorrect answer, you now have the option to view a **complete chart** for that set of forms. 
+    (Preferred case order can be adjusted in the side navigation menu.)
     """,
     },
     {"date": date(2026, 5, 17),
