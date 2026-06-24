@@ -36,6 +36,27 @@ with st.expander("Why doesn't Latin Morph! store my settings?",
                 """)
 
 i+=1
+with st.expander("Why should I make a user account?", 
+                 expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
+    st.markdown("""
+                There are two main reasons to make a user account.
+                
+                First, one of the major unique features of Latin Morph! is its adaptive learning algorithm, 
+                which makes it so that you're more likely to be asked about forms that you struggle with, 
+                although still in a randomized fashion. 
+                This functions better when it has more data about your prior answers to draw on, 
+                so by signing in and preserving your answer history across sessions, 
+                you're enabling the algorithm to function better for you.
+
+                Second, if there are settings that you find yourself having to constantly reset to your preferences 
+                (whether display settings or customizations such as which forms or irregulars to include), 
+                logging in enables you to save these settings across sessions.
+
+                Additionally, by making a user account, you have the option 
+                to let your answers contribute to academic research on Latin pedagogy and language learning!
+                """)
+
+i+=1
 with st.expander("How have you decided what vocabulary to include?", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
@@ -82,7 +103,10 @@ with st.expander("What different options can I set to customize the information 
 
                 **Pronouns** have no special display options: you should only practice pronouns that you've already encountered.
 
-                If you're logged in, you can save your preferred settings for these display options.
+                For the charts that are displayed following an incorrect answer, 
+                the **case order** (for nouns, adjectives, and pronouns) can be customized to match the order you learned the cases in.
+
+                If you're logged in, you can save your preferred settings for these display options so that you don't have to readjust them every time.
                 """)
 
 i+=1
@@ -90,7 +114,7 @@ with st.expander("""I only know a couple of cases (or persons, etc) since my boo
                  but there's no option to limit which ones I'm asked for.""", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""
-                While there is no option to limit which noun/adjective cases or verb persons one is asked for, 
+                While there is no option to limit which noun/adjective/pronoun cases or verb persons one is asked for, 
                 it's possible just to skip a question by hitting 'Next Question' if you're asked for something you don't know yet.
                 If you skip a question, it won't affect your score, and it won't count as a question that you've been asked on the statistics page.
                 """)
@@ -126,7 +150,7 @@ with st.expander("Why can't I use Latin Morph! offline?",
                 I truly hope to be able to produce an offline app version in the future.
                 
                 If you are logged in, Latin Morph! will not lose your session history during disconnects,
-                so although this isn't an actual solution, it can serve as a temporary bandaid to some of the issues.
+                so although this isn't an actual solution, it can serve as a temporary bandaid for some of the issues.
                 """)
 
 i+=1

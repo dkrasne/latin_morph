@@ -42,7 +42,7 @@ def analyze_question_data(question_list):
 
 st.markdown(
     f"""
-    # Session Stats and Data
+    # Statistics and Data
     
     {"Once you answer at least one question, this page will show" if not questions_answered else "This page shows"} 
     the questions that you have answered{" during your current session" if not st.user.is_logged_in else ""}, whether correctly or incorrectly, divided up by part of speech. 

@@ -30,7 +30,7 @@ st.markdown("""
             Latin Morph! is **data driven**, drawing on your response history 
             to test you more frequently on forms you struggle with, 
             based on a fine-grained analysis of sub-categories within each part of speech. 
-            You can also see on the Session Stats & Data page which larger categories you may most need to review.
+            You can also see on the Statistics & Data page which larger categories you may most need to review.
             """)
 
 st.markdown("""

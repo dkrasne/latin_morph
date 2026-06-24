@@ -373,10 +373,11 @@ else:
         if verb_vocab[verb].get("impers_pass_only") and ptc_type in ["ppp","gdv"]:
             gender = "n"
             number = "sg"
+            case = "nom"
         else:
             gender = random.choice(adj_options["gender"])
             number = random.choice(adj_options["number"])
-        case = random.choice(adj_options["case"])
+            case = random.choice(adj_options["case"])
 
         return [verb, ptc_type, gender, number, case]
 
@@ -503,10 +504,11 @@ else:
                             if verb_vocab[verb].get("impers_pass_only") and ptc_type in ["ppp","gdv"]:
                                 gender = "n"
                                 number = "sg"
+                                case = "nom"
                             else:
                                 gender = random.choice(adj_options["gender"])
                                 number = random.choice(adj_options["number"])
-                            case = random.choice(adj_options["case"])
+                                case = random.choice(adj_options["case"])
                 else:
                     ptc_type = None
                 
@@ -734,39 +736,42 @@ else:
         st.markdown(st.session_state.result_message)    # just write the result message, rather than other things as well.
 
         if st.session_state.current_question and st.session_state.answer_checked and "Incorrect" in st.session_state.result_message:
-            chart_popover = st.popover("View chart",type="primary")
+            starting_form = list(st.session_state.current_question[1])
+            next_form = list(starting_form)
+            help_text = "As this form cannot be declined, there is no available chart." if (starting_form[1] in ["ppp","gdv"] and complete_verb_vocab[starting_form[0]].get("impers_pass_only") is True) else None
+
+            chart_popover = st.popover("View chart",type="primary", help=help_text)
             with chart_popover:
-                st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy or if you would find other information helpful.*")
-                st.caption("You can change your preferred case order in the navigation menu.")
-                starting_form = list(st.session_state.current_question[1])
-                next_form = list(starting_form)
+                if not (starting_form[1] in ["ppp","gdv"] and complete_verb_vocab[starting_form[0]].get("impers_pass_only") is True):
+                    st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy or if you would find other information helpful.*")
+                    st.caption("You can change your preferred case order in the navigation menu.")
 
-                vb_adj_table = {}
-                table_index = []
-                cs_order = list(st.session_state.case_order)
+                    vb_adj_table = {}
+                    table_index = []
+                    cs_order = list(st.session_state.case_order)
 
-                for num in ["sg","pl"]:
-                    for gd in ["m","f","n"]:
-                        vb_adj_table[(num, gd)] = []
-                        for cs in cs_order:
-                            if cs not in table_index:
-                                table_index.append(cs)
-                            next_form[-1] = cs
-                            next_form[-2] = num
-                            next_form[-3] = gd
+                    for num in ["sg","pl"]:
+                        for gd in ["m","f","n"]:
+                            vb_adj_table[(num, gd)] = []
+                            for cs in cs_order:
+                                if cs not in table_index:
+                                    table_index.append(cs)
+                                next_form[-1] = cs
+                                next_form[-2] = num
+                                next_form[-3] = gd
 
-                            try:
-                                form = build_ptc(next_form)[0]
-                                if isinstance(form, list):
-                                    form = "/".join(form)
-                                if next_form == starting_form:
-                                    form = f":green-background[{form}]"
-                            except:
-                                form = None
-                            vb_adj_table[(num, gd)].append(form if form is not None else "--")
+                                try:
+                                    form = build_ptc(next_form)[0]
+                                    if isinstance(form, list):
+                                        form = "/".join(form)
+                                    if next_form == starting_form:
+                                        form = f":green-background[{form}]"
+                                except:
+                                    form = None
+                                vb_adj_table[(num, gd)].append(form if form is not None else "--")
 
-                display_table = pd.DataFrame(vb_adj_table, table_index)
-                st.table(display_table)
+                    display_table = pd.DataFrame(vb_adj_table, table_index)
+                    st.table(display_table)
 
 
 

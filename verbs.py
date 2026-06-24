@@ -1166,7 +1166,7 @@ else:
                         else:
                             if number == "sg":
                                 ppp = [verb_stem + ending for ending in ["us", "a", "um"]]
-                                if verb_vocab[verb].get("impers_pass_only"):
+                                if verb_vocab[verb].get("impers_pass_only") and voice == "pass":
                                     ppp = verb_stem + "um"
                             else:
                                 ppp = [verb_stem + ending for ending in ["ī", "ae", "a"]]
@@ -1294,11 +1294,16 @@ else:
         st.markdown(st.session_state.result_message)    # just write the result message, rather than other things as well.
         
         if st.session_state.current_question and st.session_state.answer_checked and "Incorrect" in st.session_state.result_message:
-            chart_popover = st.popover("View chart",type="primary")
+            starting_form = dict(st.session_state.current_question[1])
+            next_form = dict(starting_form)
+            help_text = "As this form cannot be conjugated, there is no available chart." if (starting_form["mood"] == "inf" or (starting_form["voice"] == "pass" and complete_verb_vocab[starting_form["verb"]].get("impers_pass_only") is True)) else None
+
+            chart_popover = st.popover("View chart",type="primary", help=help_text)
+
             with chart_popover:
-                starting_form = dict(st.session_state.current_question[1])
-                next_form = dict(starting_form)
-                if starting_form["mood"] not in ["inf"]:
+                # starting_form = dict(st.session_state.current_question[1])
+                # next_form = dict(starting_form)
+                if starting_form["mood"] not in ["inf"] and not (starting_form["voice"] == "pass" and complete_verb_vocab[starting_form["verb"]].get("impers_pass_only") is True):
                     st.caption("*N.B. This is a beta feature; please let me know if it appears to be buggy or if you would find other information helpful.*")
                     conj_table = {}
                     table_index = []

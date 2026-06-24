@@ -351,7 +351,7 @@ else:
         return [noun, case, number]
 
 
-    ## ADAPTIVE LEARNING ALGORITHM
+    ## ADAPTIVE LEARNING ALGORITHM ##
 
     def adap_gen_question():
         avail_nouns = dict(active_vocab)

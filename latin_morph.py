@@ -223,7 +223,7 @@ verbs_page = st.Page("verbs.py", title="Verbs")
 pronouns_page = st.Page("pronouns.py", title="Pronouns")
 adj_page = st.Page("adjectives.py", title="Adjectives and Adverbs")
 verbal_adj_page = st.Page("verbal_adj.py", title="Verbal Adjectives")
-data_page = st.Page("data.py", title="Session Stats & Data")
+data_page = st.Page("data.py", title="Your Statistics & Data")
 test_page = st.Page("button_test.py", title="Test page") if st.context.headers.get("host","").startswith("localhost") else ""
 account_page = st.Page("account.py", title=("User Account" if st.user.is_logged_in else "User Account (login)")) #if st.context.headers.get("host","").startswith("localhost") else ""
 vocab_page = st.Page("vocab_list.py", title="Vocabulary List")
