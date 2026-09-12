@@ -188,7 +188,8 @@ with st.expander("Did you use GenAI to build this?",
                 (although even then, I still had to double-check *its* claims, 
                 and I still never let it write any code for me;
                 and there were also plenty of issues that it *didn't* catch). 
-                It also sometimes assisted me in isolating the cause of errors, 
+                This is an approach [referred to as "craft coding" by Peter Bloem](https://peterbloem.nl/blog/craft-coding).
+                Gemini also sometimes assisted me in isolating the cause of errors, 
                 as well as in understanding certain peculiarities of the Streamlit framework
                 and some problems related to the user login process.
                 """, 

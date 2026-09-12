@@ -181,6 +181,8 @@ if "supabase_connection" not in st.session_state:
 
 
 if st.session_state.supabase_connection is not None and st.session_state.current_user_consent is None:
+    if "consent_submitted" not in st.session_state:
+        st.session_state.consent_submitted = False
     @st.dialog("User Consent",dismissible=False)
     def show_consent_dialog():
         sb_conn: Client = st.session_state.supabase_connection
@@ -197,11 +199,13 @@ if st.session_state.supabase_connection is not None and st.session_state.current
         st.radio("Choose one:",[True,False], format_func=consent_display, index=None, key="consent_radio")
         # print("box showing")
         def log_consent():
-            st.session_state.current_user_consent = st.session_state.consent_radio            
-            insert_dict = {"user_id": st.session_state.user_id, "consent":st.session_state.current_user_consent}
-            # print(insert_dict)
-            sb_conn.table("user_consent").insert(insert_dict).execute()
-        if st.button("Submit", on_click=log_consent, disabled=True if st.session_state.get("consent_radio") is None else False):
+            if not st.session_state.consent_submitted:
+                st.session_state.consent_submitted = True
+                st.session_state.current_user_consent = st.session_state.consent_radio            
+                insert_dict = {"user_id": st.session_state.user_id, "consent":st.session_state.current_user_consent}
+                # print(insert_dict)
+                sb_conn.table("user_consent").insert(insert_dict).execute()
+        if st.button("Submit", on_click=log_consent, disabled=(st.session_state.consent_submitted or st.session_state.get("consent_radio") is None)):
             st.rerun()
 
     show_consent_dialog()
