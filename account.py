@@ -206,7 +206,8 @@ def switch_consent():
     st.session_state.current_user_consent = st.session_state.user_consent_box
     # send new row to consent table
     insert_dict = {"user_id": st.session_state.user_id, "consent":st.session_state.current_user_consent}
-    sb_conn.table("user_consent").insert(insert_dict).execute()
+    if st.user.is_logged_in and st.session_state.get("user_id") is not None:
+        sb_conn.table("user_consent").insert(insert_dict).execute()
 
 
 if st.user.is_logged_in:

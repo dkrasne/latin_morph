@@ -201,10 +201,11 @@ if st.session_state.supabase_connection is not None and st.session_state.current
         def log_consent():
             if not st.session_state.consent_submitted:
                 st.session_state.consent_submitted = True
-                st.session_state.current_user_consent = st.session_state.consent_radio            
+                st.session_state.current_user_consent = st.session_state.consent_radio
                 insert_dict = {"user_id": st.session_state.user_id, "consent":st.session_state.current_user_consent}
                 # print(insert_dict)
-                sb_conn.table("user_consent").insert(insert_dict).execute()
+                if st.user.is_logged_in and st.session_state.get("user_id") is not None:
+                    sb_conn.table("user_consent").insert(insert_dict).execute()
         if st.button("Submit", on_click=log_consent, disabled=(st.session_state.consent_submitted or st.session_state.get("consent_radio") is None)):
             st.rerun()
 
