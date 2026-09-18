@@ -143,6 +143,19 @@ with st.expander("How are words with variant forms or endings handled?",
                 """)
 
 i+=1
+with st.expander("Why aren't forms of *coep\u012b* and *coeptus* accepted as valid answers for perfect system forms of *incipi\u014d*?", 
+                 expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
+    st.markdown("""
+                Although &Oslash;rberg gives *coep\u012b* and *coeptus* as the third and fourth principal parts of *incipi\u014d* 
+                in his *Lingua latina per se illustrata*, 
+                *coep\u012b* is in fact a separate defective verb that integrates *incipi\u014d* as its present system, 
+                rather than actually providing the perfect system of *incipi\u014d* 
+                (which has its own extensively-used perfect system, even if *coep\u012b* is often the preferred word choice). 
+                While Latin Morph! aims to be textbook-agnostic, this does not extend to supporting inaccuracies that textbooks introduce. 
+                For the underlying difference between the two verbs, see Garc&iacute;a-Hern&aacute;ndez 2005 and Ros&eacute;n 2012: 124&ndash;128.
+                """, unsafe_allow_html=True)
+
+i+=1
 with st.expander("Why can't I use Latin Morph! offline?", 
                  expanded=st.session_state["active_expander"]==f"exp{i}", on_change=set_expanders, args=(f"exp{i}",)):
     st.markdown("""

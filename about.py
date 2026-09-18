@@ -73,8 +73,10 @@ st.markdown("""
 
             In addition, however, the following were consulted for some very particular issues:
 
-            - Dickey, E. (2000) "O dee ree PIE: The Vocative Problems of Latin Words Ending in -eus," *Glotta* 76: 32-49
-            - Rauk, J. (1997) "The Vocative of Deus and Its Problems," *Classical Philology* 92: 138-149
+            - Dickey, E. (2000) "O dee ree PIE: The Vocative Problems of Latin Words Ending in -eus," *Glotta* 76: 32&ndash;49
+            - Garc&iacute;a-Hern&aacute;ndez, B. (2005) "*Incohare* y *coepi*. El comienzo de la labor agr&iacute;cola," *Revista de Estudios Latinos* 5: 31&ndash;52
+            - Rauk, J. (1997) "The Vocative of Deus and Its Problems," *Classical Philology* 92: 138&ndash;149
+            - Ros&eacute;n, H. (2012) "Two phasal verbs: Lat. *coepi* and Gk. ἔβαλον/ἔβαλα, βάλλω/βάζω/βάνω," *Indogermanische Forschungen* 117: 119&ndash;172
 
             """, unsafe_allow_html=True)
 
