@@ -31,7 +31,8 @@ with st.expander("Why doesn't Latin Morph! store my settings?",
     st.markdown("""
                 This is a limitation of the framework used to build Latin Morph! However, if you log in, 
                 your settings and prior session histories will be retained. 
-                (Macron preferences, the auto-advance setting, and the use of consonantal *u* are all automatically saved across sessions if you're logged in;
+                (Macron preferences, the auto-advance setting, the use of consonantal *u*, 
+                and your preferred case order are all automatically saved across sessions if you're logged in;
                 for other settings, you can save your preferred defaults for each part of speech.)
                 """)
 

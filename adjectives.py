@@ -16,6 +16,9 @@ page_id = "adjectives"
 clear_page(page_id)
 
 defaults = st.session_state.default_settings.get(f"{page_id}.py", {})
+if "declension" in defaults:
+    if defaults["declension"] == [1,2]:
+        defaults["declension"] = (1,2)
 
 adj_vocab = import_adjectives()
 cons_stems = ["vetus","compos", "dīves", "particeps", "pauper", "prīnceps", "sōspes", "superstes"]
