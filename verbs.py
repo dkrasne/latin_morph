@@ -799,7 +799,7 @@ else:
                 if (verb is None and conj is not None) or pick_sum_possum is True:
                     # since we need to pick a verb, reduce available vocab to the selected conjugation
                     verb_vocab_filtered = {k:v for k,v in verb_vocab_filtered.items() if v["conj"] == conj}
-                    if "fīō" in irreg_selector and conj in [3,"3io"]:
+                    if "fīō" in irreg_selector and conj in [3,"3io"] and "fīō" in verb_vocab: # ADDED THE LAST `and` CLAUSE TO MAKE SURE THAT fīō ONLY GETS ADDED IF IT MEETS ALL THE SELECTED CRITERIA
                         # since fio is classed under 3rd conj for forms but is really 3rd io and is listed as 3rd io, make sure it's there for both conjugations (regular forms only).
                         if (tense in ["fut", "impf"] and voice == "act" and not (tense == "fut" and mood == "inf")) or (tense in perf_sys and voice == "dep"):
                             verb_vocab_filtered["fīō"] = complete_verb_vocab["fīō"]

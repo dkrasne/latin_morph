@@ -218,7 +218,7 @@ def gen_question():
                     pronoun_id = [item if item != "-" else None for item in pronoun_id]
                     # st.write(pronoun_id)
                     case, number, gender = pronoun_id
-                    if len(case.split()) > 1:
+                    if case and len(case.split()) > 1: # ADDED FIRST `case` CHECK TO AVOID NoneType ERRORS
                         gen_type = case.split()[1][1:-2]
                         case = case.split()[0]
                         # if gen_type == "part":
