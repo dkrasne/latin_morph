@@ -1235,7 +1235,7 @@ def import_pronouns():
                 "gen": ["nēminis","nūllīus"],
                 "dat": "nēminī",
                 "acc": "nēminem",
-                "abl": "nūllō"
+                "abl": ["nēmine","nūllō"]
             }
         },
         "quīdam": {
